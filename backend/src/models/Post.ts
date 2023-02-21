@@ -32,5 +32,4 @@ const postSchema = new Schema({
 },{timestamps:true})
 
 interface IPostModel extends IPost,Document{}
-
 export const Post = mongoose.model<IPostModel>('Post',postSchema)
