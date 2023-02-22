@@ -12,6 +12,7 @@ export const UpdateUserPasswordApi = `${host}/api/user/changePassword`;
 export const UploadPost = `${host}/api/post/`;
 export const GetMyPost = `${host}/api/post/getMyPosts`;
 export const GetAllPost = `${host}/api/post/getAllPost`;
+export const LikeUnLikeApi = `${host}/api/post/likeUnlike/`;
 
 // APIs for Chats
 

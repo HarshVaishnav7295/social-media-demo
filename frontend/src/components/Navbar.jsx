@@ -15,7 +15,7 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { HiUpload } from "react-icons/hi";
-import React, { useCallback, useState } from "react";
+import React, { useState } from "react";
 import { AiOutlineHome, AiOutlineSearch, AiOutlineHeart } from "react-icons/ai";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { MdOutlineAddToQueue } from "react-icons/md";
@@ -42,6 +42,7 @@ const Navbar = () => {
 
   const changeProfileVisibility = () => {
     dispatch(userAction.changeProfileVisiblity());
+    dispatch(userAction.setDisplayedUser(user));
   };
   const uploadPostHandler = () => {
     // Call dispatch here

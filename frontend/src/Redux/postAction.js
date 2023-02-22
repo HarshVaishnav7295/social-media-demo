@@ -1,5 +1,10 @@
 import axios from "axios";
-import { GetAllPost, GetMyPost, UploadPost } from "../utils/ApiRoutes";
+import {
+  GetAllPost,
+  GetMyPost,
+  LikeUnLikeApi,
+  UploadPost,
+} from "../utils/ApiRoutes";
 import { postAction } from "./postReducer";
 
 export const getPersonalPostAsync = (token) => {
@@ -40,6 +45,25 @@ export const getAllPostAsync = (token) => {
       });
       const posts = await newPosts.json();
       dispatch(postAction.setAllPost(posts.posts));
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
+
+export const likeUnLikeAsync = (data) => {
+  return async (dispatch) => {
+    try {
+      const newData = await fetch(LikeUnLikeApi + data.id, {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
+
+      const isLiked = await newData.json();
+      return isLiked.message;
     } catch (error) {
       console.log(error);
     }

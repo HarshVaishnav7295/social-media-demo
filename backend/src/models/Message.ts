@@ -1,7 +1,7 @@
 import mongoose,{Schema,Document} from "mongoose";
 import { IUserRef } from "./User";
 
-export interface IMessage{
+interface IMessage{
     text : string
     sender : IUserRef,
     receiver : IUserRef
@@ -19,10 +19,6 @@ const messageSchema = new Schema({
     receiver : {
         type : mongoose.Types.ObjectId,
         ref : 'User'
-    },
-    chat : {
-        type : mongoose.Types.ObjectId,
-        ref : 'Chat'
     }
 },{timestamps:true})
 

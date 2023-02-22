@@ -69,6 +69,7 @@ const Home = () => {
             display={isProfileOpen ? "flex" : "none"}
             justifyContent="center"
             alignItems="center"
+            height="100%"
           >
             <Profile showUser={displayedUser} />
           </Box>

@@ -1,3 +1,5 @@
+/* eslint-disable array-callback-return */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Box, Img, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { AiOutlineHeart } from "react-icons/ai";
@@ -6,19 +8,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsCheck2 } from "react-icons/bs";
 import { userAction } from "../Redux/userReducer";
-import { findUserByIdAsync, followUnfollowAsync } from "../Redux/userAction";
+import {
+  findUserByIdAsync,
+  followUnfollowAsync,
+  setFollowingAsync,
+} from "../Redux/userAction";
 import { toast, ToastContainer } from "react-toastify";
 import { ToastOption } from "./Register";
+import { likeUnLikeAsync } from "../Redux/postAction";
 
 const PostContainer = ({ image, description, post, user }) => {
   const [postUser, setPostUser] = useState({});
   const dispatch = useDispatch();
   const [isFollowed, setIsFollowed] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likedCount, setLikedCount] = useState(post?.likedBy.length);
   const isUserAuthenticated = useSelector(
     (state) => state.user.isUserAuthenticated
   );
 
-  // const follower = useSelector((state) => state.user.follower);
   useEffect(() => {
     const data = {
       id: post.createdBy,
@@ -28,11 +36,11 @@ const PostContainer = ({ image, description, post, user }) => {
       setPostUser(postUser);
     });
   }, []);
-  const [isLiked, setIsLiked] = useState(false);
 
   const userProfileHandler = () => {
     dispatch(userAction.changeProfileVisiblity());
     dispatch(userAction.setDisplayedUser(postUser));
+    console.log("postUser", postUser);
   };
 
   useEffect(() => {
@@ -42,8 +50,33 @@ const PostContainer = ({ image, description, post, user }) => {
           setIsFollowed(true);
         }
       });
+
+      post.likedBy.map((likedId) => {
+        if (user._id === likedId._id) {
+          setIsLiked(true);
+        }
+      });
     }
-  }, []);
+  }, [post, user]);
+
+  const likeDisLikeHandler = () => {
+    const data = {
+      id: post._id,
+      token: user.token,
+    };
+    dispatch(likeUnLikeAsync(data)).then((res) => {
+      if (res === "Like successful") {
+        setIsLiked(true);
+        setLikedCount(likedCount + 1);
+      } else if (res === "Unlike successful") {
+        setIsLiked(false);
+        setLikedCount(likedCount - 1);
+      } else {
+        setIsLiked(false);
+        setLikedCount(post?.likedBy.length);
+      }
+    });
+  };
 
   return (
     <>
@@ -112,20 +145,29 @@ const PostContainer = ({ image, description, post, user }) => {
               fontSize={["0.8rem", "0.8rem", "0.8rem", "1rem", "1rem", "1rem"]}
               cursor="pointer"
               onClick={() => {
-                setIsFollowed(false);
-                const data = {
-                  token: user.token,
-                  id: post.createdBy,
-                };
-                dispatch(followUnfollowAsync(data)).then((res) => {
-                  if (res.status) {
-                    setIsFollowed(!isFollowed);
-                  } else {
-                    toast.error(res.errorMessage, ToastOption);
-                  }
-                });
+                if (postUser._id !== user._id) {
+                  setIsFollowed(false);
+                  const data = {
+                    token: user.token,
+                    id: post.createdBy,
+                  };
+                  dispatch(followUnfollowAsync(data)).then((res) => {
+                    console.log(res);
+                    if (res.status) {
+                      setIsFollowed(!isFollowed);
+                      dispatch(setFollowingAsync(user?.token));
+                    } else {
+                      setIsFollowed(isFollowed);
+                      toast.error(res.errorMessage, ToastOption);
+                    }
+                  });
+                }
               }}
-              color={isUserAuthenticated ? "black" : "grey"}
+              color={
+                isUserAuthenticated && postUser._id !== user._id
+                  ? "black"
+                  : "lightgrey"
+              }
             >
               <BsCheck2 />
               <Text width="fit-content">Followed</Text>
@@ -139,20 +181,28 @@ const PostContainer = ({ image, description, post, user }) => {
               fontSize={["0.8rem", "0.8rem", "0.8rem", "1rem", "1rem", "1rem"]}
               cursor="pointer"
               onClick={() => {
-                setIsFollowed(true);
-                const data = {
-                  token: user.token,
-                  id: post.createdBy,
-                };
-                dispatch(followUnfollowAsync(data)).then((res) => {
-                  if (res.status) {
-                    setIsFollowed(!isFollowed);
-                  } else {
-                    toast.error(res.errorMessage, ToastOption);
-                  }
-                });
+                if (postUser._id !== user._id) {
+                  setIsFollowed(true);
+                  const data = {
+                    token: user.token,
+                    id: post.createdBy,
+                  };
+                  dispatch(followUnfollowAsync(data)).then((res) => {
+                    if (res.status) {
+                      setIsFollowed(!isFollowed);
+                      dispatch(setFollowingAsync(user?.token));
+                    } else {
+                      setIsFollowed(isFollowed);
+                      toast.error(res.errorMessage, ToastOption);
+                    }
+                  });
+                }
               }}
-              color={isUserAuthenticated ? "black" : "grey"}
+              color={
+                isUserAuthenticated && postUser._id !== user._id
+                  ? "black"
+                  : "grey"
+              }
             >
               <AiOutlinePlus />
               <Text width="fit-content">Follow</Text>
@@ -232,13 +282,14 @@ const PostContainer = ({ image, description, post, user }) => {
         {isUserAuthenticated && (
           <Box
             cursor="pointer"
-            width="100%"
+            width="fit-content"
+            alignSelf="start"
             display="flex"
             height="5%"
             justifyContent="flex-start"
             flexDir="row"
             gap="0.2rem"
-            onClick={() => setIsLiked(!isLiked)}
+            onClick={() => likeDisLikeHandler()}
           >
             {isLiked ? (
               <FcLike size="1.3rem" />
@@ -250,7 +301,7 @@ const PostContainer = ({ image, description, post, user }) => {
               width="fit-content"
               fontSize={["0.9rem", "0.9rem", "0.9rem", "1rem", "1rem", "1rem"]}
             >
-              {post?.likedBy?.length}
+              {likedCount}
             </Box>
           </Box>
         )}

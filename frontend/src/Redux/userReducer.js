@@ -44,6 +44,14 @@ const userSlice = createSlice({
     setDisplayedUser: (state, action) => {
       state.displayedUser = action.payload;
     },
+    updateUserFollowings: (state, action) => {
+      state.user = {
+        ...state.user,
+        followings: action.payload,
+      };
+      localStorage.setItem("CLONE", JSON.stringify(state.user));
+      state.isUserAuthenticated = true;
+    },
   },
 });
 

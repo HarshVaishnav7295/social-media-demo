@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialChatState = {
   chat: [],
   isFollowerShowing: true,
-  chatId : ""
+  chatId: "",
 };
 
 const chatSlice = createSlice({

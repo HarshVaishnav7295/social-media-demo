@@ -4,22 +4,20 @@ import { chatAction } from "./chatReducer";
 export const setAllChatAsync = (data) => {
   return async (dispatch) => {
     try {
-      //console.log(data)
-      /*const newData = await fetch(GetAllChatApi, {
+      const newData = await fetch(GetAllChatApi, {
         headers: {
           Authorization: `Bearer ${data.token}`,
           "Content-Type": "application/json",
         },
         method: "POST",
         body: JSON.stringify({
-          chatId : data.chatId,
-          sender : data.sender,
-          receiver : data.receiver
+          receiverId: data.receiverId,
+          senderId: data.senderId,
         }),
       });
-      
-      const chats = await newData.json();*/
-      dispatch(chatAction.setAllChat(data));
+
+      const chats = await newData.json();
+      dispatch(chatAction.setAllChat(chats.Chat));
     } catch (error) {
       console.log(error);
     }
@@ -37,23 +35,11 @@ export const addOneChatAsync = (data) => {
         method: "POST",
         body: JSON.stringify({
           text: data.text,
-          sender : data.sender,
-          receiver: data.receiver,
-          chatId : data.chatId
+          receiverId: data.receiverId,
         }),
       });
-      //const post = await newPost.json();
-      //dispatch(chatAction.addOneChat(post.message));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-};
-
-export const addMessageToChatAsync = (data) => {
-  return async (dispatch) => {
-    try {
-      dispatch(chatAction.addOneChat(data));
+      const post = await newPost.json();
+      dispatch(chatAction.addOneChat(post.message));
     } catch (error) {
       console.log(error);
     }
@@ -63,7 +49,6 @@ export const addMessageToChatAsync = (data) => {
 export const setChatIdAsync = (data) => {
   return async (dispatch) => {
     try {
-      //console.log('Data:',data)
       dispatch(chatAction.setChatId(data));
     } catch (error) {
       console.log(error);

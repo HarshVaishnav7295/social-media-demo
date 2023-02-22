@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable array-callback-return */
 import { Box, Button, Img, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import FollowingUser from "./FollowingUser";
@@ -5,10 +7,18 @@ import { BsPower } from "react-icons/bs";
 import { userAction } from "../Redux/userReducer";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { setFollowerAsync } from "../Redux/userAction";
+import {
+  followUnfollowAsync,
+  setFollowerAsync,
+  setFollowingAsync,
+} from "../Redux/userAction";
+import { ToastOption } from "./Register";
+import { toast } from "react-toastify";
 
 const Profile = ({ showUser }) => {
   const user = useSelector((state) => state.user.user);
+  const [isFollowed, setIsFollowed] = useState(false);
+
   const isUserAuthenticated = useSelector(
     (state) => state.user.isUserAuthenticated
   );
@@ -22,8 +32,18 @@ const Profile = ({ showUser }) => {
     if (isUserAuthenticated) {
       dispatch(setFollowerAsync(user.token));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
+
+  useEffect(() => {
+    if (isUserAuthenticated) {
+      user?.followings.map((followingId) => {
+        if (followingId?._id === showUser?._id) {
+          setIsFollowed(true);
+        }
+      });
+    }
+  }, [user, showUser]);
+
   const navigate = useNavigate();
 
   const logoutHandler = () => {
@@ -32,16 +52,20 @@ const Profile = ({ showUser }) => {
   };
   const handleUserClick = (followUser) => {
     dispatch(userAction.setDisplayedUser(followUser));
+    dispatch(setFollowingAsync(user?.token));
+
+    console.log("followUser", followUser);
   };
+
   return (
     <>
       <Box
         width="100%"
-        height="90vh"
+        height="100%"
         display="flex"
         flexDir="column"
         alignItems="center"
-        justifyContent="space-between"
+        justifyContent="space-evenly"
       >
         {/* Profile Pic Box */}
         <Box
@@ -135,7 +159,7 @@ const Profile = ({ showUser }) => {
                 "0.9rem",
               ]}
             >
-              {showUser?.followers.length}
+              {showUser?.followers?.length}
             </Box>
             <Box
               fontSize={[
@@ -172,7 +196,7 @@ const Profile = ({ showUser }) => {
                 "0.9rem",
               ]}
             >
-              {showUser?.followings.length}
+              {showUser?.followings?.length}
             </Box>
             <Box
               fontSize={[
@@ -199,15 +223,63 @@ const Profile = ({ showUser }) => {
           width="100%"
           gap="0.5rem"
         >
-          {showUser?._id ? (
-            <Button
-              variant="solid"
-              colorScheme="twitter"
-              width="100%"
-              size="sm"
-            >
-              Follow
-            </Button>
+          {showUser?._id !== user?._id ? (
+            isFollowed ? (
+              <Button
+                variant="solid"
+                colorScheme="twitter"
+                width="100%"
+                size="sm"
+                onClick={() => {
+                  if (showUser._id !== user._id) {
+                    setIsFollowed(false);
+                    const followdata = {
+                      token: user.token,
+                      id: showUser._id,
+                    };
+                    dispatch(followUnfollowAsync(followdata)).then((res) => {
+                      console.log(res);
+                      if (res.status) {
+                        setIsFollowed(!isFollowed);
+                        dispatch(setFollowingAsync(followdata.token));
+                      } else {
+                        setIsFollowed(isFollowed);
+                        toast.error(res.errorMessage, ToastOption);
+                      }
+                    });
+                  }
+                }}
+              >
+                Following
+              </Button>
+            ) : (
+              <Button
+                variant="solid"
+                colorScheme="twitter"
+                width="100%"
+                size="sm"
+                onClick={() => {
+                  if (showUser._id !== user._id) {
+                    setIsFollowed(true);
+                    const followdata = {
+                      token: user.token,
+                      id: showUser._id,
+                    };
+                    dispatch(followUnfollowAsync(followdata)).then((res) => {
+                      if (res.status) {
+                        setIsFollowed(!isFollowed);
+                        dispatch(setFollowingAsync(followdata.token));
+                      } else {
+                        setIsFollowed(isFollowed);
+                        toast.error(res.errorMessage, ToastOption);
+                      }
+                    });
+                  }
+                }}
+              >
+                Follow
+              </Button>
+            )
           ) : (
             <Button
               colorScheme="gray"
@@ -297,7 +369,9 @@ const Profile = ({ showUser }) => {
                       width="100%"
                       height="fit-content"
                       key={i}
-                      onClick={() => handleUserClick(item)}
+                      onClick={() => {
+                        handleUserClick(item);
+                      }}
                     >
                       <FollowingUser
                         userdata={item}
@@ -313,14 +387,15 @@ const Profile = ({ showUser }) => {
                       width="100%"
                       height="fit-content"
                       key={i}
-                      onClick={() => handleUserClick(item)}
+                      onClick={() => {
+                        handleUserClick(item);
+                      }}
                     >
                       <FollowingUser
                         key={i}
                         userdata={item}
                         wantToNavigate={true}
                         border={true}
-                        onClick={() => handleUserClick(item)}
                       />
                     </Box>
                   );

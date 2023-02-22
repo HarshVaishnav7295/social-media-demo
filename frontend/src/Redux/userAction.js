@@ -106,6 +106,7 @@ export const followUnfollowAsync = (data) => {
         }),
       });
       const isFollowed = await newData.json();
+      dispatch(userAction.updateUserFollowings(isFollowed.followings));
       return isFollowed;
     } catch (error) {
       console.log(error);

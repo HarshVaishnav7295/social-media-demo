@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import Navbar from "../Navbar";
 import EditProfile from "./EditProfile";
 import EditPassword from "./EditPassword";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import Profile from "../Profile";
 
 const EditPage = () => {
@@ -18,7 +18,7 @@ const EditPage = () => {
       <Navbar />
       <Box
         width="100%"
-        height="100%"
+        height="90vh"
         display="flex"
         flexDir="row"
         justifyContent="space-around"
@@ -115,6 +115,7 @@ const EditPage = () => {
           display={isProfileOpen ? "flex" : "none"}
           justifyContent="center"
           alignItems="center"
+          height="100%"
         >
           <Profile showUser={displayedUser} />
         </Box>
