@@ -7,6 +7,7 @@ export const UpdateUserApi = `${host}/api/user/updateUser`;
 export const GetFollowingApi = `${host}/api/user/myFollowings`;
 export const GetFollowerApi = `${host}/api/user/myFollowers`;
 export const UpdateUserPasswordApi = `${host}/api/user/changePassword`;
+export const setAllUserApi = `${host}/api/user/getAllUser`;
 
 // APIs for Posts
 export const UploadPost = `${host}/api/post/`;

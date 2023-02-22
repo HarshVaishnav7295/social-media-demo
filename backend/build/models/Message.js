@@ -37,10 +37,6 @@ const messageSchema = new mongoose_1.Schema({
     receiver: {
         type: mongoose_1.default.Types.ObjectId,
         ref: 'User'
-    },
-    chat: {
-        type: mongoose_1.default.Types.ObjectId,
-        ref: 'Chat'
     }
 }, { timestamps: true });
 exports.Message = mongoose_1.default.model('Message', messageSchema);

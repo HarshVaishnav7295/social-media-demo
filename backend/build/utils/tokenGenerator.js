@@ -15,16 +15,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.generateToken = exports.PK = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 exports.PK = "tsnodeexpress@1234@1234";
-//export const accessTokenSecretKey = 'tsnodeexpress@accesstoken@1234'
-//export const refreshTokenSecretKey = 'tsnodeexpress@refreshtoken@1234'
 const generateToken = (id) => __awaiter(void 0, void 0, void 0, function* () {
     const token = jsonwebtoken_1.default.sign({ data: { id: id } }, exports.PK, { expiresIn: "24h" });
     return token;
 });
 exports.generateToken = generateToken;
-/*
-export const generateToken = async(id:string)=>{
-  const accessToken = jwt.sign({data:{'id':id}},accessTokenSecretKey,{expiresIn:'1h'})
-  const refreshToken = jwt.sign({data:{'id':id}},refreshTokenSecretKey,{expiresIn:'1y'})
-  return {accessToken,refreshToken}
-}*/ 

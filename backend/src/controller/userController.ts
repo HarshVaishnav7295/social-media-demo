@@ -261,27 +261,57 @@ export const findUserById = async (
   res: Response
 ): Promise<void> => {
   try {
-    // const loggedUserId: string = req.body.user.id;
+    const loggedUserId: string = req.body.user.id;
     const { id }: { id: string } = req.body;
+    const loggedUser = await User.findById(loggedUserId);
+    if (loggedUser) {
+      const user = await User.findById(id);
+      if (!user) {
+        res.status(StatusCodes.NOT_FOUND).json({
+          errorMessage: "user not found",
+        });
+      } else {
+        res.status(StatusCodes.OK).json({
+          user: {
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            dob: user.dob,
+            gender: user.gender,
+            bio: user.bio,
+            avatar: user.avatar,
+            followings: user.followings,
+            followers: user.followers,
+          },
+        });
+      }
+    } else {
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        errorMessage: "Please Login First",
+      });
+    }
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      errorMessage: error,
+    });
+  }
+};
 
-    const user = await User.findById(id);
-    if (!user) {
-      res.status(StatusCodes.NOT_FOUND).json({
-        errorMessage: "user not found",
+export const getAllUser = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const loggedUserId: string = req.body.user.id;
+    const loggedUser = await User.findById(loggedUserId);
+    if (loggedUser) {
+      const allUser = await User.find({});
+      res.status(StatusCodes.OK).json({
+        allUser,
       });
     } else {
-      res.status(StatusCodes.OK).json({
-        user: {
-          _id: user._id,
-          name: user.name,
-          email: user.email,
-          dob: user.dob,
-          gender: user.gender,
-          bio: user.bio,
-          avatar: user.avatar,
-          followings: user.followings,
-          followers: user.followers,
-        },
+      res.status(StatusCodes.UNAUTHORIZED).json({
+        errorMessage: "Please Login first.",
       });
     }
   } catch (error) {

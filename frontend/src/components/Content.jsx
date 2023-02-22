@@ -2,7 +2,7 @@ import { Box } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllPostAsync, getPersonalPostAsync } from "../Redux/postAction";
-import { setFollowingAsync } from "../Redux/userAction";
+import { setFollowerAsync, setFollowingAsync } from "../Redux/userAction";
 import PostContainer from "./PostContainer";
 
 const Content = () => {
@@ -26,8 +26,9 @@ const Content = () => {
   useEffect(() => {
     if (isUserAuthenticated) {
       dispatch(setFollowingAsync(user.token));
+      dispatch(setFollowerAsync(user.token));
     }
-  }, [dispatch]);
+  }, [dispatch, isUserAuthenticated, user.token]);
 
   return (
     <>

@@ -7,10 +7,12 @@ import {
   getMyFollowers,
   changePassword,
   findUserById,
+  getAllUser,
 } from "../controller/userController";
 
 router.route("/followUnfollow").post(followUnfollowUser);
 router.route("/myFollowings").get(getMyFollowings);
+router.route("/getAllUser").get(getAllUser);
 router.route("/myFollowers").get(getMyFollowers);
 router.route("/updateUser").patch(updateUser);
 router.route("/changePassword").patch(changePassword);

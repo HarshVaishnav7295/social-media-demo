@@ -42,21 +42,21 @@ const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const userSchema = new mongoose_1.Schema({
     name: {
         type: String,
-        required: [true, 'Please provide name']
+        required: [true, "Please provide name"],
     },
     email: {
         type: String,
-        unique: [true, 'Email already taken,try different one'],
-        required: [true, 'Please provide email'],
+        unique: [true, "Email already taken,try different one"],
+        required: [true, "Please provide email"],
         validate: function (value) {
             if (!validator_1.default.isEmail(value)) {
-                throw new Error('Please provide correct email');
+                throw new Error("Please provide correct email");
             }
-        }
+        },
     },
     password: {
         type: String,
-        required: [true, 'Please provide password']
+        required: [true, "Please provide password"],
     },
     dob: Date,
     gender: String,
@@ -66,22 +66,22 @@ const userSchema = new mongoose_1.Schema({
         {
             user: {
                 type: mongoose_1.default.Types.ObjectId,
-                ref: 'User'
-            }
-        }
+                ref: "User",
+            },
+        },
     ],
     followings: [
         {
             user: {
                 type: mongoose_1.default.Types.ObjectId,
-                ref: 'User'
-            }
-        }
-    ]
+                ref: "User",
+            },
+        },
+    ],
 }, { timestamps: true });
-userSchema.pre('save', function (next) {
+userSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
-        if (this.isModified('password')) {
+        if (this.isModified("password")) {
             const salt = yield bcryptjs_1.default.genSalt(10);
             this.password = yield bcryptjs_1.default.hash(this.password, salt);
         }
@@ -94,4 +94,4 @@ userSchema.methods.comparePassword = function (enteredPassword) {
         return matched;
     });
 };
-exports.User = mongoose_1.default.model('User', userSchema);
+exports.User = mongoose_1.default.model("User", userSchema);

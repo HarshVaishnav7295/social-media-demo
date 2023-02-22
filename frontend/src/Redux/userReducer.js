@@ -9,6 +9,7 @@ const initialUserState = {
   follower: [],
   following: [],
   displayedUser: JSON.parse(localStorage.getItem("CLONE")),
+  allUser: [],
 };
 
 const userSlice = createSlice({
@@ -51,6 +52,9 @@ const userSlice = createSlice({
       };
       localStorage.setItem("CLONE", JSON.stringify(state.user));
       state.isUserAuthenticated = true;
+    },
+    setAllUser: (state, action) => {
+      state.allUser = action.payload;
     },
   },
 });

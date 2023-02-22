@@ -28,11 +28,6 @@ const Profile = ({ showUser }) => {
 
   const [isFollowerSelected, setIsFollowerSelected] = useState(true);
   const dispatch = useDispatch();
-  useEffect(() => {
-    if (isUserAuthenticated) {
-      dispatch(setFollowerAsync(user.token));
-    }
-  }, [dispatch]);
 
   useEffect(() => {
     if (isUserAuthenticated) {
@@ -82,8 +77,8 @@ const Profile = ({ showUser }) => {
         >
           <Img
             src={
-              isUserAuthenticated
-                ? showUser?.avatar
+              isUserAuthenticated && showUser?.avatar
+                ? showUser.avatar
                 : "https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
             }
             // src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="

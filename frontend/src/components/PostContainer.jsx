@@ -123,7 +123,7 @@ const PostContainer = ({ image, description, post, user }) => {
                   ? postUser?.avatar
                   : "https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
               }
-              alt="user name"
+              alt={postUser?.name}
               width="2.5rem"
               height="2.5rem"
               borderRadius="50%"
@@ -161,6 +161,8 @@ const PostContainer = ({ image, description, post, user }) => {
                       toast.error(res.errorMessage, ToastOption);
                     }
                   });
+                } else {
+                  toast.error("You can't Unfollow YourSelf.", ToastOption);
                 }
               }}
               color={
@@ -196,6 +198,8 @@ const PostContainer = ({ image, description, post, user }) => {
                       toast.error(res.errorMessage, ToastOption);
                     }
                   });
+                } else {
+                  toast.error("You can't Follow YourSelf.", ToastOption);
                 }
               }}
               color={

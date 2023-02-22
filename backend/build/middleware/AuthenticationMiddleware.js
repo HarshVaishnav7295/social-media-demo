@@ -16,66 +16,35 @@ exports.authenticaton = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const User_1 = require("../models/User");
-//import { accessTokenSecretKey,refreshTokenSecretKey } from "../utils/tokenGenerator";
 const tokenGenerator_1 = require("../utils/tokenGenerator");
 const authenticaton = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
     const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith('Bearer')) {
+    if (!authHeader || !authHeader.startsWith("Bearer")) {
         res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
-            "errorMessage": "Please provide correct bearer token"
+            errorMessage: "Please provide correct bearer token",
         });
     }
     else {
-        const token = authHeader.split(' ')[1];
+        const token = authHeader.split(" ")[1];
         if (!token) {
             res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
-                "errorMessage": "Please provide authentication token"
+                errorMessage: "Please provide authentication token",
             });
         }
         else {
-            const { data: { id: id } } = jsonwebtoken_1.default.verify(token, tokenGenerator_1.PK);
+            const { data: { id: id }, } = jsonwebtoken_1.default.verify(token, tokenGenerator_1.PK);
             const user = yield User_1.User.findById(id);
             if (!user) {
                 res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
-                    "errorMessage": "You are not authorized to use this route"
+                    errorMessage: "You are not authorized to use this route",
                 });
             }
             else {
-                req.body['user'] = {
-                    id: id
+                req.body["user"] = {
+                    id: id,
                 };
                 next();
             }
-            /*
-            let dataPayload
-            jwt.verify(token,accessTokenSecretKey,async function(error,payload){
-                if(error){
-                    if(error.message === 'jwt expired'){
-                        res.status(StatusCodes.BAD_REQUEST).json({
-                            "errorMessage":"Jwt is expired"
-                        })
-                    }else{
-                        res.status(StatusCodes.BAD_REQUEST).json({
-                            "errorMessage":error.message
-                        })
-                    }
-                }else{
-                    dataPayload = payload
-                    const id = dataPayload.data.id
-                    const user = await User.findById(id)
-                    if(!user){
-                        res.status(StatusCodes.UNAUTHORIZED).json({
-                            "errorMessage":"You are not authorized to use this route"
-                        })
-                    }
-                    else{
-                        req.body['user'] = {
-                            id : id
-                        }
-                        next()
-                    }
-                }
-            })*/
         }
     }
 });
