@@ -1,29 +1,27 @@
-import React from 'react'
-import { useToast, Button } from '@chakra-ui/react'
+import React from "react";
+import { useToast, Button } from "@chakra-ui/react";
 
 function ToastExample() {
-    const toast = useToast()
-    return (
-      <Button
-        onClick={() =>
-          toast({
-            title: 'pic uploaded',
-            description: "Your pic is uploaded.",
-            status: 'success',
-            duration: 9000,
-            isClosable: true,
-          })
-        }
-      >
-        Show Toast
-      </Button>
-    )
-  }
-
-const Toaster = () => {
+  const toast = useToast();
   return (
-    <ToastExample/>
-  )
+    <Button
+      onClick={() =>
+        toast({
+          title: "pic uploaded",
+          description: "Your pic is uploaded.",
+          status: "success",
+          duration: 9000,
+          isClosable: true,
+        })
+      }
+    >
+      Show Toast
+    </Button>
+  );
 }
 
-export default Toaster
+const Toaster = () => {
+  return <ToastExample />;
+};
+
+export default Toaster;

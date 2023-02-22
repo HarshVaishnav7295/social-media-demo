@@ -1,16 +1,10 @@
-import {
-  Box,
-  FormControl,
-  FormHelperText,
-  FormLabel,
-  Input,
-} from "@chakra-ui/react";
+import { Box, FormControl, Input } from "@chakra-ui/react";
 import React from "react";
 
 const SearchBar = ({ searchValue, setSearchValue }) => {
   return (
-    <Box display="flex" justifyContent="center">
-      <FormControl mt="2rem" width="70%">
+    <Box display="flex" justifyContent="center" bg="white" zIndex="1">
+      <FormControl pt="2rem" width="50%" position="fixed" bg="white">
         {/* <FormLabel>Email address</FormLabel> */}
         <Input
           type="email"

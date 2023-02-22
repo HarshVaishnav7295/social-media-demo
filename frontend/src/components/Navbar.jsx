@@ -38,6 +38,8 @@ const Navbar = () => {
   const isUserAuthenticated = useSelector(
     (state) => state.user.isUserAuthenticated
   );
+  const isProfileOpen = useSelector((state) => state.user.isProfileOpen);
+
   const user = useSelector((state) => state.user.user);
 
   const changeProfileVisibility = () => {
@@ -52,7 +54,6 @@ const Navbar = () => {
       desc: caption,
       token: user.token,
     };
-
     dispatch(setNewPostAsync(data));
     setCaption("");
     setImgLink("");
@@ -68,6 +69,7 @@ const Navbar = () => {
           <ModalBody>
             {/* image sectino  */}
             <MyDropzone imgLink={imgLink} setImgLink={setImgLink} />
+
             {/* caption */}
             <Text my="1rem">Caption : </Text>
             <Textarea
@@ -84,6 +86,7 @@ const Navbar = () => {
               onClick={() => {
                 // onfail
                 if (imgLink === "") {
+                  console.log(imgLink);
                   toast({
                     title: "Failed !",
                     description: "You need to add a pic to post something!",
@@ -105,8 +108,8 @@ const Navbar = () => {
                   isClosable: true,
                   position: "top",
                 });
-                onClose();
                 uploadPostHandler();
+                onClose();
               }}
             >
               <HiUpload
@@ -171,8 +174,11 @@ const Navbar = () => {
             }}
             transition="200ms"
             onClick={() => {
-              navigate("/");
               isUserAuthenticated && dispatch(getFeedAsync(user.token));
+              if (isProfileOpen) {
+                dispatch(userAction.changeProfileVisiblity());
+              }
+              navigate("/");
             }}
           >
             <AiOutlineHome />
@@ -198,7 +204,12 @@ const Navbar = () => {
               ],
             }}
             transition="200ms"
-            onClick={() => navigate("/search")}
+            onClick={() => {
+              navigate("/search");
+              if (isProfileOpen) {
+                dispatch(userAction.changeProfileVisiblity());
+              }
+            }}
           >
             <AiOutlineSearch />
           </Box>
@@ -238,7 +249,7 @@ const Navbar = () => {
           >
             <MdOutlineAddToQueue />
           </Box>
-          <Box
+          {/* <Box
             cursor="pointer"
             fontSize={[
               "1rem",
@@ -261,7 +272,7 @@ const Navbar = () => {
             transition="200ms"
           >
             <AiOutlineHeart />
-          </Box>
+          </Box> */}
         </Box>
         {/* Progile and Chat */}
         <Box
@@ -292,7 +303,12 @@ const Navbar = () => {
                 ],
               }}
               transition="200ms"
-              onClick={() => navigate("/chat")}
+              onClick={() => {
+                navigate("/chat");
+                if (isProfileOpen) {
+                  dispatch(userAction.changeProfileVisiblity());
+                }
+              }}
             >
               <RiSendPlaneFill />
             </Box>

@@ -68,7 +68,7 @@ const Search = () => {
             flexDir="column"
             justifyContent="flex-start"
             margin="auto"
-            width={isProfileOpen ? "100%" : "70%"}
+            width={["100%", "80%", "80%", "70%", "60%", "60%"]}
             height="90vh"
             // p="1.5rem"
             overflowY="scroll"

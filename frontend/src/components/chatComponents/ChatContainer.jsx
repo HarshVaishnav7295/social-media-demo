@@ -1,5 +1,6 @@
-import { Box, Img, Input, Text } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import { Box, Input } from "@chakra-ui/react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Navbar from "../Navbar";
 import Profile from "../Profile";
@@ -9,18 +10,62 @@ import FollowingUser from "../FollowingUser";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { BsEmojiSmileFill } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
-import { addOneChatAsync, setAllChatAsync } from "../../Redux/chatAction";
-import { setFollowingAsync } from "../../Redux/userAction";
+import { setFollowerAsync, setFollowingAsync } from "../../Redux/userAction";
+import { io } from "socket.io-client";
+import { Img, Text } from "@chakra-ui/react";
+import { setAllChatAsync } from "../../Redux/chatAction";
 
 const ChatContainer = () => {
   const dispatch = useDispatch();
   const displayedUser = useSelector((state) => state.user.displayedUser);
   const user = useSelector((state) => state.user.user);
-
+  //const chatId = useSelector((state)=>state.chat.chatId)
   const [clickedFollowingUser, setClickedFollowingUser] = useState("");
   const isProfileOpen = useSelector((state) => state.user.isProfileOpen);
   const following = useSelector((state) => state.user.following);
+  const [socket, setSocket] = useState(null);
+  const [chatId, setChatId] = useState("");
 
+  useEffect(() => {
+    if (socket === null) {
+      setSocket(io.connect("http://localhost:8000"));
+    }
+  }, [socket]);
+
+  const SetRoom = useCallback(
+    async (followingUserProp) => {
+      setClickedFollowingUser(followingUserProp);
+      if (socket) {
+        socket.emit("Leave Room", chatId);
+      }
+      let resp = await fetch("http://localhost:8000/api/chat/accessChat", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        method: "POST",
+        body: JSON.stringify({
+          users: [followingUserProp._id, user._id],
+        }),
+      });
+      if (resp.status === 500) {
+        let error = await resp.json();
+        console.log(error.errorMessage);
+      } else if (resp.status === 200) {
+        let data = await resp.json();
+        console.log(data.chat[0]);
+        setChatId(data.chat[0]._id);
+
+        if (socket) {
+          socket.emit("Join Room", {
+            chatId: data.chat[0]._id,
+            users: data.chat[0].users,
+          });
+        }
+      }
+    },
+    [chatId]
+  );
   const isUserAuthenticated = useSelector(
     (state) => state.user.isUserAuthenticated
   );
@@ -34,9 +79,9 @@ const ChatContainer = () => {
   useEffect(() => {
     if (isUserAuthenticated) {
       dispatch(setFollowingAsync(user.token));
+      dispatch(setFollowerAsync(user.token));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch]);
 
   return (
     <>
@@ -134,7 +179,7 @@ const ChatContainer = () => {
                           ? "lightgrey"
                           : ""
                       }
-                      onClick={() => setClickedFollowingUser(followingUser)}
+                      onClick={() => SetRoom(followingUser)}
                     >
                       <FollowingUser
                         border={false}
@@ -157,16 +202,16 @@ const ChatContainer = () => {
             >
               {/* Main Chat Container */}
               <Box width="100%" height="100%">
-                {clickedFollowingUser && (
+                {clickedFollowingUser && chatId && (
                   <AllChatContainer
+                    chatId={chatId}
+                    socket={socket}
                     clickedFollowingUser={clickedFollowingUser}
                     user={user}
                     isUserAuthenticated={isUserAuthenticated}
                   />
                 )}
               </Box>
-
-              {/* Box for Input Chat Container */}
             </Box>
           </Box>
 
@@ -186,10 +231,9 @@ const ChatContainer = () => {
     </>
   );
 };
-// *******************************************************************************************************
 
-const InputContainer = ({ clickedFollowingUser, user }) => {
-  const dispatch = useDispatch();
+const InputContainer = ({ socket, chatId, clickedFollowingUser, user }) => {
+  //const chatId = useSelector((state)=>state.chat.chatId)
   const [showEmojji, setShowEmoji] = useState(false);
   const [msg, setMsg] = useState("");
   const enterKeyPressed = (e) => {
@@ -212,10 +256,18 @@ const InputContainer = ({ clickedFollowingUser, user }) => {
       // Call dispatch here for send msg
       const data = {
         text: msg,
-        receiverId: clickedFollowingUser._id,
+        sender: user._id,
+        chatId: chatId,
+        receiver: clickedFollowingUser._id,
         token: user.token,
       };
-      dispatch(addOneChatAsync(data));
+      //dispatch(addOneChatAsync(data));
+      socket.emit("sendMessage", {
+        text: data.text,
+        sender: data.sender,
+        receiver: data.receiver,
+        chatId: data.chatId,
+      });
       setMsg("");
     }
   };
@@ -279,22 +331,28 @@ const InputContainer = ({ clickedFollowingUser, user }) => {
     </>
   );
 };
-// *******************************************************************************************************
-export const AllChatContainer = ({
+
+const AllChatContainer = ({
+  chatId,
+  socket,
   clickedFollowingUser,
   user,
   isUserAuthenticated,
 }) => {
   const dispatch = useDispatch();
   const chats = useSelector((state) => state.chat.chat);
+
   useEffect(() => {
-    const data = {
-      receiverId: clickedFollowingUser._id,
-      senderId: user._id,
-      token: user.token,
-    };
-    dispatch(setAllChatAsync(data));
-  }, [clickedFollowingUser._id, user.token, dispatch, user._id]);
+    socket.on("MessagesUpdated", (data) => {
+      if (!data.message) {
+        dispatch(setAllChatAsync(data));
+      } else {
+        if (data.message.chat === chatId) {
+          dispatch(setAllChatAsync(data.messages));
+        }
+      }
+    });
+  }, [chats, clickedFollowingUser, chatId]);
 
   return (
     <>
@@ -470,6 +528,7 @@ export const AllChatContainer = ({
             </Box>
           </Box>
         </Box>
+        {/* ******************************************************************************************************************** */}
         {/* Box for chats between users */}
 
         <Box
@@ -531,18 +590,12 @@ export const AllChatContainer = ({
                   >
                     {chat.text}
                   </Box>
-                  {/* Time stamp Box */}
-                  {/* 2023-02-20T09:28:41.985Z */}
-                  <Box fontSize="0.57rem" textColor="darkgrey">
-                    {chat.createdAt.split("T")[1].split(":")[0]}:
-                    {chat.createdAt.split("T")[1].split(":")[1]}
-                  </Box>
                 </Box>
               );
             })}
           </Box>
         </Box>
-        {clickedFollowingUser && (
+        {clickedFollowingUser && chatId && (
           <Box
             width="100%"
             height="10%"
@@ -552,6 +605,8 @@ export const AllChatContainer = ({
             alignItems="center"
           >
             <InputContainer
+              socket={socket}
+              chatId={chatId}
               clickedFollowingUser={clickedFollowingUser}
               user={user}
             />

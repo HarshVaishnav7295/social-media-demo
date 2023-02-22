@@ -1,5 +1,4 @@
 export const host = `http://localhost:8000`;
-
 // APIs for User
 export const RegisterAPI = `${host}/api/auth/signup`;
 export const LoginAPI = `${host}/api/auth/login`;
@@ -10,7 +9,7 @@ export const UpdateUserPasswordApi = `${host}/api/user/changePassword`;
 export const setAllUserApi = `${host}/api/user/getAllUser`;
 
 // APIs for Posts
-export const UploadPost = `${host}/api/post/`;
+export const UploadPost = `${host}/api/post`;
 export const GetMyPost = `${host}/api/post/getMyPosts`;
 export const LikeUnLikeApi = `${host}/api/post/likeUnlike/`;
 export const GetUserPostApi = `${host}/api/post/getUserPost`;

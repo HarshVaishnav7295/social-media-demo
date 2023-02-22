@@ -17,9 +17,7 @@ import {
 } from "@chakra-ui/react";
 import MyDropzone from "./Dropzone";
 
-
 function BasicUsage(props) {
-
   const toast = useToast();
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
@@ -57,9 +55,7 @@ function BasicUsage(props) {
                 display="none"
                 _hover={{ display: "block" }}
               />{" "}
-              <Text mx="1rem" _hover={{}}>
-                Upload
-              </Text>
+              <Text mx="1rem">Upload</Text>
             </Button>
             {/* <Button variant="ghost">Secondary Action</Button> */}
           </ModalFooter>
