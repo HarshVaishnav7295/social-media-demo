@@ -12,8 +12,9 @@ export const setAllUserApi = `${host}/api/user/getAllUser`;
 // APIs for Posts
 export const UploadPost = `${host}/api/post/`;
 export const GetMyPost = `${host}/api/post/getMyPosts`;
-export const GetAllPost = `${host}/api/post/getAllPost`;
 export const LikeUnLikeApi = `${host}/api/post/likeUnlike/`;
+export const GetUserPostApi = `${host}/api/post/getUserPost`;
+export const GetFeedApi = `${host}/api/post/getFeed`;
 
 // APIs for Chats
 

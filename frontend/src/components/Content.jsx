@@ -1,7 +1,7 @@
-import { Box } from "@chakra-ui/react";
+import { Box, Text } from "@chakra-ui/react";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getAllPostAsync, getPersonalPostAsync } from "../Redux/postAction";
+import { getFeedAsync, getPersonalPostAsync } from "../Redux/postAction";
 import { setFollowerAsync, setFollowingAsync } from "../Redux/userAction";
 import PostContainer from "./PostContainer";
 
@@ -18,7 +18,7 @@ const Content = () => {
   useEffect(() => {
     if (isUserAuthenticated && user) {
       dispatch(getPersonalPostAsync(user.token));
-      dispatch(getAllPostAsync(user.token));
+      dispatch(getFeedAsync(user.token));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, user]);
@@ -42,7 +42,7 @@ const Content = () => {
         // justifyContent="center"
         gap={["1rem", "1rem", "1rem", "3rem", "3rem", "3rem"]}
       >
-        {allPosts.length > 0 &&
+        {isUserAuthenticated && allPosts.length > 0 ? (
           allPosts.map((post) => {
             return (
               <PostContainer
@@ -53,7 +53,10 @@ const Content = () => {
                 description={post.description}
               />
             );
-          })}
+          })
+        ) : (
+          <Text>Post not Found</Text>
+        )}
       </Box>
     </>
   );

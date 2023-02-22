@@ -25,7 +25,11 @@ const EditPage = () => {
         alignItems="center"
       >
         <Box
-          display="flex"
+          display={
+            isProfileOpen
+              ? ["none", "none", "none", "flex", "flex", "flex"]
+              : "flex"
+          }
           flexDir="column"
           justifyContent="center"
           margin="auto"
@@ -111,10 +115,11 @@ const EditPage = () => {
 
         {/* Profile Box */}
         <Box
-          width={["70%", "70%", "70%", "30%", "30%", "30%"]}
+          width={["80%", "40%", "35%", "30%", "30%", "30%"]}
           display={isProfileOpen ? "flex" : "none"}
           justifyContent="center"
           alignItems="center"
+          // height={["90%", "90%", "90%", "100%", "100%", "100%"]}
           height="100%"
         >
           <Profile showUser={displayedUser} />

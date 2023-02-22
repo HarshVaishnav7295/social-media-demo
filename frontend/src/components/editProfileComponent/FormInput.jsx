@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, Text, Input } from "@chakra-ui/react";
-import useInput from "../../Hook/UseInput";
 
 const FormInput = (props) => {
   return (

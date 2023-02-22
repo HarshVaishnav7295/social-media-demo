@@ -146,7 +146,8 @@ export const setAllUserAsync = (token) => {
         },
         method: "GET",
       });
-      console.log(allUserData.allUser);
+      const data = await allUserData.json();
+      dispatch(userAction.setAllUser(data.allUser));
     } catch (error) {
       console.log(error);
     }

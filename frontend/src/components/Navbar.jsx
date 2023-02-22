@@ -24,7 +24,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { userAction } from "../Redux/userReducer";
 
 import MyDropzone from "../components/UploadPost/Dropzone";
-import { setNewPostAsync } from "../Redux/postAction";
+import { getFeedAsync, setNewPostAsync } from "../Redux/postAction";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -128,41 +128,100 @@ const Navbar = () => {
         display="flex"
         justifyContent="space-between"
         flexDir="row"
+        px={["0.5rem", "0.5rem", "1rem", "1rem", "1rem", "1rem"]}
+        pt="0.5rem"
       >
         {/* Navbar Icon and Logo */}
         <Box
           display="flex"
           flexDirection="row"
           alignItems="center"
-          gap="0.7rem"
+          fontSize={["0.8rem", "1rem", "1.5rem", "1.5rem", "1.5rem", "1.5rem"]}
         >
           <Box cursor="pointer" display="flex">
             <Text>Logo</Text>
           </Box>
         </Box>
         {/* Home, Search, AddPost and Notification */}
-        <Box display="flex" flexDir="row" gap="1.3rem" alignItems="center">
+        <Box
+          display="flex"
+          flexDir="row"
+          gap={["0.5rem", "1rem", "1.3rem", "1.3rem", "1.3rem", "1.3rem"]}
+          alignItems="center"
+        >
           <Box
             cursor="pointer"
-            fontSize="1.5rem"
-            _hover={{ fontSize: "1.6rem" }}
+            fontSize={[
+              "1rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+            ]}
+            _hover={{
+              fontSize: [
+                "1.1rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+              ],
+            }}
             transition="200ms"
-            onClick={() => navigate("/")}
+            onClick={() => {
+              navigate("/");
+              isUserAuthenticated && dispatch(getFeedAsync(user.token));
+            }}
           >
             <AiOutlineHome />
           </Box>
           <Box
             cursor="pointer"
-            fontSize="1.5rem"
-            _hover={{ fontSize: "1.6rem" }}
+            fontSize={[
+              "1rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+            ]}
+            _hover={{
+              fontSize: [
+                "1.1rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+              ],
+            }}
             transition="200ms"
+            onClick={() => navigate("/search")}
           >
             <AiOutlineSearch />
           </Box>
           <Box
             cursor="pointer"
-            fontSize="1.5rem"
-            _hover={{ fontSize: "1.6rem" }}
+            fontSize={[
+              "1rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+            ]}
+            _hover={{
+              fontSize: [
+                "1.1rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+              ],
+            }}
             transition="200ms"
             onClick={() =>
               isUserAuthenticated
@@ -181,20 +240,57 @@ const Navbar = () => {
           </Box>
           <Box
             cursor="pointer"
-            fontSize="1.5rem"
-            _hover={{ fontSize: "1.6rem" }}
+            fontSize={[
+              "1rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+            ]}
+            _hover={{
+              fontSize: [
+                "1.1rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+              ],
+            }}
             transition="200ms"
           >
             <AiOutlineHeart />
           </Box>
         </Box>
         {/* Progile and Chat */}
-        <Box display="flex" flexDir="row" gap="1rem" alignItems="center">
+        <Box
+          display="flex"
+          flexDir="row"
+          gap={["0.5rem", "0.8rem", "1rem", "1rem", "1rem", "1rem"]}
+          alignItems="center"
+        >
           {isUserAuthenticated && (
             <Box
               cursor="pointer"
-              fontSize="1.5rem"
-              _hover={{ fontSize: "1.6rem" }}
+              fontSize={[
+                "1rem",
+                "1.5rem",
+                "1.5rem",
+                "1.5rem",
+                "1.5rem",
+                "1.5rem",
+              ]}
+              _hover={{
+                fontSize: [
+                  "1.1rem",
+                  "1.6rem",
+                  "1.6rem",
+                  "1.6rem",
+                  "1.6rem",
+                  "1.6rem",
+                ],
+              }}
               transition="200ms"
               onClick={() => navigate("/chat")}
             >
@@ -216,9 +312,27 @@ const Navbar = () => {
                       ? user.avatar
                       : "https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
                   }
-                  width="2rem"
+                  width={["1rem", "1.5rem", "2rem", "2rem", "2rem", "2rem"]}
+                  height={["1rem", "1.5rem", "2rem", "2rem", "2rem", "2rem"]}
                   transition="200ms"
-                  _hover={{ width: "2.1rem" }}
+                  _hover={{
+                    width: [
+                      "1.1rem",
+                      "1.6rem",
+                      "2.1rem",
+                      "2.1rem",
+                      "2.1rem",
+                      "2.1rem",
+                    ],
+                    height: [
+                      "1.1rem",
+                      "1.6rem",
+                      "2.1rem",
+                      "2.1rem",
+                      "2.1rem",
+                      "2.1rem",
+                    ],
+                  }}
                 />
               </Box>
             ) : (

@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import { Post } from "../models/Post";
+import { User } from "../models/User";
 import { findUserById } from "./userController";
+import { IPostModel } from "../models/Post";
 
 interface IPostReq {
   desc: string;
@@ -188,14 +190,57 @@ export const LikeUnlikePost = async (
   }
 };
 
-export const getAllPost = async (
+export const getUserPost = async (
   req: Request,
   res: Response
 ): Promise<void> => {
   try {
-    const allPost = await Post.find({});
-    res.status(StatusCodes.OK).json({
-      posts: allPost,
+    const loggedUserId: string = await req.body.user.id;
+    const _id: string = await req.body._id;
+    if (!loggedUserId || !_id) {
+      res.status(StatusCodes.BAD_REQUEST).json({
+        errorMessage: "User Id Required.",
+      });
+    } else {
+      const loggedUser = await User.findById(loggedUserId);
+      if (loggedUser) {
+        const userposts = await Post.find({ createdBy: _id });
+        res.status(StatusCodes.OK).json({
+          status: true,
+          posts: userposts,
+        });
+      } else {
+        res.status(StatusCodes.BAD_REQUEST).json({
+          errorMessage: "User not Found.",
+        });
+      }
+    }
+  } catch (error) {
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      errorMessage: error,
+    });
+  }
+};
+
+export const getFeed = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const currUser = await User.findById(req.body.user.id);
+    var currUsersFollowingsIds = currUser?.followings;
+    var feed: IPostModel[] = [];
+    var counter = 0;
+    const myPosts = await Post.find({ createdBy: req.body.user.id });
+    currUsersFollowingsIds?.map(async (user) => {
+      const posts = await Post.find({
+        createdBy: user,
+      });
+      feed = feed.concat(posts);
+      counter += 1;
+      if (counter === currUsersFollowingsIds?.length) {
+        feed = feed.concat(myPosts);
+        res.status(StatusCodes.OK).json({
+          feed: feed,
+        });
+      }
     });
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({

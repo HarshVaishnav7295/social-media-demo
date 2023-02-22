@@ -9,9 +9,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllPost = exports.LikeUnlikePost = exports.getMyPosts = exports.deletePost = exports.updatePost = exports.getPost = exports.createPost = void 0;
+exports.getFeed = exports.getUserPost = exports.LikeUnlikePost = exports.getMyPosts = exports.deletePost = exports.updatePost = exports.getPost = exports.createPost = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const Post_1 = require("../models/Post");
+const User_1 = require("../models/User");
 const createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { desc, img } = req.body;
@@ -185,12 +186,30 @@ const LikeUnlikePost = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
 });
 exports.LikeUnlikePost = LikeUnlikePost;
-const getAllPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const allPost = yield Post_1.Post.find({});
-        res.status(http_status_codes_1.StatusCodes.OK).json({
-            posts: allPost,
-        });
+        const loggedUserId = yield req.body.user.id;
+        const _id = yield req.body._id;
+        if (!loggedUserId || !_id) {
+            res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
+                errorMessage: "User Id Required.",
+            });
+        }
+        else {
+            const loggedUser = yield User_1.User.findById(loggedUserId);
+            if (loggedUser) {
+                const userposts = yield Post_1.Post.find({ createdBy: _id });
+                res.status(http_status_codes_1.StatusCodes.OK).json({
+                    status: true,
+                    posts: userposts,
+                });
+            }
+            else {
+                res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
+                    errorMessage: "User not Found.",
+                });
+            }
+        }
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -198,4 +217,32 @@ const getAllPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
     }
 });
-exports.getAllPost = getAllPost;
+exports.getUserPost = getUserPost;
+const getFeed = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const currUser = yield User_1.User.findById(req.body.user.id);
+        var currUsersFollowingsIds = currUser === null || currUser === void 0 ? void 0 : currUser.followings;
+        var feed = [];
+        var counter = 0;
+        const myPosts = yield Post_1.Post.find({ createdBy: req.body.user.id });
+        currUsersFollowingsIds === null || currUsersFollowingsIds === void 0 ? void 0 : currUsersFollowingsIds.map((user) => __awaiter(void 0, void 0, void 0, function* () {
+            const posts = yield Post_1.Post.find({
+                createdBy: user,
+            });
+            feed = feed.concat(posts);
+            counter += 1;
+            if (counter === (currUsersFollowingsIds === null || currUsersFollowingsIds === void 0 ? void 0 : currUsersFollowingsIds.length)) {
+                feed = feed.concat(myPosts);
+                res.status(http_status_codes_1.StatusCodes.OK).json({
+                    feed: feed,
+                });
+            }
+        }));
+    }
+    catch (error) {
+        res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+            errorMessage: error,
+        });
+    }
+});
+exports.getFeed = getFeed;

@@ -28,22 +28,24 @@ const mongoose_1 = __importStar(require("mongoose"));
 const postSchema = new mongoose_1.Schema({
     description: {
         type: String,
-        required: [true, 'Please provide description']
+        required: [true, "Please provide description"],
     },
     image: String,
     createdBy: {
         type: mongoose_1.default.Types.ObjectId,
-        ref: 'User'
+        ref: "User",
     },
     likedBy: [
-        { user: {
+        {
+            user: {
                 type: mongoose_1.default.Types.ObjectId,
-                ref: 'User'
-            } }
+                ref: "User",
+            },
+        },
     ],
     likes: {
         type: Number,
-        default: 0
-    }
+        default: 0,
+    },
 }, { timestamps: true });
-exports.Post = mongoose_1.default.model('Post', postSchema);
+exports.Post = mongoose_1.default.model("Post", postSchema);

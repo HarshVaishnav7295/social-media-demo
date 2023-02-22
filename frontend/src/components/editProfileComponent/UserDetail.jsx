@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useRef } from "react";
 import { Box, Img, Input, Text } from "@chakra-ui/react";
 
 const UserDetail = (props) => {

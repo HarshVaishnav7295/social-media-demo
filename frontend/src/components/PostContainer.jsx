@@ -84,7 +84,7 @@ const PostContainer = ({ image, description, post, user }) => {
       <ToastContainer />
       <Box
         // width={["30rem", "30rem", "30rem", "40rem", "40rem", "40rem"]}
-        width={["80%", "80%", "80%", "70%", "70%", "70%"]}
+        width={["90%", "85%", "80%", "70%", "70%", "70%"]}
         height="35rem"
         display="flex"
         alignItems="center"
@@ -104,7 +104,7 @@ const PostContainer = ({ image, description, post, user }) => {
           height="5%"
           justifyContent="space-between"
           alignItems="center"
-          px="2rem"
+          px={["0.5rem", "0.5rem", "1.5rem", "1.5rem", "1.5rem", "1.5rem"]}
         >
           {/* Avatar */}
           <Box
@@ -114,6 +114,7 @@ const PostContainer = ({ image, description, post, user }) => {
             backgroundColor="transparent"
             alignItems="center"
             gap="0.2rem"
+            py="5px"
             cursor="pointer"
             onClick={() => userProfileHandler()}
           >
@@ -124,14 +125,28 @@ const PostContainer = ({ image, description, post, user }) => {
                   : "https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
               }
               alt={postUser?.name}
-              width="2.5rem"
-              height="2.5rem"
+              width={[
+                "1.5rem",
+                "1.5rem",
+                "1.5rem",
+                "2.5rem",
+                "2.5rem",
+                "2.5rem",
+              ]}
+              height={[
+                "1.5rem",
+                "1.5rem",
+                "1.5rem",
+                "2.5rem",
+                "2.5rem",
+                "2.5rem",
+              ]}
               borderRadius="50%"
               p="0px"
             />
             <Text
               width="fit-content"
-              fontSize={["0.8rem", "0.8rem", "0.8rem", "1rem", "1rem", "1rem"]}
+              fontSize={["0.6rem", "1rem", "1rem", "1rem", "1rem", "1rem"]}
             >
               {postUser?.name}
             </Text>
@@ -142,7 +157,7 @@ const PostContainer = ({ image, description, post, user }) => {
               display="flex"
               flexDir="row"
               alignItems="center"
-              fontSize={["0.8rem", "0.8rem", "0.8rem", "1rem", "1rem", "1rem"]}
+              fontSize={["0.8rem", "0.8rem", "0.9rem", "1rem", "1rem", "1rem"]}
               cursor="pointer"
               onClick={() => {
                 if (postUser._id !== user._id) {
@@ -180,7 +195,7 @@ const PostContainer = ({ image, description, post, user }) => {
               display="flex"
               flexDir="row"
               alignItems="center"
-              fontSize={["0.8rem", "0.8rem", "0.8rem", "1rem", "1rem", "1rem"]}
+              fontSize={["0.8rem", "0.8rem", "0.9rem", "1rem", "1rem", "1rem"]}
               cursor="pointer"
               onClick={() => {
                 if (postUser._id !== user._id) {
@@ -215,12 +230,13 @@ const PostContainer = ({ image, description, post, user }) => {
         </Box>
         {/* Post image Box */}
         <Box
-          width="100%"
+          minWidth="100%"
+          maxWidth="100%"
           minHeight="70%"
           maxHeight="70%"
           display="flex"
           justifyContent="center"
-          px="1.5rem"
+          px={["0.2rem", "0.7rem", "0.7rem", "1.5rem", "1.5rem", "1.5rem"]}
           py="1rem"
         >
           <Img

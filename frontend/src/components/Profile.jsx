@@ -7,17 +7,17 @@ import { BsPower } from "react-icons/bs";
 import { userAction } from "../Redux/userReducer";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  followUnfollowAsync,
-  setFollowerAsync,
-  setFollowingAsync,
-} from "../Redux/userAction";
+import { followUnfollowAsync, setFollowingAsync } from "../Redux/userAction";
 import { ToastOption } from "./Register";
 import { toast } from "react-toastify";
+import { getUserPostAsync } from "../Redux/postAction";
+import { postAction } from "../Redux/postReducer";
 
 const Profile = ({ showUser }) => {
   const user = useSelector((state) => state.user.user);
+  const dispatch = useDispatch();
   const [isFollowed, setIsFollowed] = useState(false);
+  const [showUserPost, setShowUserPost] = useState([]);
 
   const isUserAuthenticated = useSelector(
     (state) => state.user.isUserAuthenticated
@@ -27,13 +27,23 @@ const Profile = ({ showUser }) => {
   const following = useSelector((state) => state.user.following);
 
   const [isFollowerSelected, setIsFollowerSelected] = useState(true);
-  const dispatch = useDispatch();
 
   useEffect(() => {
-    if (isUserAuthenticated) {
+    if (isUserAuthenticated && showUser) {
       user?.followings.map((followingId) => {
         if (followingId?._id === showUser?._id) {
           setIsFollowed(true);
+        }
+      });
+      const data = {
+        token: user.token,
+        _id: showUser._id,
+      };
+      dispatch(getUserPostAsync(data)).then((res) => {
+        if (res.status) {
+          setShowUserPost(res.posts);
+        } else {
+          setShowUserPost([]);
         }
       });
     }
@@ -48,8 +58,6 @@ const Profile = ({ showUser }) => {
   const handleUserClick = (followUser) => {
     dispatch(userAction.setDisplayedUser(followUser));
     dispatch(setFollowingAsync(user?.token));
-
-    console.log("followUser", followUser);
   };
 
   return (
@@ -60,7 +68,14 @@ const Profile = ({ showUser }) => {
         display="flex"
         flexDir="column"
         alignItems="center"
-        justifyContent="space-evenly"
+        justifyContent={[
+          "space-evenly",
+          "space-evenly",
+          "space-evenly",
+          "space-evenly",
+          "space-evenly",
+          "space-evenly",
+        ]}
       >
         {/* Profile Pic Box */}
         <Box
@@ -105,6 +120,10 @@ const Profile = ({ showUser }) => {
             gap="0"
             alignItems="center"
             cursor="pointer"
+            onClick={() => {
+              dispatch(postAction.setAllPost(showUserPost));
+              dispatch(userAction.changeProfileVisiblity());
+            }}
           >
             <Box
               fontWeight="bold"
@@ -117,7 +136,7 @@ const Profile = ({ showUser }) => {
                 "0.9rem",
               ]}
             >
-              {0}
+              {showUserPost?.length}
             </Box>
             <Box
               fontSize={[
@@ -280,7 +299,10 @@ const Profile = ({ showUser }) => {
               colorScheme="gray"
               size="xs"
               width="100%"
-              onClick={() => navigate("/editProfile")}
+              onClick={() => {
+                navigate("/editProfile");
+                dispatch(userAction.changeProfileVisiblity());
+              }}
             >
               Edit Profile
             </Button>
@@ -332,13 +354,15 @@ const Profile = ({ showUser }) => {
           alignItems="center"
           flexDir="column"
           gap="1rem"
+          height="50%"
         >
           {/* Followes */}
           <Box
             width="95%"
             p="10px"
             display="flex"
-            height={["8rem", "8rem", "8rem", "14rem", "14rem", "14rem"]}
+            height="100%"
+            // height={["8rem", "8rem", "8rem", "14rem", "14rem", "14rem"]}
             flexDir="column"
             gap="0.8rem"
             overflowY="scroll"
@@ -398,26 +422,28 @@ const Profile = ({ showUser }) => {
           </Box>
 
           <Box>
-            <Box
-              display="flex"
-              justifyContent="center"
-              alignItems="center"
-              cursor="pointer"
-              flexDir="row"
-              fontSize="0.8rem"
-              _hover={{ fontSize: "0.9rem" }}
-              transition="200ms"
-              onClick={logoutHandler}
-              py="1.5px"
-              px="2px"
-              borderRadius="5px"
-              fontWeight="medium"
-              gap="3px"
-              color="red.500"
-            >
-              <BsPower size="1rem" />
-              <Text width="-moz-fit-content">LogOut</Text>
-            </Box>
+            {showUser?._id === user?._id && (
+              <Box
+                display="flex"
+                justifyContent="center"
+                alignItems="center"
+                cursor="pointer"
+                flexDir="row"
+                fontSize="0.8rem"
+                _hover={{ fontSize: "0.9rem" }}
+                transition="200ms"
+                onClick={logoutHandler}
+                py="1.5px"
+                px="2px"
+                borderRadius="5px"
+                fontWeight="medium"
+                gap="3px"
+                color="red.500"
+              >
+                <BsPower size="1rem" />
+                <Text width="-moz-fit-content">LogOut</Text>
+              </Box>
+            )}
           </Box>
         </Box>
       </Box>
