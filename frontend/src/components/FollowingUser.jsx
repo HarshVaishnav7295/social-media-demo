@@ -18,9 +18,9 @@ const FollowingUser = ({ border, userdata, wantToNavigate }) => {
         flexDir="row"
         width="100%"
         cursor="pointer"
-        justifyContent="space-between"
         border={border ? "2px" : "0px"}
         gap="0.3rem"
+        justifyContent="space-between"
         px={["3px", "3px", "3px", "0.3rem", "0.3rem", "0.3rem"]}
       >
         {/*Image Box  */}
@@ -32,7 +32,6 @@ const FollowingUser = ({ border, userdata, wantToNavigate }) => {
           flexDirection="row"
           height="3.5rem"
           borderRadius="50%"
-          gap="0.5rem"
         >
           <Img
             src={
@@ -45,6 +44,7 @@ const FollowingUser = ({ border, userdata, wantToNavigate }) => {
             width="80%"
             border="1px solid red"
             p="3px"
+            gap="0.5rem"
             height="80%"
           />
 

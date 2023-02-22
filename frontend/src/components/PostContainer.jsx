@@ -40,7 +40,6 @@ const PostContainer = ({ image, description, post, user }) => {
   const userProfileHandler = () => {
     dispatch(userAction.changeProfileVisiblity());
     dispatch(userAction.setDisplayedUser(postUser));
-    console.log("postUser", postUser);
   };
 
   useEffect(() => {
@@ -167,7 +166,6 @@ const PostContainer = ({ image, description, post, user }) => {
                     id: post.createdBy,
                   };
                   dispatch(followUnfollowAsync(data)).then((res) => {
-                    console.log(res);
                     if (res.status) {
                       setIsFollowed(!isFollowed);
                       dispatch(setFollowingAsync(user?.token));

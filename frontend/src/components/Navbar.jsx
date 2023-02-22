@@ -86,7 +86,6 @@ const Navbar = () => {
               onClick={() => {
                 // onfail
                 if (imgLink === "") {
-                  console.log(imgLink);
                   toast({
                     title: "Failed !",
                     description: "You need to add a pic to post something!",

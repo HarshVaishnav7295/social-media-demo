@@ -53,7 +53,6 @@ const ChatContainer = () => {
         console.log(error.errorMessage);
       } else if (resp.status === 200) {
         let data = await resp.json();
-        console.log(data.chat[0]);
         setChatId(data.chat[0]._id);
 
         if (socket) {
@@ -90,7 +89,7 @@ const ChatContainer = () => {
         flexDir="column"
         width="100vw"
         margin="auto"
-        height="90vh"
+        height={["80vh", "80vh", "90vh", "90vh", "90vh", "90vh"]}
         alignItems="center"
       >
         {/* Navbar Box */}
@@ -125,9 +124,14 @@ const ChatContainer = () => {
           >
             {/* All Followers Section */}
             <Box
-              width={isFollowerShowing ? "25%" : "fit-content"}
+              width={
+                isFollowerShowing
+                  ? ["80%", "80%", "25%", "25%", "25%", "25%"]
+                  : "fit-content"
+              }
               height="100%"
               // border="1px solid grey"
+              boxShadow="0px 0px 10px -6px grey"
               position="relative"
             >
               <Box
@@ -170,7 +174,7 @@ const ChatContainer = () => {
                   return (
                     <Box
                       key={i}
-                      width="100%"
+                      width={["100%", "60%", "100%", "100%", "100%", "100%"]}
                       height="fit-content"
                       // border="0.5px solid lightgrey"
                       boxShadow="0px 1px 5px -2px grey "
@@ -179,7 +183,10 @@ const ChatContainer = () => {
                           ? "lightgrey"
                           : ""
                       }
-                      onClick={() => SetRoom(followingUser)}
+                      onClick={() => {
+                        SetRoom(followingUser);
+                        dispatch(chatAction.changeFollowerShowing());
+                      }}
                     >
                       <FollowingUser
                         border={false}
@@ -194,8 +201,16 @@ const ChatContainer = () => {
 
             {/* Main Parent Component for Input and Chats */}
             <Box
-              display="flex"
-              width={isFollowerShowing ? "75%" : "100%"}
+              display={
+                isFollowerShowing
+                  ? ["none", "none", "flex", "flex", "flex", "flex"]
+                  : "flex"
+              }
+              width={
+                isFollowerShowing
+                  ? ["0%", "0%", "75%", "75%", "75%", "75%"]
+                  : "100%"
+              }
               height="100%"
               flexDir="column"
               // border="2px solid lightgrey"
@@ -385,20 +400,56 @@ const AllChatContainer = ({
             gap="0.5rem"
             pl="0.5rem"
           >
-            <Box width="3.5rem" height="3.5rem" borderRadius="50%">
+            <Box
+              width={[
+                "2.5rem",
+                "2.5rem",
+                "3.5rem",
+                "3.5rem",
+                "3.5rem",
+                "3.5rem",
+              ]}
+              height={[
+                "2.5rem",
+                "2.5rem",
+                "3.5rem",
+                "3.5rem",
+                "3.5rem",
+                "3.5rem",
+              ]}
+              borderRadius="50%"
+            >
               <Img src={clickedFollowingUser.avatar} borderRadius="50%" />
             </Box>
             <Box width="fit-content" display="flex" flexDir="column">
-              <Text width="fit-content" fontSize="1.2rem" height="fit-content">
+              <Text
+                width="fit-content"
+                fontSize={[
+                  "0.8rem",
+                  "0.8rem",
+                  "1rem",
+                  "1.2rem",
+                  "1.2rem",
+                  "1.2rem",
+                ]}
+                height="fit-content"
+              >
                 {clickedFollowingUser.name}
               </Text>
               <Text
                 width="fit-content"
-                fontSize="0.8rem"
+                fontSize={[
+                  "0.6rem",
+                  "0.6rem",
+                  "0.8rem",
+                  "0.8rem",
+                  "0.8rem",
+                  "0.8rem",
+                ]}
                 color="grey"
                 height="fit-content"
               >
-                {clickedFollowingUser.bio}kfffff
+                {clickedFollowingUser.bio}
               </Text>
             </Box>
 
@@ -406,16 +457,16 @@ const AllChatContainer = ({
           </Box>
 
           {/* User Name */}
-          {/* Followers and Post Container */}
+          {/* Followers and Followings Container */}
           <Box
             width="fit-content"
             display="flex"
             flexDir="row"
             justifyContent="space-evenly"
-            gap="1rem"
+            gap={["0.6rem", "0.7rem", "0.8rem", "1rem", "1rem", "1rem"]}
             // backgroundColor="lightgray"
           >
-            {/* posts */}
+            {/* posts
             <Box
               display="flex"
               flexDir="column"
@@ -426,9 +477,9 @@ const AllChatContainer = ({
               <Box
                 fontWeight="bold"
                 fontSize={[
+                  "0.6rem",
                   "0.7rem",
-                  "0.7rem",
-                  "0.7rem",
+                  "0.8rem",
                   "0.9rem",
                   "0.9rem",
                   "0.9rem",
@@ -438,8 +489,8 @@ const AllChatContainer = ({
               </Box>
               <Box
                 fontSize={[
-                  "0.6rem",
-                  "0.6rem",
+                  "0.5rem",
+                  "0.5rem",
                   "0.6rem",
                   "0.8rem",
                   "0.8rem",
@@ -449,7 +500,7 @@ const AllChatContainer = ({
               >
                 Posts
               </Box>
-            </Box>
+            </Box> */}
 
             {/* Followers */}
             <Box
@@ -462,9 +513,9 @@ const AllChatContainer = ({
               <Box
                 fontWeight="bold"
                 fontSize={[
+                  "0.6rem",
                   "0.7rem",
-                  "0.7rem",
-                  "0.7rem",
+                  "0.8rem",
                   "0.9rem",
                   "0.9rem",
                   "0.9rem",
@@ -476,8 +527,8 @@ const AllChatContainer = ({
               </Box>
               <Box
                 fontSize={[
-                  "0.6rem",
-                  "0.6rem",
+                  "0.5rem",
+                  "0.5rem",
                   "0.6rem",
                   "0.8rem",
                   "0.8rem",
@@ -500,9 +551,9 @@ const AllChatContainer = ({
               <Box
                 fontWeight="bold"
                 fontSize={[
+                  "0.6rem",
                   "0.7rem",
-                  "0.7rem",
-                  "0.7rem",
+                  "0.8rem",
                   "0.9rem",
                   "0.9rem",
                   "0.9rem",
@@ -514,8 +565,8 @@ const AllChatContainer = ({
               </Box>
               <Box
                 fontSize={[
-                  "0.6rem",
-                  "0.6rem",
+                  "0.5rem",
+                  "0.5rem",
                   "0.6rem",
                   "0.8rem",
                   "0.8rem",
@@ -603,6 +654,7 @@ const AllChatContainer = ({
             display="flex"
             justifyContent="center"
             alignItems="center"
+            mt="0.2rem"
           >
             <InputContainer
               socket={socket}

@@ -7,7 +7,11 @@ import { BsPower } from "react-icons/bs";
 import { userAction } from "../Redux/userReducer";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { followUnfollowAsync, setFollowingAsync } from "../Redux/userAction";
+import {
+  followUnfollowAsync,
+  setFollowerAsync,
+  setFollowingAsync,
+} from "../Redux/userAction";
 import { ToastOption } from "./Register";
 import { toast } from "react-toastify";
 import { getUserPostAsync } from "../Redux/postAction";
@@ -58,6 +62,7 @@ const Profile = ({ showUser }) => {
   const handleUserClick = (followUser) => {
     dispatch(userAction.setDisplayedUser(followUser));
     dispatch(setFollowingAsync(user?.token));
+    dispatch(setFollowerAsync(user?.token));
   };
 
   return (
@@ -96,7 +101,6 @@ const Profile = ({ showUser }) => {
                 ? showUser.avatar
                 : "https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
             }
-            // src="https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
             width="100%"
             height="100%"
             backgroundColor="transparent"
@@ -160,7 +164,9 @@ const Profile = ({ showUser }) => {
             gap="0"
             alignItems="center"
             cursor="pointer"
-            onClick={() => setIsFollowerSelected(true)}
+            onClick={() => {
+              setIsFollowerSelected(true);
+            }}
           >
             <Box
               fontWeight="bold"
@@ -197,7 +203,9 @@ const Profile = ({ showUser }) => {
             gap="0"
             alignItems="center"
             cursor="pointer"
-            onClick={() => setIsFollowerSelected(false)}
+            onClick={() => {
+              setIsFollowerSelected(false);
+            }}
           >
             <Box
               fontWeight="bold"
@@ -252,7 +260,6 @@ const Profile = ({ showUser }) => {
                       id: showUser._id,
                     };
                     dispatch(followUnfollowAsync(followdata)).then((res) => {
-                      console.log(res);
                       if (res.status) {
                         setIsFollowed(!isFollowed);
                         dispatch(setFollowingAsync(followdata.token));
@@ -387,6 +394,7 @@ const Profile = ({ showUser }) => {
                     <Box
                       width="100%"
                       height="fit-content"
+                      boxShadow="0px 1px 7px -2px grey"
                       key={i}
                       onClick={() => {
                         handleUserClick(item);
@@ -395,7 +403,7 @@ const Profile = ({ showUser }) => {
                       <FollowingUser
                         userdata={item}
                         wantToNavigate={true}
-                        border={true}
+                        border={false}
                       />
                     </Box>
                   );
@@ -404,6 +412,7 @@ const Profile = ({ showUser }) => {
                   return (
                     <Box
                       width="100%"
+                      boxShadow="0px 1px 7px -2px grey"
                       height="fit-content"
                       key={i}
                       onClick={() => {
@@ -414,7 +423,7 @@ const Profile = ({ showUser }) => {
                         key={i}
                         userdata={item}
                         wantToNavigate={true}
-                        border={true}
+                        border={false}
                       />
                     </Box>
                   );

@@ -64,7 +64,7 @@ const Content = () => {
             );
           })
         ) : (
-          <Text>Post not Found</Text>
+          <Text>Posts not Found</Text>
         )}
       </Box>
     </>
