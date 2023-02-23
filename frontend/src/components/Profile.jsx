@@ -404,6 +404,7 @@ const Profile = ({ showUser }) => {
                         userdata={item}
                         wantToNavigate={true}
                         border={false}
+                        showChatIcon={true}
                       />
                     </Box>
                   );
@@ -423,6 +424,7 @@ const Profile = ({ showUser }) => {
                         key={i}
                         userdata={item}
                         wantToNavigate={true}
+                        showChatIcon={true}
                         border={false}
                       />
                     </Box>

@@ -1,4 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
+
 import { Box, Input } from "@chakra-ui/react";
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,6 +15,7 @@ import { setFollowerAsync, setFollowingAsync } from "../../Redux/userAction";
 import { io } from "socket.io-client";
 import { Img, Text } from "@chakra-ui/react";
 import { setAllChatAsync } from "../../Redux/chatAction";
+import { AiOutlineSearch } from "react-icons/ai";
 
 const ChatContainer = () => {
   const dispatch = useDispatch();
@@ -25,12 +27,25 @@ const ChatContainer = () => {
   const following = useSelector((state) => state.user.following);
   const [socket, setSocket] = useState(null);
   const [chatId, setChatId] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const [followingUserState, setFollowingUserState] = useState([]);
 
   useEffect(() => {
     if (socket === null) {
       setSocket(io.connect("http://localhost:8000"));
     }
   }, [socket]);
+
+  useEffect(() => {
+    if (searchValue.trim(" ") === "") {
+      setFollowingUserState(following);
+    } else {
+      const tempUser = following.filter(
+        (user) => user.name.indexOf(searchValue) === 0
+      );
+      setFollowingUserState(tempUser);
+    }
+  }, [following, searchValue]);
 
   const SetRoom = useCallback(
     async (followingUserProp) => {
@@ -153,6 +168,33 @@ const ChatContainer = () => {
               >
                 <IoReorderThreeOutline />
               </Box>
+              {/* Search Box for following User in Chat */}
+              {isFollowerShowing && (
+                <Box
+                  width="fit-content"
+                  display="flex"
+                  boxShadow="0px 0px 5px -1px grey"
+                  flexDir="row"
+                  justifyContent="center"
+                  cursor="pointer"
+                  borderRadius="3px"
+                  mx="3px"
+                  mb="10px"
+                  margin="auto"
+                >
+                  <Input
+                    width="90%"
+                    height="1.7rem"
+                    focusBorderColor="transparent"
+                    borderRadius="3px"
+                    pl="5px"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                  />
+                  <AiOutlineSearch size="1.3rem" />
+                </Box>
+              )}
+
               <Box
                 height="93%"
                 width="100%"
@@ -176,33 +218,44 @@ const ChatContainer = () => {
                 }}
               >
                 {/* Call Api here */}
-
-                {following.map((followingUser, i) => {
-                  return (
-                    <Box
-                      key={i}
-                      width={["100%", "60%", "100%", "100%", "100%", "100%"]}
-                      height="fit-content"
-                      // border="0.5px solid lightgrey"
-                      boxShadow="0px 1px 5px -2px grey "
-                      backgroundColor={
-                        clickedFollowingUser._id === followingUser._id
-                          ? "lightgrey"
-                          : ""
-                      }
-                      onClick={() => {
-                        SetRoom(followingUser);
-                        dispatch(chatAction.changeFollowerShowing());
-                      }}
-                    >
-                      <FollowingUser
-                        border={false}
-                        userdata={followingUser}
-                        wantToNavigate={false}
-                      />
-                    </Box>
-                  );
-                })}
+                {followingUserState.length > 0 ? (
+                  followingUserState.map((followingUser, i) => {
+                    return (
+                      <Box
+                        key={i}
+                        width={["100%", "60%", "100%", "100%", "100%", "100%"]}
+                        height="fit-content"
+                        // border="0.5px solid lightgrey"
+                        boxShadow="0px 1px 5px -2px grey "
+                        backgroundColor={
+                          clickedFollowingUser._id === followingUser._id
+                            ? "lightgrey"
+                            : ""
+                        }
+                        onClick={() => {
+                          SetRoom(followingUser);
+                          dispatch(chatAction.changeFollowerShowing());
+                        }}
+                      >
+                        <FollowingUser
+                          border={false}
+                          userdata={followingUser}
+                          wantToNavigate={false}
+                          showChatIcon={false}
+                        />
+                      </Box>
+                    );
+                  })
+                ) : (
+                  <Text
+                    marginTop="20px"
+                    fontSize="0.7rem"
+                    color="gray"
+                    fontStyle="italic"
+                  >
+                    No User Found.
+                  </Text>
+                )}
               </Box>
             </Box>
 

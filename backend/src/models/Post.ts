@@ -1,7 +1,7 @@
 import express from "express";
 import mongoose, { Schema, Document } from "mongoose";
 import { IUserRef } from "./User";
-interface IPost {
+export interface IPost {
   description: string;
   img: string;
   createdBy: IUserRef;

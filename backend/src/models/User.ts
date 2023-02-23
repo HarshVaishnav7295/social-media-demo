@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, ObjectId } from "mongoose";
 import validator from "validator";
 import bcrypt from "bcryptjs";
 import { NextFunction } from "express";
-interface IUser {
+export interface IUser {
   name: string;
   email: string;
   password: string;
@@ -63,7 +63,7 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-userSchema.pre("save", async function (next) {
+userSchema.pre("save", async function (next): Promise<void> {
   if (this.isModified("password")) {
     const salt = await bcrypt.genSalt(10);
     this.password = await bcrypt.hash(this.password, salt);

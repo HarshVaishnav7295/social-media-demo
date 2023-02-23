@@ -1,11 +1,12 @@
 import { Box, Img, Text } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { userAction } from "../Redux/userReducer";
 
-const FollowingUser = ({ border, userdata, wantToNavigate }) => {
+const FollowingUser = ({ border, userdata, wantToNavigate, showChatIcon }) => {
+  const [unReadCount, setunReadCount] = useState(10);
   const isProfileOpen = useSelector((state) => state.user.isProfileOpen);
 
   const dispatch = useDispatch();
@@ -29,6 +30,7 @@ const FollowingUser = ({ border, userdata, wantToNavigate }) => {
         border={border ? "2px" : "0px"}
         gap="0.3rem"
         justifyContent="space-between"
+        alignItems="center"
         px={["3px", "3px", "3px", "0.3rem", "0.3rem", "0.3rem"]}
       >
         {/*Image Box  */}
@@ -71,19 +73,39 @@ const FollowingUser = ({ border, userdata, wantToNavigate }) => {
             </Text>
           </Box>
         </Box>
-
+        {showChatIcon ? (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            fontSize="2xl"
+            px="5px"
+            width="fit-content"
+            onClick={userClicked}
+          >
+            <RiSendPlaneFill />
+          </Box>
+        ) : (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            fontSize="0.7rem"
+            width="20px"
+            height="20px"
+            cursor="pointer"
+            // boxShadow="0px 0px 10px -3px "
+            borderRadius="50%"
+            fontWeight="medium"
+            p="5px"
+            backgroundColor="#128C7E"
+            color="white"
+            textAlign="center"
+          >
+            {unReadCount !== 0 ? unReadCount : null}
+          </Box>
+        )}
         {/* Chat User Icon */}
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          fontSize="2xl"
-          px="5px"
-          width="fit-content"
-          onClick={userClicked}
-        >
-          <RiSendPlaneFill />
-        </Box>
       </Box>
     </>
   );

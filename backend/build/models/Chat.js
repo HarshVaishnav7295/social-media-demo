@@ -26,11 +26,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Chat = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const chatSchema = new mongoose_1.Schema({
-    users: [{
+    users: [
+        {
             user: {
                 type: mongoose_1.default.Types.ObjectId,
-                ref: 'User'
-            }
-        }]
+                ref: "User",
+            },
+        },
+    ],
 }, { timestamps: true });
-exports.Chat = mongoose_1.default.model('Chat', chatSchema);
+exports.Chat = mongoose_1.default.model("Chat", chatSchema);
