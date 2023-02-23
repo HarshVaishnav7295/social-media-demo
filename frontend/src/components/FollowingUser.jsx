@@ -1,14 +1,22 @@
 import { Box, Img, Text } from "@chakra-ui/react";
 import React from "react";
 import { RiSendPlaneFill } from "react-icons/ri";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { userAction } from "../Redux/userReducer";
 
 const FollowingUser = ({ border, userdata, wantToNavigate }) => {
+  const isProfileOpen = useSelector((state) => state.user.isProfileOpen);
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const userClicked = () => {
     if (wantToNavigate) {
       navigate("/chat");
+      if (isProfileOpen) {
+        dispatch(userAction.changeProfileVisiblity());
+      }
     }
   };
   return (
@@ -70,6 +78,7 @@ const FollowingUser = ({ border, userdata, wantToNavigate }) => {
           justifyContent="center"
           alignItems="center"
           fontSize="2xl"
+          px="5px"
           width="fit-content"
           onClick={userClicked}
         >

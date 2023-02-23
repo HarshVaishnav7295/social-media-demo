@@ -112,15 +112,22 @@ const ChatContainer = () => {
         >
           {/* Content Box */}
           <Box
-            display="flex"
-            flexDir="row"
             gap="0.2rem"
             justifyContent="space-between"
-            width={isProfileOpen ? "70%" : "90%"}
-            height="90vh"
+            // width={isProfileOpen ? "70%" : "90%"}
+            // height="90vh"
             backgroundColor="whiteAlpha.900"
             // border="2px"
             p="1.5rem"
+            display={
+              isProfileOpen
+                ? ["none", "none", "none", "flex", "flex", "flex"]
+                : "flex"
+            }
+            flexDir="row"
+            margin="auto"
+            width={isProfileOpen ? "100%" : "70%"}
+            height="90vh"
           >
             {/* All Followers Section */}
             <Box
@@ -232,11 +239,10 @@ const ChatContainer = () => {
 
           {/* Profile Box */}
           <Box
-            width="25%"
+            width={["80%", "40%", "35%", "30%", "30%", "30%"]}
             display={isProfileOpen ? "flex" : "none"}
             justifyContent="center"
             alignItems="center"
-            transition="250ms"
             height="100%"
           >
             <Profile showUser={displayedUser} />
