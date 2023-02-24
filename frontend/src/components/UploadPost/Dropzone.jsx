@@ -1,5 +1,6 @@
-import React, { useCallback, useState } from "react";
-import { Image, Img, Box, Text } from "@chakra-ui/react";
+/* eslint-disable react-hooks/exhaustive-deps */
+import React, { useCallback } from "react";
+import {  Img, Box, Text } from "@chakra-ui/react";
 import { useDropzone } from "react-dropzone";
 
 function MyDropzone({ imgLink, setImgLink }) {
@@ -16,6 +17,7 @@ function MyDropzone({ imgLink, setImgLink }) {
     reader.readAsDataURL(img);
   }, []);
 
+  // eslint-disable-next-line no-unused-vars
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     onDrop,
     accept: {

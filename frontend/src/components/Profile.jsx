@@ -357,24 +357,59 @@ const Profile = ({ showUser }) => {
         <Box
           width="100%"
           display="flex"
-          justifyContent="space-between"
+          // justifyContent="space-between"
           alignItems="center"
           flexDir="column"
-          gap="1rem"
+          // gap="1rem"
           height="50%"
         >
+          {/* Box for change Follower and followings */}
+          <Box
+            display="flex"
+            flexDir="row"
+            justifyContent="space-evenly"
+            width="95%"
+            position="relative"
+          >
+            <Box
+              width="50%"
+              px="0.5rem"
+              cursor="pointer"
+              textAlign="center"
+              border="2px solid lightgrey"
+              borderRight="1px solid lightgray"
+              fontSize={["0.7rem", "0.8rem", "0.9rem", "1rem", "1rem", "1rem"]}
+              borderBottomColor={!isFollowerSelected ? "" : "transparent"}
+              onClick={() => setIsFollowerSelected(true)}
+            >
+              Followers
+            </Box>
+            <Box
+              width="50%"
+              border="2px solid lightgrey"
+              px="0.5rem"
+              cursor="pointer"
+              textAlign="center"
+              borderLeft="1px solid lightgray"
+              fontSize={["0.7rem", "0.8rem", "0.9rem", "1rem", "1rem", "1rem"]}
+              borderBottomColor={!isFollowerSelected ? "transparent" : ""}
+              onClick={() => setIsFollowerSelected(false)}
+            >
+              Followings
+            </Box>
+          </Box>
           {/* Followes */}
           <Box
             width="95%"
             p="10px"
             display="flex"
             height="100%"
-            // height={["8rem", "8rem", "8rem", "14rem", "14rem", "14rem"]}
             flexDir="column"
             gap="0.8rem"
             overflowY="scroll"
             alignItems="center"
             border="2px solid lightgrey"
+            borderTopColor="transparent"
             css={{
               "&::-webkit-scrollbar": {
                 width: "2px",

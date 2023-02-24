@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:build": "tsc -w",
     "start:run": "nodemon build/server/index.js",
-    "start": "concurrently npm:start:*"
+    "start": "nodemon ./src/server/index.ts"
   },
   "author": "Harsh Vaishnav",
   "license": "ISC",
@@ -37,5 +37,8 @@
     "socket.io": "^4.6.0",
     "ts-node": "^10.9.1",
     "validator": "^13.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^18.14.1"
   }
 }

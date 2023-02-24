@@ -16,17 +16,19 @@ import {
 } from "@chakra-ui/react";
 import { HiUpload } from "react-icons/hi";
 import React, { useState } from "react";
-import { AiOutlineHome, AiOutlineSearch, AiOutlineHeart } from "react-icons/ai";
+import { AiOutlineHome, AiOutlineSearch } from "react-icons/ai";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { MdOutlineAddToQueue } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { userAction } from "../Redux/userReducer";
+import { BsFillBellFill } from "react-icons/bs";
 
 import MyDropzone from "../components/UploadPost/Dropzone";
 import { getFeedAsync, setNewPostAsync } from "../Redux/postAction";
+import { chatAction } from "../Redux/chatReducer";
 
-const Navbar = () => {
+const Navbar = ({ showBell, notificationCount }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [caption, setCaption] = useState("");
@@ -309,7 +311,49 @@ const Navbar = () => {
                 }
               }}
             >
-              <RiSendPlaneFill />
+              {showBell ? (
+                <Box
+                  display="flex"
+                  flexDir="row"
+                  position="relative"
+                  p="3px"
+                  onClick={() => {
+                    dispatch(chatAction.changeFollowerShowing());
+                  }}
+                >
+                  <Box>
+                    <BsFillBellFill />
+                  </Box>
+                  {notificationCount === 0 ? null : (
+                    <Box
+                      fontSize={[
+                        "0.5rem",
+                        "0.65rem",
+                        "0.65rem",
+                        "0.65rem",
+                        "0.65rem",
+                        "0.65rem",
+                      ]}
+                      backgroundColor="red"
+                      color="white"
+                      width={["12px", "15px", "15px", "15px", "15px", "15px"]}
+                      height={["12px", "15px", "15px", "15px", "15px", "15px"]}
+                      borderRadius="50%"
+                      textAlign="center"
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                      position="absolute"
+                      right="0px"
+                      top="0px"
+                    >
+                      {notificationCount}
+                    </Box>
+                  )}
+                </Box>
+              ) : (
+                <RiSendPlaneFill />
+              )}
             </Box>
           )}
 

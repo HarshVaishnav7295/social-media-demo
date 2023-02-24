@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { HiUpload } from "react-icons/hi";
 import {
   Modal,
@@ -8,7 +8,6 @@ import {
   ModalFooter,
   ModalBody,
   ModalCloseButton,
-  Box,
   Text,
   Textarea,
   Button,
@@ -19,6 +18,7 @@ import MyDropzone from "./Dropzone";
 
 function BasicUsage(props) {
   const toast = useToast();
+  // eslint-disable-next-line no-unused-vars
   const { isOpen, onOpen, onClose } = useDisclosure();
   return (
     <>

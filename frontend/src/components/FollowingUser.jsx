@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import { Box, Img, Text } from "@chakra-ui/react";
 import React, { useState } from "react";
 import { RiSendPlaneFill } from "react-icons/ri";
@@ -27,7 +28,7 @@ const FollowingUser = ({ border, userdata, wantToNavigate, showChatIcon }) => {
         flexDir="row"
         width="100%"
         cursor="pointer"
-        border={border ? "2px" : "0px"}
+        border={border ? "2px" : "none"}
         gap="0.3rem"
         justifyContent="space-between"
         alignItems="center"
@@ -94,7 +95,6 @@ const FollowingUser = ({ border, userdata, wantToNavigate, showChatIcon }) => {
             width="20px"
             height="20px"
             cursor="pointer"
-            // boxShadow="0px 0px 10px -3px "
             borderRadius="50%"
             fontWeight="medium"
             p="5px"

@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
-import { Box, Input } from "@chakra-ui/react";
+import { Box, Flex, Input } from "@chakra-ui/react";
 import React, { useEffect, useState, useCallback } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Navbar from "../Navbar";
@@ -9,7 +9,7 @@ import { IoReorderThreeOutline } from "react-icons/io5";
 import { chatAction } from "../../Redux/chatReducer";
 import FollowingUser from "../FollowingUser";
 import { RiSendPlaneFill } from "react-icons/ri";
-import { BsEmojiSmileFill } from "react-icons/bs";
+import { BsEmojiSmileFill, BsCheck2All, BsCheck2 } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
 import { setFollowerAsync, setFollowingAsync } from "../../Redux/userAction";
 import { io } from "socket.io-client";
@@ -20,6 +20,9 @@ import { AiOutlineSearch } from "react-icons/ai";
 const ChatContainer = () => {
   const dispatch = useDispatch();
   const displayedUser = useSelector((state) => state.user.displayedUser);
+  const notificationCount = useSelector(
+    (state) => state.chat.notificationCount
+  );
   const user = useSelector((state) => state.user.user);
   //const chatId = useSelector((state)=>state.chat.chatId)
   const [clickedFollowingUser, setClickedFollowingUser] = useState("");
@@ -29,11 +32,14 @@ const ChatContainer = () => {
   const [chatId, setChatId] = useState("");
   const [searchValue, setSearchValue] = useState("");
   const [followingUserState, setFollowingUserState] = useState([]);
+  const [isReaded, setisReaded] = useState(true);
 
   useEffect(() => {
     if (socket === null) {
       setSocket(io.connect("http://localhost:8000"));
     }
+
+    dispatch(chatAction.setNotificationCount(10));
   }, [socket]);
 
   useEffect(() => {
@@ -113,7 +119,7 @@ const ChatContainer = () => {
           // backgroundColor="grey"
           py="0.3rem"
         >
-          <Navbar />
+          <Navbar showBell={true} notificationCount={notificationCount} />
         </Box>
         <Box
           display="flex"
@@ -124,6 +130,7 @@ const ChatContainer = () => {
           boxShadow="0px 0px 15px -7px grey"
           gap="1rem"
           backgroundColor="whiteAlpha.300"
+          height="100%"
         >
           {/* Content Box */}
           <Box
@@ -141,8 +148,12 @@ const ChatContainer = () => {
             }
             flexDir="row"
             margin="auto"
-            width={isProfileOpen ? "100%" : "70%"}
-            height="90vh"
+            width={
+              isProfileOpen
+                ? "100%"
+                : ["90%", "85%", "80%", "80%", "80%", "85%"]
+            }
+            height={["80vh", "85vh", "85vh", "90vh", "90vh", "90vh"]}
           >
             {/* All Followers Section */}
             <Box
@@ -153,13 +164,13 @@ const ChatContainer = () => {
               }
               height="100%"
               // border="1px solid grey"
-              boxShadow="0px 0px 10px -6px grey"
               position="relative"
             >
               <Box
-                // position="absolute"
+                position="absolute"
                 top="0.5rem"
                 left="0.5rem"
+                boxShadow="0px 0px 10px -6px grey"
                 fontSize="3xl"
                 width={isFollowerShowing ? "100%" : "fit-content"}
                 cursor="pointer"
@@ -171,6 +182,8 @@ const ChatContainer = () => {
               {/* Search Box for following User in Chat */}
               {isFollowerShowing && (
                 <Box
+                  position="relative"
+                  top="3rem"
                   width="fit-content"
                   display="flex"
                   boxShadow="0px 0px 5px -1px grey"
@@ -179,7 +192,6 @@ const ChatContainer = () => {
                   cursor="pointer"
                   borderRadius="3px"
                   mx="3px"
-                  mb="10px"
                   margin="auto"
                 >
                   <Input
@@ -196,8 +208,11 @@ const ChatContainer = () => {
               )}
 
               <Box
-                height="93%"
+                position="relative"
+                top="3rem"
+                height="80%"
                 width="100%"
+                mt="0.7rem"
                 display={isFollowerShowing ? "flex" : "none"}
                 flexDir="column"
                 gap="0.5rem"
@@ -223,7 +238,7 @@ const ChatContainer = () => {
                     return (
                       <Box
                         key={i}
-                        width={["100%", "60%", "100%", "100%", "100%", "100%"]}
+                        width="100%"
                         height="fit-content"
                         // border="0.5px solid lightgrey"
                         boxShadow="0px 1px 5px -2px grey "
@@ -284,6 +299,7 @@ const ChatContainer = () => {
                     clickedFollowingUser={clickedFollowingUser}
                     user={user}
                     isUserAuthenticated={isUserAuthenticated}
+                    isReaded={isReaded}
                   />
                 )}
               </Box>
@@ -360,17 +376,32 @@ const InputContainer = ({ socket, chatId, clickedFollowingUser, user }) => {
         position="relative"
         boxShadow="0px 0px 6px -3px grey"
       >
-        <BsEmojiSmileFill
-          cursor="pointer"
-          fontSize="1.3rem"
-          onClick={() => setShowEmoji(!showEmojji)}
-        />
+        <Box width="fit-content" height="fit-content">
+          <BsEmojiSmileFill
+            cursor="pointer"
+            fontSize={[
+              "0.8rem",
+              "1rem",
+              "1.1rem",
+              "1.3rem",
+              "1.3rem",
+              "1.3rem",
+            ]}
+            onClick={() => setShowEmoji(!showEmojji)}
+          />
+        </Box>
 
-        <Box position="absolute" bottom="80%" left="0%" className="emoji">
+        <Box
+          position="absolute"
+          bottom="80%"
+          left="0%"
+          display={["none", "block", "block", "block", "block", "block"]}
+          className="emoji"
+        >
           {showEmojji && (
             <EmojiPicker
               width="20rem"
-              height="30rem"
+              height="20rem"
               onEmojiClick={emojiClicked}
             />
           )}
@@ -379,7 +410,7 @@ const InputContainer = ({ socket, chatId, clickedFollowingUser, user }) => {
         <Input
           placeholder="Aa"
           variant="flushed"
-          width="70%"
+          width={["60%", "65%", "65%", "70%", "70%", "70%"]}
           borderRadius="5px"
           height="50%"
           backgroundColor="white"
@@ -393,7 +424,7 @@ const InputContainer = ({ socket, chatId, clickedFollowingUser, user }) => {
           width="fit-content"
           justifyContent="center"
           alignItems="center"
-          fontSize="1.5rem"
+          fontSize={["1rem", "1rem", "1.2rem", "1.5rem", "1.5rem", "1.5rem"]}
           transition="100ms"
           cursor="pointer"
           _hover={{ fontSize: "1.7rem" }}
@@ -412,6 +443,7 @@ const AllChatContainer = ({
   clickedFollowingUser,
   user,
   isUserAuthenticated,
+  isReaded,
 }) => {
   const dispatch = useDispatch();
   const chats = useSelector((state) => state.chat.chat);
@@ -446,7 +478,7 @@ const AllChatContainer = ({
           flexDir="row"
           justifyContent="space-evenly"
           alignItems="center"
-          width="85%"
+          width="100%"
           height="17%"
         >
           {/* Box for Following User Avatar amd Name, Bio */}
@@ -523,45 +555,7 @@ const AllChatContainer = ({
             flexDir="row"
             justifyContent="space-evenly"
             gap={["0.6rem", "0.7rem", "0.8rem", "1rem", "1rem", "1rem"]}
-            // backgroundColor="lightgray"
           >
-            {/* posts
-            <Box
-              display="flex"
-              flexDir="column"
-              gap="0"
-              alignItems="center"
-              cursor="pointer"
-            >
-              <Box
-                fontWeight="bold"
-                fontSize={[
-                  "0.6rem",
-                  "0.7rem",
-                  "0.8rem",
-                  "0.9rem",
-                  "0.9rem",
-                  "0.9rem",
-                ]}
-              >
-                {0}
-              </Box>
-              <Box
-                fontSize={[
-                  "0.5rem",
-                  "0.5rem",
-                  "0.6rem",
-                  "0.8rem",
-                  "0.8rem",
-                  "0.8rem",
-                ]}
-                color="grey"
-              >
-                Posts
-              </Box>
-            </Box> */}
-
-            {/* Followers */}
             <Box
               display="flex"
               flexDir="column"
@@ -663,7 +657,7 @@ const AllChatContainer = ({
             },
           }}
         >
-          {/* Map here */}
+          {/* all chats being Map here */}
           <Box
             width="100%"
             height="100%"
@@ -676,7 +670,7 @@ const AllChatContainer = ({
                 <Box
                   key={i}
                   width="100%"
-                  height="2rem"
+                  height="fit-content"
                   display="flex"
                   alignItems={
                     chat.sender === user._id ? "flex-end" : "flex-start"
@@ -688,17 +682,40 @@ const AllChatContainer = ({
                     maxWidth="40%"
                     minWidth="7%"
                     height="fit-content"
-                    backgroundColor="lightgrey"
+                    backgroundColor="#ebebeb"
                     px="10px"
                     py="3px"
-                    display="flex"
-                    justifyContent="center"
+                    // display="flex"
+                    // justifyContent="center"
                     borderRadius="3px"
                     fontSize="0.9rem"
                     mb="-2px"
                     cursor="pointer"
                   >
                     {chat.text}
+                    <Box
+                      display="flex"
+                      flexDir="row"
+                      justifyContent="flex-end"
+                      alignItems="end"
+                      fontSize="0.65rem"
+                    >
+                      {new Date(chat.createdAt).getHours()}:
+                      {new Date(chat.createdAt).getMinutes() < 10
+                        ? `0${new Date(chat.createdAt).getMinutes()}`
+                        : new Date(chat.createdAt).getMinutes()}
+                      {chat.sender === user._id ? (
+                        isReaded ? (
+                          <Box fontSize="0.8rem" ml="0px" mr="-5px" mb="2px">
+                            <BsCheck2All color="#00a3e6" />
+                          </Box>
+                        ) : (
+                          <Box fontSize="0.8rem" ml="0px" mr="-5px" mb="2px">
+                            <BsCheck2All />
+                          </Box>
+                        )
+                      ) : null}
+                    </Box>
                   </Box>
                 </Box>
               );
@@ -707,7 +724,7 @@ const AllChatContainer = ({
         </Box>
         {clickedFollowingUser && chatId && (
           <Box
-            width="100%"
+            width={["90%", "95%", "95%", "100%", "100%", "100%"]}
             height="10%"
             backgroundColor="lightgray"
             display="flex"

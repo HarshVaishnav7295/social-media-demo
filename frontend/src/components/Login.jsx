@@ -73,7 +73,7 @@ const Login = () => {
 
   return (
     <>
-      <ToastContainer></ToastContainer>
+      <ToastContainer />
       <Box
         width="100wvw"
         height="100vh"
