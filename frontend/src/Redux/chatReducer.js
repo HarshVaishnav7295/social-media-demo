@@ -3,8 +3,9 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialChatState = {
   chat: [],
   isFollowerShowing: true,
-  chatId: "",
+  roomId: "",
   notificationCount: 0,
+  
   // newNotification: [],
 };
 
@@ -21,8 +22,8 @@ const chatSlice = createSlice({
     setAllChat: (state, actions) => {
       state.chat = actions.payload;
     },
-    setChatId: (state, action) => {
-      state.chatId = action.payload;
+    setRoomId: (state, action) => {
+      state.roomId = action.payload;
     },
     setNotificationCount: (state, action) => {
       state.notificationCount = action.payload;

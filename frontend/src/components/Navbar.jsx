@@ -131,25 +131,39 @@ const Navbar = ({ showBell, notificationCount }) => {
         width="100%"
         display="flex"
         justifyContent="space-between"
+        backgroundColor="#636363"
+        // backgroundColor="#636363"
+        borderBottomRadius="7px"
         flexDir="row"
         px={["0.5rem", "0.5rem", "1rem", "1rem", "1rem", "1rem"]}
-        pt="0.5rem"
+        py="0.5rem"
       >
         {/* Navbar Icon and Logo */}
         <Box
           display="flex"
           flexDirection="row"
           alignItems="center"
-          fontSize={["0.8rem", "1rem", "1.5rem", "1.5rem", "1.5rem", "1.5rem"]}
+          color="white"
+          // fontSize={["0.8rem", "1rem", "1.5rem", "1.5rem", "1.5rem", "1.5rem"]}
         >
-          <Box cursor="pointer" display="flex">
-            <Text>Logo</Text>
+          <Box cursor="pointer" display="flex" onClick={() => navigate("/")}>
+            {/* <Img
+              width="8rem"
+              height="3.3rem"
+              src="./img/logo.png"
+              transition="200ms"
+              backgroundColor="transparent"
+              _hover={{ width: "8.2rem", height: "3.5rem" }}
+            /> */}
+            <Text>Media</Text>
           </Box>
         </Box>
         {/* Home, Search, AddPost and Notification */}
         <Box
           display="flex"
           flexDir="row"
+          color="white"
+          fontWeight="bold"
           gap={["0.5rem", "1rem", "1.3rem", "1.3rem", "1.3rem", "1.3rem"]}
           alignItems="center"
         >
@@ -281,6 +295,8 @@ const Navbar = ({ showBell, notificationCount }) => {
           flexDir="row"
           gap={["0.5rem", "0.8rem", "1rem", "1rem", "1rem", "1rem"]}
           alignItems="center"
+          color="white"
+          fontWeight="bold"
         >
           {isUserAuthenticated && (
             <Box
@@ -311,49 +327,7 @@ const Navbar = ({ showBell, notificationCount }) => {
                 }
               }}
             >
-              {showBell ? (
-                <Box
-                  display="flex"
-                  flexDir="row"
-                  position="relative"
-                  p="3px"
-                  onClick={() => {
-                    dispatch(chatAction.changeFollowerShowing());
-                  }}
-                >
-                  <Box>
-                    <BsFillBellFill />
-                  </Box>
-                  {notificationCount === 0 ? null : (
-                    <Box
-                      fontSize={[
-                        "0.5rem",
-                        "0.65rem",
-                        "0.65rem",
-                        "0.65rem",
-                        "0.65rem",
-                        "0.65rem",
-                      ]}
-                      backgroundColor="red"
-                      color="white"
-                      width={["12px", "15px", "15px", "15px", "15px", "15px"]}
-                      height={["12px", "15px", "15px", "15px", "15px", "15px"]}
-                      borderRadius="50%"
-                      textAlign="center"
-                      display="flex"
-                      justifyContent="center"
-                      alignItems="center"
-                      position="absolute"
-                      right="0px"
-                      top="0px"
-                    >
-                      {notificationCount}
-                    </Box>
-                  )}
-                </Box>
-              ) : (
-                <RiSendPlaneFill />
-              )}
+              <RiSendPlaneFill />
             </Box>
           )}
 

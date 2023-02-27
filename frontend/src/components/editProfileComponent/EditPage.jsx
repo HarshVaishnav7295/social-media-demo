@@ -15,114 +15,131 @@ const EditPage = () => {
 
   return (
     <>
-      <Navbar />
       <Box
-        width="100%"
-        height="90vh"
+        width="100vw"
+        height="100vh"
         display="flex"
-        flexDir="row"
-        justifyContent="space-around"
+        flexDir="column"
         alignItems="center"
       >
+        <Box width={["100%", "100%", "100%", "95%", "95%", "95%"]} mt="0.05rem">
+          <Navbar />
+        </Box>
         <Box
-          display={
-            isProfileOpen
-              ? ["none", "none", "none", "flex", "flex", "flex"]
-              : "flex"
-          }
-          flexDir="column"
-          justifyContent="center"
-          margin="auto"
-          width={isProfileOpen ? "100%" : "70%"}
-          height="90vh"
+          width="95%"
+          height="100%"
+          display="flex"
+          flexDir="row"
+          justifyContent="space-around"
+          alignItems="center"
         >
           <Box
-            display="flex"
+            display={
+              isProfileOpen
+                ? ["none", "none", "none", "flex", "flex", "flex"]
+                : "flex"
+            }
+            flexDir="column"
+            justifyContent="center"
             margin="auto"
-            w="80%"
-            flexDirection={["column", "column", "column", "row", "row", "row"]}
+            width={isProfileOpen ? "100%" : "70%"}
             height="90vh"
-            borderRadius=".4rem"
-            marginTop="2rem"
           >
-            {/* left */}
             <Box
               display="flex"
+              margin="auto"
+              w="80%"
               flexDirection={[
-                "row",
-                "row",
-                "row",
                 "column",
                 "column",
                 "column",
+                "row",
+                "row",
+                "row",
               ]}
-              flexBasis={["5%", "5%", "5%", "20%", "20%", "20%"]}
-              // border={['none','none','none','1px solid gray','1px solid gray','1px solid gray']}
-              // borderBottom={['1px solid gray','1px solid gray','1px solid gray','none','none','none',]}
-              // borderBottom='1px solid gray'
+              height="90vh"
+              borderRadius=".4rem"
+              marginTop="2rem"
             >
-              <Text
-                px=".9rem"
-                py="1rem"
-                fontWeight={isActive === "editProfile" ? "700" : "500"}
-                borderLeft={isActive === "editProfile" ? "2px solid" : "none"}
-                borderLeftColor={[
-                  "none",
-                  "none",
-                  "none",
-                  "gray",
-                  "gray",
-                  "gray",
+              {/* left */}
+              <Box
+                display="flex"
+                flexDirection={[
+                  "row",
+                  "row",
+                  "row",
+                  "column",
+                  "column",
+                  "column",
                 ]}
-                borderTopRadius=".2rem"
-                _hover={{ cursor: "pointer" }}
-                onClick={() => setIsActive("editProfile")}
+                flexBasis={["5%", "5%", "5%", "20%", "20%", "20%"]}
+                // border={['none','none','none','1px solid gray','1px solid gray','1px solid gray']}
+                // borderBottom={['1px solid gray','1px solid gray','1px solid gray','none','none','none',]}
+                // borderBottom='1px solid gray'
               >
-                Edit Profile
-              </Text>
+                <Text
+                  px=".9rem"
+                  py="1rem"
+                  fontWeight={isActive === "editProfile" ? "700" : "500"}
+                  borderLeft={isActive === "editProfile" ? "2px solid" : "none"}
+                  borderLeftColor={[
+                    "none",
+                    "none",
+                    "none",
+                    "gray",
+                    "gray",
+                    "gray",
+                  ]}
+                  borderTopRadius=".2rem"
+                  _hover={{ cursor: "pointer" }}
+                  onClick={() => setIsActive("editProfile")}
+                >
+                  Edit Profile
+                </Text>
 
-              <Text
-                px=".9rem"
-                py="1rem"
-                fontWeight={isActive === "changePassword" ? "700" : "500"}
-                borderLeft={
-                  isActive === "changePassword" ? "2px solid" : "none"
-                }
-                borderLeftColor={[
-                  "none",
-                  "none",
-                  "none",
-                  "gray",
-                  "gray",
-                  "gray",
-                ]}
-                borderRadius=".1rem"
-                _hover={{ cursor: "pointer" }}
-                onClick={() => setIsActive("changePassword")}
-              >
-                Change Password
-              </Text>
+                <Text
+                  px=".9rem"
+                  py="1rem"
+                  fontWeight={isActive === "changePassword" ? "700" : "500"}
+                  borderLeft={
+                    isActive === "changePassword" ? "2px solid" : "none"
+                  }
+                  borderLeftColor={[
+                    "none",
+                    "none",
+                    "none",
+                    "gray",
+                    "gray",
+                    "gray",
+                  ]}
+                  borderRadius=".1rem"
+                  _hover={{ cursor: "pointer" }}
+                  onClick={() => setIsActive("changePassword")}
+                >
+                  Change Password
+                </Text>
+              </Box>
+
+              {/* right */}
+              {isActive === "editProfile" ? (
+                <EditProfile user={user} />
+              ) : (
+                <EditPassword user={user} />
+              )}
             </Box>
-
-            {/* right */}
-            {isActive === "editProfile" ? (
-              <EditProfile user={user} />
-            ) : (
-              <EditPassword user={user} />
-            )}
           </Box>
-        </Box>
 
-        {/* Profile Box */}
-        <Box
-          width={["80%", "40%", "35%", "30%", "30%", "30%"]}
-          display={isProfileOpen ? "flex" : "none"}
-          justifyContent="center"
-          alignItems="center"
-          // height={["90%", "90%", "90%", "100%", "100%", "100%"]}
-          height="100%"
-        >
-          <Profile showUser={displayedUser} />
+          {/* Profile Box */}
+          <Box
+            width={["80%", "40%", "35%", "30%", "30%", "30%"]}
+            display={isProfileOpen ? "flex" : "none"}
+            justifyContent="center"
+            alignItems="center"
+            // height={["90%", "90%", "90%", "100%", "100%", "100%"]}
+            height="100%"
+          >
+            <Profile showUser={displayedUser} />
+          </Box>
         </Box>
       </Box>
     </>

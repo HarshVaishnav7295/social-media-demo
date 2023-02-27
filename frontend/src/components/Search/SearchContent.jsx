@@ -28,12 +28,12 @@ const SearchContent = ({ allUser, searchValue }) => {
     <Box
       w={["80%", "80%", "80%", "70%", "70%", "70%"]}
       marginInline="auto"
-      mt="3rem"
-      border="1px solid transparent"
+      mt="4rem"
       boxShadow="lg"
       display="flex"
       flexDirection="column"
       cursor="pointer"
+      gap="0.2rem"
       // h="10rem"
     >
       {showUser.map((user) => {
@@ -44,7 +44,10 @@ const SearchContent = ({ allUser, searchValue }) => {
             }}
             key={user._id}
             padding="0.5rem"
+            backgroundColor="darkgray"
+            borderRadius="5px"
             width="100%"
+            boxShadow="0px 0px 5px -2px black"
             display="flex"
             justifyContent="space-between"
             alignItems="center"
@@ -55,7 +58,7 @@ const SearchContent = ({ allUser, searchValue }) => {
               alignItems="center"
               gap={["0.3rem", "0.3rem", "0.4rem", "1rem", "1rem", "1rem"]}
             >
-              <Box width="4rem">
+              <Box width="4rem" height="4rem">
                 <Image
                   src={
                     user?.avatar
@@ -79,7 +82,7 @@ const SearchContent = ({ allUser, searchValue }) => {
                     "3.5rem",
                     "3.5rem",
                   ]}
-                  border="1px solid transparent"
+                  border="1.5px solid white"
                 />
               </Box>
               <Box>
@@ -92,12 +95,14 @@ const SearchContent = ({ allUser, searchValue }) => {
                     ".7rem",
                     ".7rem",
                   ]}
-                  color="gray"
+                  color="black"
                   textAlign="center"
                 >
                   Username
                 </Text>
                 <Text
+                  color="white"
+                  fontWeight="medium"
                   fontSize={[
                     "0.8rem",
                     "0.8rem",
@@ -123,7 +128,7 @@ const SearchContent = ({ allUser, searchValue }) => {
                     ".7rem",
                     ".7rem",
                   ]}
-                  color="gray"
+                  color="black"
                   textAlign="center"
                 >
                   Followings
@@ -137,6 +142,8 @@ const SearchContent = ({ allUser, searchValue }) => {
                     "1rem",
                     "1rem",
                   ]}
+                  color="white"
+                  fontWeight="medium"
                   textAlign="center"
                 >
                   {user.followings.length}
@@ -152,7 +159,7 @@ const SearchContent = ({ allUser, searchValue }) => {
                     ".7rem",
                     ".7rem",
                   ]}
-                  color="gray"
+                  color="black"
                   textAlign="center"
                 >
                   Followers
@@ -166,6 +173,8 @@ const SearchContent = ({ allUser, searchValue }) => {
                     "1rem",
                     "1rem",
                   ]}
+                  color="white"
+                  fontWeight="medium"
                   textAlign="center"
                 >
                   {user.followers.length}

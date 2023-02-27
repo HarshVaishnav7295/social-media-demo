@@ -1,5 +1,5 @@
 import React from "react";
-import { Box,  } from "@chakra-ui/react";
+import { Box } from "@chakra-ui/react";
 import FormInput from "./FormInput";
 import SubmitBtn from "./SubmitBtn";
 import UserDetail from "./UserDetail";
@@ -82,7 +82,7 @@ const EditPassword = ({ user }) => {
           invalidInput={invalidPasswordInput}
         />
         <FormInput
-          name="Conform Password"
+          name="Retry Password"
           placeholder="Conform password"
           enteredInputValue={confPassInputValue}
           handleInputChange={handleConfPassInputChange}

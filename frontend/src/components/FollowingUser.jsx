@@ -6,8 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { userAction } from "../Redux/userReducer";
 
-const FollowingUser = ({ border, userdata, wantToNavigate, showChatIcon }) => {
-  const [unReadCount, setunReadCount] = useState(10);
+const FollowingUser = ({ userdata, wantToNavigate, showChatIcon }) => {
+  //const [unReadCount, setunReadCount] = useState(10);
   const isProfileOpen = useSelector((state) => state.user.isProfileOpen);
 
   const dispatch = useDispatch();
@@ -28,10 +28,10 @@ const FollowingUser = ({ border, userdata, wantToNavigate, showChatIcon }) => {
         flexDir="row"
         width="100%"
         cursor="pointer"
-        border={border ? "2px" : "none"}
         gap="0.3rem"
         justifyContent="space-between"
         alignItems="center"
+        color="white"
         px={["3px", "3px", "3px", "0.3rem", "0.3rem", "0.3rem"]}
       >
         {/*Image Box  */}
@@ -43,6 +43,7 @@ const FollowingUser = ({ border, userdata, wantToNavigate, showChatIcon }) => {
           flexDirection="row"
           height="3.5rem"
           borderRadius="50%"
+          gap="0.7rem"
         >
           <Img
             src={
@@ -53,7 +54,7 @@ const FollowingUser = ({ border, userdata, wantToNavigate, showChatIcon }) => {
             // src="https://www.shutterstock.com/image-vector/default-avatar-profile-icon-vector-260nw-1725655669.jpg"
             borderRadius="50%"
             width="80%"
-            border="1px solid red"
+            border="1px solid #636363"
             p="3px"
             gap="0.5rem"
             height="80%"
@@ -74,7 +75,9 @@ const FollowingUser = ({ border, userdata, wantToNavigate, showChatIcon }) => {
             </Text>
           </Box>
         </Box>
-        {showChatIcon ? (
+
+        {/* Chat User Icon */}
+        {showChatIcon && (
           <Box
             display="flex"
             justifyContent="center"
@@ -83,29 +86,11 @@ const FollowingUser = ({ border, userdata, wantToNavigate, showChatIcon }) => {
             px="5px"
             width="fit-content"
             onClick={userClicked}
+            color="black"
           >
             <RiSendPlaneFill />
           </Box>
-        ) : (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            fontSize="0.7rem"
-            width="20px"
-            height="20px"
-            cursor="pointer"
-            borderRadius="50%"
-            fontWeight="medium"
-            p="5px"
-            backgroundColor="#128C7E"
-            color="white"
-            textAlign="center"
-          >
-            {unReadCount !== 0 ? unReadCount : null}
-          </Box>
         )}
-        {/* Chat User Icon */}
       </Box>
     </>
   );

@@ -77,25 +77,30 @@ export const accessChat = async(req:Request,res:Response):Promise<void>=>{
         const {users} = req.body as {users: string[]}
         const u1 = await User.findById(users[0])
         const u2 = await User.findById(users[1])
-        const chat = await Chat.find({
-            $and: [
-                { users: { $elemMatch: { _id : {$eq : u1?._id} } } },
-                { users: { $elemMatch: { _id : {$eq : u2?._id} } } },
-              ]
+        const messages = await Message.find({
+            sender : { $in : [ u1?._id,u2?._id ] },
+            receiver : { $in : [ u1?._id,u2?._id ] }
         })
-        if(chat.length === 0){
-            const newChat = await Chat.create({
-                users : [u1,u2]
-            })
-            res.status(StatusCodes.OK).json({
-                "chat":newChat
-            })
-        }else{
-            res.status(StatusCodes.OK).json({
-                "chat":chat
-            })
-        }
+        res.status(StatusCodes.OK).json({
+            "chat":messages
+        })
         
+    }catch(error){
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            "errorMessage":error
+        })
+    }
+}
+
+export const markRead = async(req:Request,res:Response):Promise<void>=>{
+    try{
+        const {id} = req.body as {id:string}
+        const message = await Message.findByIdAndUpdate(id,{
+            isRead : true
+        })
+        res.status(StatusCodes.OK).json({
+            "status":"marked"
+        })
     }catch(error){
         res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
             "errorMessage":error

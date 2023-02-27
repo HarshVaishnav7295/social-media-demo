@@ -73,6 +73,12 @@ const Profile = ({ showUser }) => {
         display="flex"
         flexDir="column"
         alignItems="center"
+        // bgGradient="linear(to-b, #797EF6,#b5b7fa)"
+        backgroundColor="darkgray"
+        borderBottomRadius="10px"
+        borderTopRadius="5px"
+        boxShadow="0px 0px 10px -3px grey"
+        // backgroundColor="#1AA7EC"
         justifyContent={[
           "space-evenly",
           "space-evenly",
@@ -84,7 +90,7 @@ const Profile = ({ showUser }) => {
       >
         {/* Profile Pic Box */}
         <Box
-          border="2px solid red"
+          border="2px solid #636363"
           display="flex"
           width={["3.5rem", "3.5rem", "3.5rem", "4.5rem", "4.5rem", "4.5rem"]}
           height={["3.5rem", "3.5rem", "3.5rem", "4.5rem", "4.5rem", "4.5rem"]}
@@ -94,6 +100,7 @@ const Profile = ({ showUser }) => {
           borderRadius="50%"
           overflow="hidden"
           cursor="pointer"
+          color="white"
         >
           <Img
             src={
@@ -114,6 +121,7 @@ const Profile = ({ showUser }) => {
           width="100%"
           display="flex"
           flexDir="row"
+          color="white"
           justifyContent="space-evenly"
           // backgroundColor="lightgray"
         >
@@ -151,7 +159,8 @@ const Profile = ({ showUser }) => {
                 "0.8rem",
                 "0.8rem",
               ]}
-              color="grey"
+              color="white"
+              fontWeight="semibold"
             >
               Posts
             </Box>
@@ -190,7 +199,8 @@ const Profile = ({ showUser }) => {
                 "0.8rem",
                 "0.8rem",
               ]}
-              color="grey"
+              color="white"
+              fontWeight="semibold"
             >
               Followers
             </Box>
@@ -229,7 +239,8 @@ const Profile = ({ showUser }) => {
                 "0.8rem",
                 "0.8rem",
               ]}
-              color="grey"
+              color="white"
+              fontWeight="semibold"
             >
               Following
             </Box>
@@ -242,7 +253,7 @@ const Profile = ({ showUser }) => {
           flexDir="column"
           justifyContent="center"
           alignItems="center"
-          width="100%"
+          width="93%"
           gap="0.5rem"
         >
           {showUser?._id !== user?._id ? (
@@ -323,33 +334,36 @@ const Profile = ({ showUser }) => {
           flexDir="column"
           alignItems="flex-start"
           px="0.5rem"
-          gap="0.3rem"
+          pl="1rem"
         >
           {/* Name Box */}
           <Box
             fontSize={[
-              "0.7rem",
-              "0.7rem",
-              "0.7rem",
               "0.8rem",
               "0.8rem",
               "0.8rem",
+              "0.9rem",
+              "0.9rem",
+              "0.9rem",
             ]}
             fontWeight="semibold"
+            color="white"
           >
             {isUserAuthenticated ? showUser?.name : ""}
           </Box>
           <Box
             fontSize={[
-              "0.6rem",
-              "0.6rem",
-              "0.6rem",
               "0.7rem",
               "0.7rem",
               "0.7rem",
+              "0.8rem",
+              "0.8rem",
+              "0.8rem",
             ]}
+            color="white"
+            mt="-5px"
           >
-            {isUserAuthenticated ? showUser?.bio : "0"}
+            {isUserAuthenticated ? showUser?.bio : ""}
           </Box>
         </Box>
 
@@ -370,14 +384,17 @@ const Profile = ({ showUser }) => {
             justifyContent="space-evenly"
             width="95%"
             position="relative"
+            color="white"
           >
             <Box
               width="50%"
               px="0.5rem"
+              py="0.2rem"
               cursor="pointer"
               textAlign="center"
-              border="2px solid lightgrey"
-              borderRight="1px solid lightgray"
+              // border="2px solid lightgrey"
+              // borderRight="1px solid lightgray"
+              fontWeight={isFollowerSelected ? "medium" : "normal"}
               fontSize={["0.7rem", "0.8rem", "0.9rem", "1rem", "1rem", "1rem"]}
               borderBottomColor={!isFollowerSelected ? "" : "transparent"}
               onClick={() => setIsFollowerSelected(true)}
@@ -386,11 +403,11 @@ const Profile = ({ showUser }) => {
             </Box>
             <Box
               width="50%"
-              border="2px solid lightgrey"
               px="0.5rem"
+              py="0.2rem"
               cursor="pointer"
               textAlign="center"
-              borderLeft="1px solid lightgray"
+              fontWeight={isFollowerSelected ? "normal" : "medium"}
               fontSize={["0.7rem", "0.8rem", "0.9rem", "1rem", "1rem", "1rem"]}
               borderBottomColor={!isFollowerSelected ? "transparent" : ""}
               onClick={() => setIsFollowerSelected(false)}
@@ -408,8 +425,6 @@ const Profile = ({ showUser }) => {
             gap="0.8rem"
             overflowY="scroll"
             alignItems="center"
-            border="2px solid lightgrey"
-            borderTopColor="transparent"
             css={{
               "&::-webkit-scrollbar": {
                 width: "2px",

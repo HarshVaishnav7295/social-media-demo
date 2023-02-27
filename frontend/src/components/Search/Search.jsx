@@ -36,7 +36,7 @@ const Search = () => {
         flexDir="column"
         width="100vw"
         margin="auto"
-        height="90vh"
+        height="100vh"
         alignItems="center"
       >
         {/* Navbar Box */}
@@ -93,7 +93,7 @@ const Search = () => {
           </Box>
           {/* Profile Box */}
           <Box
-            width={["80%", "40%", "35%", "30%", "30%", "30%"]}
+            width={["80%", "50%", "38%", "25%", "25%", "25%"]}
             display={isProfileOpen ? "flex" : "none"}
             justifyContent="center"
             alignItems="center"

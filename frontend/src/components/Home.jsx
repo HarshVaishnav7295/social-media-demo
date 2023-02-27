@@ -17,14 +17,13 @@ const Home = () => {
         flexDir="column"
         width="100vw"
         margin="auto"
-        height="90vh"
+        height="100vh"
         alignItems="center"
       >
         {/* Navbar Box */}
         <Box
           width={["100%", "100%", "100%", "95%", "95%", "95%"]}
           // backgroundColor="grey"
-          py="0.3rem"
         >
           <Navbar />
         </Box>
