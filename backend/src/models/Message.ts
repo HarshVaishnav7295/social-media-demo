@@ -5,6 +5,7 @@ export interface IMessage {
   text: string;
   sender: IUserRef;
   receiver: IUserRef;
+  isRead: boolean;
 }
 
 const messageSchema = new Schema(
@@ -21,10 +22,10 @@ const messageSchema = new Schema(
       type: mongoose.Types.ObjectId,
       ref: "User",
     },
-    isRead : {
-     type : Boolean,
-     default : false
-    }
+    isRead: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true }
 );
