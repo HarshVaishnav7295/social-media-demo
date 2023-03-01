@@ -41,6 +41,8 @@ const userSlice = createSlice({
     },
     updateUser: (state, action: { payload: IUser }) => {
       state.user = { ...state.user, ...action.payload };
+      localStorage.removeItem("CLONE");
+      localStorage.setItem("CLONE", JSON.stringify(state.user));
       state.isUserAuthenticated = true;
     },
     setFollower: (state, action: { payload: IUser[] }) => {

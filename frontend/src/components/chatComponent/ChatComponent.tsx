@@ -9,17 +9,17 @@ import { chatAction } from "../../Redux/chatReducer";
 import FollowingUser from "../FollowingUser";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { BsEmojiSmileFill, BsCheck2All, BsCheck } from "react-icons/bs";
-import EmojiPicker from "emoji-picker-react";
+import EmojiPicker, { IEmojiData } from "emoji-picker-react";
 import { addOneChatAsync } from "../../Redux/chatAction";
 import { setFollowingAsync, setFollowerAsync } from "../../Redux/userAction";
-import { io } from "socket.io-client";
+import io, { Socket } from "socket.io-client";
 import { Img, Text } from "@chakra-ui/react";
 import { setAllChatAsync } from "../../Redux/chatAction";
 import { AiOutlineSearch } from "react-icons/ai";
 import { ToastContainer, toast } from "react-toastify";
 import { FindUserByIdApi } from "../../utils/ApiRoutes";
 import { useAppDispatch, useAppSelector } from "../../Redux/store";
-import { IUser } from "../../types/reduxTypes";
+import { IChat, IUser } from "../../types/reduxTypes";
 const ChatContainer = () => {
   const dispatch = useAppDispatch();
   const displayedUser = useAppSelector((state) => state.user.displayedUser);
@@ -28,29 +28,29 @@ const ChatContainer = () => {
   //const roomId = useSelector((state)=>state.chat.roomId)
   const isProfileOpen = useAppSelector((state) => state.user.isProfileOpen);
   const following = useAppSelector((state) => state.user.following);
-  const [socket, setSocket] = useState(null);
+  const [socket, setSocket] = useState<Socket>();
   //const [roomId, setroomId] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  const [followingUserState, setFollowingUserState] = useState<IUser>();
+  const [followingUserState, setFollowingUserState] = useState<IUser[]>();
   const [clickedFollowingUser, setClickedFollowingUser] = useState<IUser>();
 
   const [roomId, setRoomId] = useState("");
 
   useEffect(() => {
-    if (socket === null) {
-      setSocket(io.connect("http://localhost:8000"));
+    if (socket === undefined) {
+      setSocket(io("http://localhost:8000"));
       //console.log('Connection made')
     }
     setTimeout(() => {
       if (socket != null) {
         //console.log('setup called')
-        socket.emit("setup", user._id);
+        if (user) socket.emit("setup", user._id);
       }
     }, 200);
   }, [socket]);
 
   useEffect(() => {
-    if (searchValue.trim(" ") === "") {
+    if (searchValue.trim() === "") {
       setFollowingUserState(following);
     } else {
       const tempUser = following.filter(
@@ -61,7 +61,7 @@ const ChatContainer = () => {
   }, [following, searchValue]);
 
   const SetRoom = useCallback(
-    async (followingUserProp) => {
+    async (followingUserProp: IUser) => {
       if (socket) {
         socket.emit("Leave Room", roomId);
       }
@@ -77,34 +77,36 @@ const ChatContainer = () => {
           console.log(roomId);
         }, 500);
       }
-      let resp = await fetch("http://localhost:8000/api/chat/accessChat", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        method: "POST",
-        body: JSON.stringify({
-          users: [followingUserProp._id, user._id],
-        }),
-      });
-      if (resp.status === 500) {
-        let error = await resp.json();
-        console.log(error.errorMessage);
-      } else if (resp.status === 200) {
-        let data = await resp.json();
-        // console.log(data.chat)
-        if (socket) {
-          socket.emit("Join Room", roomId);
+      if (user) {
+        const resp = await fetch("http://localhost:8000/api/chat/accessChat", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          method: "POST",
+          body: JSON.stringify({
+            users: [followingUserProp._id, user._id],
+          }),
+        });
+        if (resp.status === 500) {
+          let error = await resp.json();
+          console.log(error.errorMessage);
+        } else if (resp.status === 200) {
+          let data = await resp.json();
+          // console.log(data.chat)
+          if (socket) {
+            socket.emit("Join Room", roomId);
+          }
+          dispatch(setAllChatAsync(data.chat));
         }
-        dispatch(setAllChatAsync(data.chat));
       }
     },
     [roomId]
   );
-  const isUserAuthenticated = useSelector(
+  const isUserAuthenticated = useAppSelector(
     (state) => state.user.isUserAuthenticated
   );
-  const isFollowerShowing = useSelector(
+  const isFollowerShowing = useAppSelector(
     (state) => state.chat.isFollowerShowing
   );
 
@@ -116,8 +118,10 @@ const ChatContainer = () => {
       dispatch(chatAction.changeFollowerShowing());
     }
     if (isUserAuthenticated) {
-      dispatch(setFollowingAsync(user.token));
-      dispatch(setFollowerAsync(user.token));
+      if (user) {
+        dispatch(setFollowingAsync(user.token));
+        dispatch(setFollowerAsync(user.token));
+      }
     }
   }, [dispatch]);
 
@@ -137,7 +141,7 @@ const ChatContainer = () => {
           // backgroundColor="grey"
           py="0.3rem"
         >
-          <Navbar showBell={true} />
+          <Navbar showBell={true} notificationCount={0} />
         </Box>
         <Box
           display="flex"
@@ -257,7 +261,7 @@ const ChatContainer = () => {
                 }}
               >
                 {/* Call Api here */}
-                {followingUserState.length > 0 ? (
+                {followingUserState ? (
                   followingUserState.map((followingUser, i) => {
                     return (
                       <Box
@@ -267,7 +271,7 @@ const ChatContainer = () => {
                         // border="0.5px solid lightgrey"
                         boxShadow="0px 0px 6px -3px black "
                         backgroundColor={
-                          clickedFollowingUser._id === followingUser._id
+                          clickedFollowingUser?._id === followingUser._id
                             ? "lightgrey"
                             : ""
                         }
@@ -277,7 +281,6 @@ const ChatContainer = () => {
                         }}
                       >
                         <FollowingUser
-                          border={false}
                           userdata={followingUser}
                           wantToNavigate={false}
                           showChatIcon={false}
@@ -364,22 +367,37 @@ const ChatContainer = () => {
   );
 };
 
-const InputContainer = ({ socket, roomId, clickedFollowingUser, user }) => {
+interface IInputContainerProps {
+  socket: Socket | undefined;
+  clickedFollowingUser: IUser;
+  user: IUser | undefined;
+}
+
+const InputContainer = ({
+  socket,
+  clickedFollowingUser,
+  user,
+}: IInputContainerProps) => {
   //const roomId = useSelector((state)=>state.chat.roomId)
 
-  const dispatch = useDispatch();
-  const [showEmojji, setShowEmoji] = useState(false);
+  const dispatch = useAppDispatch();
+  const [showEmojji, setShowEmoji] = useState<boolean>(false);
   const [msg, setMsg] = useState("");
-  const enterKeyPressed = (e) => {
-    if (e.code === "Enter" || e.code === "NumpadEnter") {
+  const enterKeyPressed = (
+    e: React.KeyboardEvent<HTMLInputElement> | undefined
+  ) => {
+    if (e?.code === "Enter" || e?.code === "NumpadEnter") {
       submitMessage();
     }
   };
-  const newMessage = (e) => {
+  const newMessage = (e: React.ChangeEvent<HTMLInputElement>) => {
     setMsg(e.target.value);
   };
 
-  const emojiClicked = (e, emoji) => {
+  const emojiClicked = (
+    e: React.MouseEvent<Element, MouseEvent>,
+    emoji: IEmojiData
+  ) => {
     setShowEmoji(!showEmojji);
     const emojiMessage = emoji.emoji;
     setMsg(msg + emojiMessage);
@@ -390,20 +408,18 @@ const InputContainer = ({ socket, roomId, clickedFollowingUser, user }) => {
       // Call dispatch here for send msg
       const data = {
         text: msg,
-        sender: user._id,
-        //roomId:roomId,
+        sender: user?._id,
         receiver: clickedFollowingUser._id,
-        //token: user.token,
       };
       //dispatch(addOneChatAsync(data));
-      socket.emit(
+      socket?.emit(
         "sendMessage",
         {
           text: data.text,
           sender: data.sender,
           receiver: data.receiver,
         },
-        (data) => {
+        (data: IChat) => {
           dispatch(addOneChatAsync(data));
         }
       );
@@ -425,17 +441,13 @@ const InputContainer = ({ socket, roomId, clickedFollowingUser, user }) => {
         position="relative"
         boxShadow="0px 0px 6px -3px grey"
       >
-        <Box width="fit-content" height="fit-content">
+        <Box
+          width="fit-content"
+          height="fit-content"
+          fontSize={["0.8rem", "1rem", "1.1rem", "1.3rem", "1.3rem", "1.3rem"]}
+        >
           <BsEmojiSmileFill
             cursor="pointer"
-            fontSize={[
-              "0.8rem",
-              "1rem",
-              "1.1rem",
-              "1.3rem",
-              "1.3rem",
-              "1.3rem",
-            ]}
             onClick={() => setShowEmoji(!showEmojji)}
           />
         </Box>
@@ -447,13 +459,7 @@ const InputContainer = ({ socket, roomId, clickedFollowingUser, user }) => {
           display={["none", "block", "block", "block", "block", "block"]}
           className="emoji"
         >
-          {showEmojji && (
-            <EmojiPicker
-              width="20rem"
-              height="20rem"
-              onEmojiClick={emojiClicked}
-            />
-          )}
+          {showEmojji && <EmojiPicker onEmojiClick={emojiClicked} />}
         </Box>
 
         <Input
@@ -486,31 +492,39 @@ const InputContainer = ({ socket, roomId, clickedFollowingUser, user }) => {
   );
 };
 
+interface IAllChatContainerProps {
+  roomId: string;
+  socket: Socket | undefined;
+  clickedFollowingUser: IUser;
+  user: IUser | undefined;
+  isUserAuthenticated: boolean;
+}
+
 const AllChatContainer = ({
   roomId,
   socket,
   clickedFollowingUser,
   user,
   isUserAuthenticated,
-}) => {
-  const dispatch = useDispatch();
-  const chats = useSelector((state) => state.chat.chat);
+}: IAllChatContainerProps) => {
+  const dispatch = useAppDispatch();
+  const chats = useAppSelector((state) => state.chat.chat);
   const [isRead, setIsRead] = useState(false);
   useEffect(() => {
     //console.log('Current Room : ',roomId)
-    socket.on("MessagesUpdated", async (data) => {
+    socket?.on("MessagesUpdated", async (data) => {
       console.log(data.newMessage);
       //console.log('Current Room : ',roomId)
       //console.log('sender id : ',data.newMessage.sender)
       if (
         data.newMessage.sender.toString() === roomId &&
-        data.newMessage.receiver.toString() === user._id.toString()
+        data.newMessage.receiver.toString() === user?._id.toString()
       ) {
         dispatch(addOneChatAsync(data.newMessage));
         let resp = await fetch("http://localhost:8000/api/chat/markRead", {
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
+            Authorization: `Bearer ${user?.token}`,
           },
           method: "POST",
           body: JSON.stringify({
@@ -527,14 +541,14 @@ const AllChatContainer = ({
         //setNotification(data.newMessage.sender.toString())
         //dispatch(chatAction.setNotificationCount(parseInt(notificationCount)+1))
         if (
-          data.newMessage.sender.toString() !== user._id.toString() &&
-          data.newMessage.receiver.toString() === user._id.toString()
+          data.newMessage.sender.toString() !== user?._id.toString() &&
+          data.newMessage.receiver.toString() === user?._id.toString()
         ) {
           //console.log(data.newMessage)
           const resp = await fetch(FindUserByIdApi, {
             headers: {
               "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
+              Authorization: `Bearer ${user?.token}`,
             },
             method: "POST",
             body: JSON.stringify({
@@ -552,11 +566,11 @@ const AllChatContainer = ({
       }
     });
     return () => {
-      socket.off("MessagesUpdated");
+      socket?.off("MessagesUpdated");
     };
   }, [clickedFollowingUser]);
 
-  const getTime = (createdAt) => {
+  const getTime = (createdAt: string) => {
     const hours = new Date(createdAt).getHours();
     const minutes = new Date(createdAt).getMinutes();
     if (hours <= 12) {
@@ -568,7 +582,7 @@ const AllChatContainer = ({
     }
   };
 
-  const scrollRef = useRef();
+  const scrollRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chats]);
@@ -787,7 +801,7 @@ const AllChatContainer = ({
                   height="fit-content"
                   display="flex"
                   alignItems={
-                    chat.sender === user._id ? "flex-end" : "flex-start"
+                    chat.sender === user?._id ? "flex-end" : "flex-start"
                   }
                   flexDir="column"
                 >
@@ -821,7 +835,7 @@ const AllChatContainer = ({
                         ? `0${new Date(chat.createdAt).getMinutes()}`
                         : new Date(chat.createdAt).getMinutes()} */}
                       {getTime(chat.createdAt)}
-                      {chat.sender === user._id ? (
+                      {chat.sender === user?._id ? (
                         isRead ? (
                           <Box fontSize="0.8rem" ml="0px" mr="-2px" mb="1px">
                             <BsCheck2All color="#00a3e6" />
@@ -853,7 +867,6 @@ const AllChatContainer = ({
           >
             <InputContainer
               socket={socket}
-              roomId={roomId}
               clickedFollowingUser={clickedFollowingUser}
               user={user}
             />

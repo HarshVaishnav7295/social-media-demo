@@ -28,6 +28,7 @@ export interface IChat {
   sender: string;
   receiver: string;
   isRead: boolean;
+  createdAt: string;
 }
 
 export interface IInitialUserState {

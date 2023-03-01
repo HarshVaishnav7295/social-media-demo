@@ -260,7 +260,7 @@ const PostContainer = ({ post, user }: IPostContainerProps) => {
             alt={postUser?.name + "'s" + " post"}
             width="100%"
             height="100%"
-            borderRadius="8px"
+            borderRadius="5px"
           />
         </Box>
         {/* Post Description Box */}

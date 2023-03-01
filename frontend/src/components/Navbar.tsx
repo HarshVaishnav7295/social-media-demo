@@ -17,11 +17,11 @@ import {
 import { HiUpload } from "react-icons/hi";
 import React, { useState } from "react";
 import { AiOutlineHome, AiOutlineSearch } from "react-icons/ai";
+import { BsFillBellFill } from "react-icons/bs";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { MdOutlineAddToQueue } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { userAction } from "../Redux/userReducer";
-
 import { getFeedAsync, setNewPostAsync } from "../Redux/postAction";
 import { useAppDispatch, useAppSelector } from "../Redux/store";
 import MyDropzone from "./uploadContainer/Dropzone";
@@ -335,7 +335,31 @@ const Navbar = ({ showBell, notificationCount }: INavbarProps) => {
                 }
               }}
             >
-              <RiSendPlaneFill />
+              {!showBell ? (
+                <RiSendPlaneFill />
+              ) : (
+                <Box position="relative">
+                  <BsFillBellFill />
+                  {notificationCount !== 0 ? null : (
+                    <Box
+                      position="absolute"
+                      top="-5px"
+                      right="-1px"
+                      width="14px"
+                      height="14px"
+                      borderRadius="50%"
+                      backgroundColor="red.600"
+                      color="white"
+                      fontSize="0.6rem"
+                      display="flex"
+                      justifyContent="center"
+                      alignItems="center"
+                    >
+                      {notificationCount}
+                    </Box>
+                  )}
+                </Box>
+              )}
             </Box>
           )}
 
