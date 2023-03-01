@@ -5,6 +5,7 @@ import { BsPower } from "react-icons/bs";
 import { userAction } from "../Redux/userReducer";
 import { useNavigate } from "react-router-dom";
 import {
+  findUserByIdAsync,
   followUnfollowAsync,
   setFollowerAsync,
   setFollowingAsync,
@@ -25,22 +26,70 @@ const Profile = ({ showUser }: IProfileProps) => {
   const dispatch = useAppDispatch();
   const [isFollowed, setIsFollowed] = useState<boolean>(false);
   const [showUserPost, setShowUserPost] = useState<IPost[]>([]);
+  const follower = useAppSelector((state) => state.user.follower);
+  const following = useAppSelector((state) => state.user.following);
+  const [localFollower, setLocalFollower] = useState<IUser[]>(follower);
+  const [localFollowing, setLocalFollowing] = useState<IUser[]>(following);
 
   const isUserAuthenticated: boolean = useAppSelector(
     (state) => state.user.isUserAuthenticated
   );
 
-  const follower = useAppSelector((state) => state.user.follower);
-  const following = useAppSelector((state) => state.user.following);
+  const followerOfDisp = useAppSelector((state) => state.user.followerOfDisp);
+  const followingOfDisp = useAppSelector((state) => state.user.followingOfDisp);
 
   const [isFollowerSelected, setIsFollowerSelected] = useState<boolean>(true);
 
   useEffect(() => {
+    if (showUser?._id !== user?._id) {
+      showUser?.followers.map((_followerId) => {
+        dispatch(
+          findUserByIdAsync({ id: _followerId._id, token: user?.token })
+          // @ts-ignore
+        ).then((res: IUser) => {
+          // console.log(res);
+          dispatch(userAction.setFollowerOfDisp(res));
+        });
+      });
+
+      showUser?.followings.map((_followingId) => {
+        dispatch(
+          findUserByIdAsync({ id: _followingId._id, token: user?.token })
+          //@ts-ignore
+        ).then((res: IUser) => {
+          dispatch(userAction.setFollowingOfDisp(res));
+        });
+      });
+    }
+  }, [dispatch, showUser, user]);
+
+  useEffect(() => {
+    if (showUser?._id === user?._id) {
+      setLocalFollower(follower);
+      setLocalFollowing(following);
+    } else {
+      setLocalFollower(followerOfDisp);
+      setLocalFollowing(followingOfDisp);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    follower.length,
+    followerOfDisp.length,
+    following.length,
+    followingOfDisp.length,
+    showUser?._id,
+    user?._id,
+  ]);
+
+  useEffect(() => {
     if (isUserAuthenticated && showUser && user) {
       // eslint-disable-next-line array-callback-return
+      dispatch(userAction.setDispFollowerFollowingEmpty());
       user?.followings.map((followingId) => {
         if (followingId._id.toString() === showUser?._id) {
           setIsFollowed(true);
+        } else {
+          setIsFollowed(false);
         }
       });
       if (user) {
@@ -156,7 +205,7 @@ const Profile = ({ showUser }: IProfileProps) => {
                 "0.9rem",
               ]}
             >
-              {showUserPost?.length}
+              {showUserPost?.length || 0}
             </Box>
             <Box
               fontSize={[
@@ -183,6 +232,7 @@ const Profile = ({ showUser }: IProfileProps) => {
             cursor="pointer"
             onClick={() => {
               setIsFollowerSelected(true);
+              if (user) dispatch(setFollowerAsync(user?.token));
             }}
           >
             <Box
@@ -196,7 +246,7 @@ const Profile = ({ showUser }: IProfileProps) => {
                 "0.9rem",
               ]}
             >
-              {showUser?.followers?.length}
+              {showUser?.followers?.length || 0}
             </Box>
             <Box
               fontSize={[
@@ -223,6 +273,7 @@ const Profile = ({ showUser }: IProfileProps) => {
             cursor="pointer"
             onClick={() => {
               setIsFollowerSelected(false);
+              if (user) dispatch(setFollowingAsync(user?.token));
             }}
           >
             <Box
@@ -236,7 +287,7 @@ const Profile = ({ showUser }: IProfileProps) => {
                 "0.9rem",
               ]}
             >
-              {showUser?.followings?.length}
+              {showUser?.followings?.length || 0}
             </Box>
             <Box
               fontSize={[
@@ -470,8 +521,17 @@ const Profile = ({ showUser }: IProfileProps) => {
               },
             }}
           >
-            {isFollowerSelected
-              ? follower.map((item, i) => {
+            {isFollowerSelected ? (
+              localFollower.length === 0 ? (
+                <Box
+                  fontSize="0.8rem"
+                  fontStyle="italic"
+                  color="whiteAlpha.800"
+                >
+                  Follower not Found.
+                </Box>
+              ) : (
+                localFollower.map((item, i) => {
                   return (
                     <Box
                       width="100%"
@@ -490,25 +550,32 @@ const Profile = ({ showUser }: IProfileProps) => {
                     </Box>
                   );
                 })
-              : following.map((item, i) => {
-                  return (
-                    <Box
-                      width="100%"
-                      boxShadow="0px 1px 7px -2px grey"
-                      height="fit-content"
-                      key={i.toString()}
-                      onClick={() => {
-                        handleUserClick(item);
-                      }}
-                    >
-                      <FollowingUser
-                        userdata={item}
-                        wantToNavigate={true}
-                        showChatIcon={true}
-                      />
-                    </Box>
-                  );
-                })}
+              )
+            ) : localFollowing.length === 0 ? (
+              <Box fontSize="0.8rem" fontStyle="italic" color="whiteAlpha.800">
+                Following not Found.
+              </Box>
+            ) : (
+              localFollowing.map((item, i) => {
+                return (
+                  <Box
+                    width="100%"
+                    boxShadow="0px 1px 7px -2px grey"
+                    height="fit-content"
+                    key={i.toString()}
+                    onClick={() => {
+                      handleUserClick(item);
+                    }}
+                  >
+                    <FollowingUser
+                      userdata={item}
+                      wantToNavigate={true}
+                      showChatIcon={true}
+                    />
+                  </Box>
+                );
+              })
+            )}
           </Box>
 
           <Box>

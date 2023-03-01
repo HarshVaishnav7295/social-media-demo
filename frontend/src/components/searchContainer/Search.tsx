@@ -2,7 +2,11 @@
 import { Box } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../Redux/store";
-import { setAllUserAsync } from "../../Redux/userAction";
+import {
+  setAllUserAsync,
+  setFollowerAsync,
+  setFollowingAsync,
+} from "../../Redux/userAction";
 import Navbar from "../Navbar";
 import Profile from "../Profile";
 import SearchBar from "./SearchBar";
@@ -21,6 +25,8 @@ const Search = () => {
   useEffect(() => {
     if (isUserAuthenticated && user) {
       dispatch(setAllUserAsync(user.token));
+      dispatch(setFollowerAsync(user.token));
+      dispatch(setFollowingAsync(user.token));
     }
   }, []);
 

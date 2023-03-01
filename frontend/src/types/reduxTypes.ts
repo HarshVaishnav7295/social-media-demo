@@ -39,6 +39,8 @@ export interface IInitialUserState {
   following: IUser[];
   displayedUser: IUser | undefined;
   allUser: IUser[];
+  followerOfDisp: IUser[];
+  followingOfDisp: IUser[];
 }
 
 export interface IInitialPostState {

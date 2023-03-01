@@ -16,6 +16,8 @@ const initialUserState: IInitialUserState = {
   follower: [],
   following: [],
   displayedUser: storedUser() ? storedUser() : undefined,
+  followerOfDisp: [],
+  followingOfDisp: [],
   allUser: [],
 };
 
@@ -66,6 +68,22 @@ const userSlice = createSlice({
     },
     setAllUser: (state, action: { payload: IUser[] }) => {
       state.allUser = action.payload;
+    },
+    setFollowerOfDisp: (state, action: { payload: IUser }) => {
+      state.followerOfDisp.push(action.payload);
+      state.followerOfDisp.filter(function (item, pos, self) {
+        return self.indexOf(item) === pos;
+      });
+    },
+    setFollowingOfDisp: (state, action: { payload: IUser }) => {
+      state.followingOfDisp.push(action.payload);
+      state.followingOfDisp.filter(function (item, pos, self) {
+        return self.indexOf(item) === pos;
+      });
+    },
+    setDispFollowerFollowingEmpty: (state) => {
+      state.followerOfDisp = [];
+      state.followingOfDisp = [];
     },
   },
 });

@@ -134,7 +134,10 @@ export const followUnfollowAsync = (data: { token: string; id: string }) => {
   };
 };
 
-export const findUserByIdAsync = (data: { token: string; id: string }) => {
+export const findUserByIdAsync = (data: {
+  token: string | undefined;
+  id: string;
+}) => {
   return async (dispatch: Dispatch) => {
     try {
       const postUser = await fetch(FindUserByIdApi, {
