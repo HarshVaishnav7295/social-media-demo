@@ -1,5 +1,11 @@
 import axios from "axios";
-import { GetAllPost, GetMyPost, UploadPost } from "../utils/ApiRoutes";
+import {
+  GetFeedApi,
+  GetMyPost,
+  GetUserPostApi,
+  LikeUnLikeApi,
+  UploadPost,
+} from "../utils/ApiRoutes";
 import { postAction } from "./postReducer";
 
 export const getPersonalPostAsync = (token) => {
@@ -9,6 +15,25 @@ export const getPersonalPostAsync = (token) => {
     });
     //   console.log(userPosts.data.posts);
     dispatch(postAction.setPersonalPost(userPosts.data.posts));
+  };
+};
+
+export const getFeedAsync = (token) => {
+  return async (dispatch) => {
+    try {
+      const feeddata = await fetch(GetFeedApi, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+      });
+
+      const feed = await feeddata.json();
+      dispatch(postAction.setAllPost(feed.feed));
+    } catch (error) {
+      console.log(error);
+    }
   };
 };
 
@@ -31,17 +56,40 @@ export const setNewPostAsync = (data) => {
   };
 };
 
-export const getAllPostAsync = (token) => {
+export const likeUnLikeAsync = (data) => {
   return async (dispatch) => {
     try {
-      const newPosts = await fetch(GetAllPost, {
-        headers: { Authorization: `Bearer ${token}` },
-        "Content-Type": "application/json",
+      const newData = await fetch(LikeUnLikeApi + data.id, {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
       });
-      const posts = await newPosts.json();
-      dispatch(postAction.setAllPost(posts.posts));
+
+      const isLiked = await newData.json();
+      return isLiked.message;
     } catch (error) {
       console.log(error);
     }
+  };
+};
+
+export const getUserPostAsync = (data) => {
+  return async (dispatch) => {
+    try {
+      const userPosts = await fetch(GetUserPostApi, {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
+          _id: data._id,
+        }),
+      });
+      const posts = await userPosts.json();
+      return posts;
+    } catch (error) {}
   };
 };

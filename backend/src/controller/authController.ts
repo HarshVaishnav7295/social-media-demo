@@ -3,6 +3,9 @@ import { StatusCodes } from 'http-status-codes'
 import { User } from '../models/User'
 import { generateToken } from '../utils/tokenGenerator'
 import jwt from 'jsonwebtoken'
+import nodemailer from 'nodemailer'
+//const SEND_GRID_KEY = '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'
+//import sgMail from '@sendgrid/mail'
 interface ISignupRequest{
     name : string
     email : string
@@ -49,7 +52,7 @@ export const signupUser = async(req:Request,res:Response):Promise<void>=>{
                 const token = await generateToken(user._id)
                 res.status(StatusCodes.CREATED).json({
                     user : {
-                        id : user._id,
+                        _id : user._id,
                         name : user.name,
                         email : user.email,
                         dob : user.dob,
@@ -96,7 +99,7 @@ export const loginUser = async(req:Request,res:Response):Promise<void>=>{
                     //const {accessToken,refreshToken} = await generateToken(user._id)
                     res.status(StatusCodes.OK).json({
                         user : {
-                            id : user._id,
+                            _id : user._id,
                             name : user.name,
                             email : user.email,
                             dob : user.dob,
@@ -131,6 +134,68 @@ export const checkProtectedRoute = async(req:Request,res:Response):Promise<void>
         "message":"Protected route"
     })
 }
+
+export const forgotPassword = async(req:Request,res:Response):Promise<void>=>{
+    try{
+        const {email} = req.body as {email:string}
+        let transporter = nodemailer.createTransport({
+            host: "ram21636519@gmail.com",
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+              user: 'ram21636519@gmail.com', // generated ethereal user
+              pass: 'nodemailer@123@pass', // generated ethereal password
+            },
+          });
+
+          let mailOptions = {
+            from: '"Harsh" <ram21636519@gmail.com>', // sender address
+            to: "ram21636519@gmail.com", // list of receivers
+            subject: "Hello ✔", // Subject line
+            text: "Hello world?", // plain text body
+            html: "<b>Hello world?</b>", // html body
+          }
+        transporter.sendMail(mailOptions,(error,info)=>{
+            if(error){
+                res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    "errorMessage":error
+                })
+            }else{
+                console.log('Message sent : ',info.messageId)
+                res.status(StatusCodes.OK).json({
+                    "status":info.messageId
+                })
+            }
+        })
+        /*onst msg = {
+            to: email, // Change to your recipient
+            from: 'ram21636519@gmail.com', // Change to your verified sender
+            subject: 'OTP for forgot password',
+            text: 'OTP'
+        }
+        sgMail.setApiKey(SEND_GRID_KEY)
+        sgMail
+        .send(msg)
+        .then(() => {
+            console.log('Email sent')
+            res.status(StatusCodes.OK).json({
+                "status":"Email sent"
+            })
+        })
+        .catch((error) => {
+            console.error(error)
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                "errorMessage":error
+            })
+        })*/
+
+    }catch(error){
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            "errorMessage":error
+        })
+    }
+}
+
 /*
 export const refreshToken = async(req:Request,res:Response):Promise<void>=>{
     try{

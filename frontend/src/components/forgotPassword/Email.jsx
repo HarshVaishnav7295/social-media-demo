@@ -47,7 +47,6 @@ function EmailInput(props) {
     props.onReset(true);
 
     // email here
-    console.log(input);
     setInput("");
     setIsError(false);
   }
@@ -103,7 +102,13 @@ const Email = ({ onReset }) => {
       <Text fontSize="1.3rem" fontWeight="600">
         Forgot Password
       </Text>
-      <Text textAlign='center' as="p" color="gray" fontSize=".8rem" fontWeight="semibold">
+      <Text
+        textAlign="center"
+        as="p"
+        color="gray"
+        fontSize=".8rem"
+        fontWeight="semibold"
+      >
         No worries we'll send you a reset mail
       </Text>
 

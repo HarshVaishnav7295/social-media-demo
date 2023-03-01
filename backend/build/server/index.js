@@ -23,10 +23,10 @@ const chatRouter_1 = require("../routers/chatRouter");
 const AuthenticationMiddleware_1 = require("../middleware/AuthenticationMiddleware");
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
-const Chat_1 = require("../models/Chat");
 const Message_1 = require("../models/Message");
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
+app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));
 app.use((0, cors_1.default)());
 app.use('/api/auth', authRouter_1.router);
 app.use('/api/user', AuthenticationMiddleware_1.authenticaton, userRouter_1.router);
@@ -41,50 +41,86 @@ const io = new socket_io_1.Server(server, {
 });
 io.on('connection', (socket) => {
     console.log('Connection successful with : ', socket.id);
-    socket.on('setup', (data) => {
-        // this is for current user only
-        //socket.join(data)
+    socket.on('setup', (id) => {
+        // creating room for current user
+        socket.join(id);
+        console.log("User : ", id, " has joined the room : ", id);
         //console.log(data)
-        socket.emit("connected");
     });
-    socket.on('Join Room', (data) => __awaiter(void 0, void 0, void 0, function* () {
-        socket.join(data.chatId);
-        /*console.log("chatid:",data.chatId)*/
-        const u1 = data.users[0];
-        const u2 = data.users[1];
-        const messages = yield Message_1.Message.find({
-            chat: data.chatId,
-            sender: { $in: [u1._id, u2._id] },
-            receiver: { $in: [u1._id, u2._id] }
+    socket.on('Leave Room', (data) => {
+        socket.leave(data);
+        console.log('User has left the room : ', data);
+    });
+    /*socket.on('Join Room',async(data:{chatId : string,users:{_id : string}[]})=>{
+        socket.join(data.chatId)
+        //console.log("chatid:",data.chatId)
+        const u1 = data.users[0]
+        const u2 = data.users[1]
+        const messages = await Message.find({
+            chat : data.chatId,
+            sender : { $in : [ u1._id,u2._id ] },
+            receiver : { $in : [ u1._id,u2._id ] }
+        })
+        io.to(data.chatId).emit('MessagesUpdated',messages)
+    })*/
+    socket.on('Join Room', function (data) {
+        return __awaiter(this, void 0, void 0, function* () {
+            socket.join(data.roomId);
+            console.log("User has joined the room : ", data.roomId);
+            /*const messages = await Message.find({
+                sender : { $in : [ data.roomId,data.currUserId ] },
+                receiver : { $in : [ data.roomId,data.currUserId ] }
+            })
+            //console.log(messages)
+            cb(messages)*/
+            //io.to(data.currUserId).emit('MessagesUpdated',{"roomId":data.roomId,"messages" : messages})
         });
-        io.to(data.chatId).emit('MessagesUpdated', messages);
-    }));
-    socket.on('sendMessage', (data) => __awaiter(void 0, void 0, void 0, function* () {
-        var chatId = data.chatId;
+    });
+    /*socket.on('sendMessage',async(data:{text:string,sender:mongoose.Types.ObjectId,receiver:mongoose.Types.ObjectId,chatId:string})=>{
+        var chatId = data.chatId
         //console.log(data)
-        const chat = yield Chat_1.Chat.findById(chatId);
-        if (!(chat === null || chat === void 0 ? void 0 : chat.users)) {
-            console.log('chat.users not defined');
-        }
-        else {
+        const chat = await Chat.findById(chatId)
+        if(!chat?.users){
+            console.log('chat.users not defined')
+        }else{
+            const message = await Message.create({
+                text : data.text,
+                sender : data.sender,
+                receiver :  data.receiver,
+                chat : chatId
+            })
+            const messages = await Message.find({
+                chat : chatId,
+                sender : { $in : [ data.sender,data.receiver ] },
+                receiver : { $in : [ data.sender,data.receiver ] }
+            })
+            
+            io.to(chatId).emit('MessagesUpdated',{message,messages})
+            //console.log(messages)
+            
+       }
+    })*/
+    socket.on('sendMessage', function (data, cb) {
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(data);
             const message = yield Message_1.Message.create({
                 text: data.text,
                 sender: data.sender,
-                receiver: data.receiver,
-                chat: chatId
+                receiver: data.receiver
             });
-            const messages = yield Message_1.Message.find({
-                chat: chatId,
-                sender: { $in: [data.sender, data.receiver] },
-                receiver: { $in: [data.sender, data.receiver] }
-            });
+            io.to(data.receiver.toString()).emit('MessagesUpdated', { "newMessage": message });
+            cb(message);
+            /*console.log("Message : ",message)
+            console.log("RoomID : ",roomId)
+            const messages = await Message.find({
+                sender : { $in : [ data.sender,data.receiver ] },
+                receiver : { $in : [ data.sender,data.receiver ] }
+            })
+            */
+            // io.to(data.sender.toString()).emit('MessagesUpdated',{"roomId":roomId,"newMessage":message,"messages":messages}) 
             //console.log(messages)
-            chat.users.forEach((user) => {
-                //console.log('Updated sent')
-                io.to(chatId).emit('MessagesUpdated', { message, messages });
-            });
-        }
-    }));
+        });
+    });
 });
 const port = 8000 || process.env.PORT;
 const startServer = () => __awaiter(void 0, void 0, void 0, function* () {

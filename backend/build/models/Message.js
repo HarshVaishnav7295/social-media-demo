@@ -28,19 +28,19 @@ const mongoose_1 = __importStar(require("mongoose"));
 const messageSchema = new mongoose_1.Schema({
     text: {
         type: String,
-        required: [true, 'Please provide trxt']
+        required: [true, "Please provide trxt"],
     },
     sender: {
         type: mongoose_1.default.Types.ObjectId,
-        ref: 'User'
+        ref: "User",
     },
     receiver: {
         type: mongoose_1.default.Types.ObjectId,
-        ref: 'User'
+        ref: "User",
     },
-    chat: {
-        type: mongoose_1.default.Types.ObjectId,
-        ref: 'Chat'
+    isRead: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
-exports.Message = mongoose_1.default.model('Message', messageSchema);
+exports.Message = mongoose_1.default.model("Message", messageSchema);

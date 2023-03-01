@@ -8,11 +8,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.checkProtectedRoute = exports.loginUser = exports.signupUser = void 0;
+exports.forgotPassword = exports.checkProtectedRoute = exports.loginUser = exports.signupUser = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const User_1 = require("../models/User");
 const tokenGenerator_1 = require("../utils/tokenGenerator");
+const nodemailer_1 = __importDefault(require("nodemailer"));
 const signupUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { name, email, password, dob, gender, bio, avatar } = req.body;
@@ -44,7 +48,7 @@ const signupUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 const token = yield (0, tokenGenerator_1.generateToken)(user._id);
                 res.status(http_status_codes_1.StatusCodes.CREATED).json({
                     user: {
-                        id: user._id,
+                        _id: user._id,
                         name: user.name,
                         email: user.email,
                         dob: user.dob,
@@ -92,7 +96,7 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                     //const {accessToken,refreshToken} = await generateToken(user._id)
                     res.status(http_status_codes_1.StatusCodes.OK).json({
                         user: {
-                            id: user._id,
+                            _id: user._id,
                             name: user.name,
                             email: user.email,
                             dob: user.dob,
@@ -128,6 +132,67 @@ const checkProtectedRoute = (req, res) => __awaiter(void 0, void 0, void 0, func
     });
 });
 exports.checkProtectedRoute = checkProtectedRoute;
+const forgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { email } = req.body;
+        let transporter = nodemailer_1.default.createTransport({
+            host: "ram21636519@gmail.com",
+            port: 587,
+            secure: false,
+            auth: {
+                user: 'ram21636519@gmail.com',
+                pass: 'nodemailer@123@pass', // generated ethereal password
+            },
+        });
+        let mailOptions = {
+            from: '"Harsh" <ram21636519@gmail.com>',
+            to: "ram21636519@gmail.com",
+            subject: "Hello ✔",
+            text: "Hello world?",
+            html: "<b>Hello world?</b>", // html body
+        };
+        transporter.sendMail(mailOptions, (error, info) => {
+            if (error) {
+                res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+                    "errorMessage": error
+                });
+            }
+            else {
+                console.log('Message sent : ', info.messageId);
+                res.status(http_status_codes_1.StatusCodes.OK).json({
+                    "status": info.messageId
+                });
+            }
+        });
+        /*onst msg = {
+            to: email, // Change to your recipient
+            from: 'ram21636519@gmail.com', // Change to your verified sender
+            subject: 'OTP for forgot password',
+            text: 'OTP'
+        }
+        sgMail.setApiKey(SEND_GRID_KEY)
+        sgMail
+        .send(msg)
+        .then(() => {
+            console.log('Email sent')
+            res.status(StatusCodes.OK).json({
+                "status":"Email sent"
+            })
+        })
+        .catch((error) => {
+            console.error(error)
+            res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+                "errorMessage":error
+            })
+        })*/
+    }
+    catch (error) {
+        res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+            "errorMessage": error
+        });
+    }
+});
+exports.forgotPassword = forgotPassword;
 /*
 export const refreshToken = async(req:Request,res:Response):Promise<void>=>{
     try{

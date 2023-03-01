@@ -1,13 +1,32 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Box } from "@chakra-ui/react";
-import React from "react";
-import { useSelector } from "react-redux";
-import Content from "./Content";
-import Navbar from "./Navbar";
-import Profile from "./Profile";
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setAllUserAsync } from "../../Redux/userAction";
+import Navbar from "../Navbar";
+import Profile from "../Profile";
+import SearchBar from "./SearchBar";
+import SearchContent from "./SearchContent";
 
-const Home = () => {
+const Search = () => {
+  const allUser = useSelector((state) => state.user.allUser);
+  const user = useSelector((state) => state.user.user);
+  const isUserAuthenticated = useSelector(
+    (state) => state.user.isUserAuthenticated
+  );
+  const dispatch = useDispatch();
   const isProfileOpen = useSelector((state) => state.user.isProfileOpen);
   const displayedUser = useSelector((state) => state.user.displayedUser);
+  const [searchValue, setSearchValue] = useState("");
+  useEffect(() => {
+    if (isUserAuthenticated) {
+      dispatch(setAllUserAsync(user.token));
+    }
+  }, []);
+
+  useEffect(() => {
+    allUser.filter((user) => user.name.indexOf(searchValue) === 0);
+  }, [searchValue, allUser.length]);
 
   return (
     <>
@@ -24,6 +43,7 @@ const Home = () => {
         <Box
           width={["100%", "100%", "100%", "95%", "95%", "95%"]}
           // backgroundColor="grey"
+          py="0.3rem"
         >
           <Navbar />
         </Box>
@@ -46,9 +66,9 @@ const Home = () => {
                 : "flex"
             }
             flexDir="column"
-            justifyContent="center"
+            justifyContent="flex-start"
             margin="auto"
-            width={isProfileOpen ? "100%" : "70%"}
+            width={["100%", "80%", "80%", "70%", "60%", "60%"]}
             height="90vh"
             // p="1.5rem"
             overflowY="scroll"
@@ -65,11 +85,15 @@ const Home = () => {
               },
             }}
           >
-            <Content />
+            <SearchBar
+              searchValue={searchValue}
+              setSearchValue={setSearchValue}
+            />
+            <SearchContent allUser={allUser} searchValue={searchValue} />
           </Box>
           {/* Profile Box */}
           <Box
-            width={["80%", "40%", "35%", "30%", "30%", "30%"]}
+            width={["80%", "50%", "38%", "25%", "25%", "25%"]}
             display={isProfileOpen ? "flex" : "none"}
             justifyContent="center"
             alignItems="center"
@@ -86,4 +110,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Search;

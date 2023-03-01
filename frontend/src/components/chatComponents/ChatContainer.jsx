@@ -1,5 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+
 import { Box, Input } from "@chakra-ui/react";
-import React, { useEffect, useState,useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Navbar from "../Navbar";
 import Profile from "../Profile";
@@ -7,74 +9,98 @@ import { IoReorderThreeOutline } from "react-icons/io5";
 import { chatAction } from "../../Redux/chatReducer";
 import FollowingUser from "../FollowingUser";
 import { RiSendPlaneFill } from "react-icons/ri";
-import { BsEmojiSmileFill } from "react-icons/bs";
+import { BsEmojiSmileFill, BsCheck2All, BsCheck } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
-import { addMessageToChatAsync, addOneChatAsync, setChatIdAsync } from "../../Redux/chatAction";
-import { setFollowingAsync } from "../../Redux/userAction";
-import {io} from 'socket.io-client'
+import { addOneChatAsync } from "../../Redux/chatAction";
+import { setFollowingAsync, setFollowerAsync } from "../../Redux/userAction";
+import { io } from "socket.io-client";
 import { Img, Text } from "@chakra-ui/react";
 import { setAllChatAsync } from "../../Redux/chatAction";
-
-
-var socket,selectedChat
+import { AiOutlineSearch } from "react-icons/ai";
+import { ToastContainer, toast } from "react-toastify";
+import { FindUserByIdApi } from "../../utils/ApiRoutes";
 const ChatContainer = () => {
   const dispatch = useDispatch();
   const displayedUser = useSelector((state) => state.user.displayedUser);
+
   const user = useSelector((state) => state.user.user);
-  const chatId = useSelector((state)=>state.chat.chatId)
-  const [clickedFollowingUser, setClickedFollowingUser] = useState("");
+  //const roomId = useSelector((state)=>state.chat.roomId)
   const isProfileOpen = useSelector((state) => state.user.isProfileOpen);
   const following = useSelector((state) => state.user.following);
-  //const [socket,setSocket] = useState()
-  
-  
-  useEffect(()=>{
-    socket = io.connect('http://localhost:8000')
-    socket.emit('setup',user.id)
-    socket.on("connected",()=>{
-      //console.log("connected")
-    })
-    return ()=>{
-      socket.disconnect()
-    }
-  },[])
-  /*useEffect(()=>{
-    socket.on('MessagesUpdated',(data)=>{
-      console.log(data)
-    })
-  })*/
+  const [socket, setSocket] = useState(null);
+  //const [roomId, setroomId] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const [followingUserState, setFollowingUserState] = useState([]);
+  const [clickedFollowingUser, setClickedFollowingUser] = useState({});
+  const roomId = useSelector((state)=>state.chat.roomId)
+  //const [roomId, setRoomId] = useState("");
 
-  const SetRoom = useCallback(async(followingUserProp,socketPro)=>{
-    setClickedFollowingUser(followingUserProp)
-    let resp = await fetch('http://localhost:8000/api/chat/accessChat',{
-      headers:{
-        "Content-Type":"application/json",
-        "Authorization":`Bearer ${user.token}`
-      },
-      method:'POST',
-      body : JSON.stringify({
-        users : [followingUserProp._id,user.id]
-      })
-    })
-    if(resp.status == 500){
-      let error = await resp.json()
-      console.log(error.errorMessage)
-    }else if(resp.status == 200){
-      let data = await resp.json()
-      //console.log(data)
-      dispatch(setChatIdAsync(data.chat[0]._id))
-      console.log("setRoom-chatid:",chatId)
-      /*const chatReqData = {
-        receiver: clickedFollowingUser._id,
-        sender: user.id,
-        chatId : chatId,
-        token: user.token,
-      };
-      console.log(chatReqData)
-      dispatch(setAllChatAsync(chatReqData));*/
-      socketPro.emit('Join Room',{chatId:data.chat[0]._id,users:data.chat[0].users})
+  useEffect(() => {
+    if (socket === null) {
+      setSocket(io.connect("http://localhost:8000"));
+      //console.log('Connection made')
     }
-  },[chatId])
+    setTimeout(() => {
+      if (socket != null) {
+        //console.log('setup called')
+        socket.emit("setup", user._id);
+      }
+    }, 200);
+  }, [socket]);
+
+  useEffect(() => {
+    if (searchValue.trim(" ") === "") {
+      setFollowingUserState(following);
+    } else {
+      const tempUser = following.filter(
+        (user) => user.name.indexOf(searchValue) === 0
+      );
+      setFollowingUserState(tempUser);
+    }
+  }, [following, searchValue]);
+
+  const SetRoom = async (followingUserProp) => {
+      if (socket) {
+        if(clickedFollowingUser._id){
+          socket.emit("Leave Room", clickedFollowingUser._id);
+        }
+      }
+      console.log("FollowingUserId:", followingUserProp._id);
+      dispatch(chatAction.setRoomId(followingUserProp._id));
+      console.log("RoomId:", followingUserProp._id);
+
+      setClickedFollowingUser(followingUserProp);
+      // if (socket) {
+      //   //console.log(followingUserProp._id)
+      //   setTimeout(() => {
+      //     socket.emit("Join Room", { roomId: roomId });
+      //     console.log(roomId);
+      //   }, 500);
+      // }
+      let resp = await fetch("http://localhost:8000/api/chat/accessChat", {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${user.token}`,
+        },
+        method: "POST",
+        body: JSON.stringify({
+          users: [followingUserProp._id, user._id],
+        }),
+      });
+      if (resp.status === 500) {
+        let error = await resp.json();
+        console.log(error.errorMessage);
+      } else if (resp.status === 200) {
+        let data = await resp.json();
+        // console.log(data.chat)
+        if (socket) {
+          if(followingUserProp._id !== undefined){
+            socket.emit("Join Room", {roomId : followingUserProp._id});
+          }
+        }
+        dispatch(setAllChatAsync(data.chat));
+      }
+    }
   const isUserAuthenticated = useSelector(
     (state) => state.user.isUserAuthenticated
   );
@@ -86,8 +112,12 @@ const ChatContainer = () => {
     dispatch(chatAction.changeFollowerShowing());
   };
   useEffect(() => {
+    if (!isFollowerShowing) {
+      dispatch(chatAction.changeFollowerShowing());
+    }
     if (isUserAuthenticated) {
       dispatch(setFollowingAsync(user.token));
+      dispatch(setFollowerAsync(user.token));
     }
   }, [dispatch]);
 
@@ -98,7 +128,7 @@ const ChatContainer = () => {
         flexDir="column"
         width="100vw"
         margin="auto"
-        height="90vh"
+        height="100vh"
         alignItems="center"
       >
         {/* Navbar Box */}
@@ -107,7 +137,7 @@ const ChatContainer = () => {
           // backgroundColor="grey"
           py="0.3rem"
         >
-          <Navbar />
+          <Navbar showBell={true} />
         </Box>
         <Box
           display="flex"
@@ -117,42 +147,96 @@ const ChatContainer = () => {
           alignItems="center"
           boxShadow="0px 0px 15px -7px grey"
           gap="1rem"
-          backgroundColor="whiteAlpha.300"
+          height="100%"
         >
           {/* Content Box */}
           <Box
-            display="flex"
-            flexDir="row"
             gap="0.2rem"
             justifyContent="space-between"
-            width={isProfileOpen ? "70%" : "90%"}
-            height="90vh"
             backgroundColor="whiteAlpha.900"
-            // border="2px"
-            p="1.5rem"
+            p="1rem"
+            display={
+              isProfileOpen
+                ? ["none", "none", "none", "flex", "flex", "flex"]
+                : "flex"
+            }
+            flexDir="row"
+            margin="auto"
+            width={
+              isProfileOpen
+                ? "100%"
+                : ["90%", "85%", "80%", "80%", "80%", "85%"]
+            }
+            height={["80vh", "85vh", "85vh", "90vh", "90vh", "90vh"]}
           >
             {/* All Followers Section */}
             <Box
-              width={isFollowerShowing ? "25%" : "fit-content"}
+              width={
+                isFollowerShowing
+                  ? ["80%", "80%", "25%", "25%", "25%", "25%"]
+                  : "fit-content"
+              }
               height="100%"
-              // border="1px solid grey"
               position="relative"
+              // bgGradient="linear(to-b, #797EF6,#b5b7fa)"
+              // borderRadius="10px"
+              backgroundColor="darkgray"
+              borderBottomRadius="10px"
+              borderTopRadius="5px"
+              boxShadow="0px 0px 10px -3px grey"
             >
               <Box
-                // position="absolute"
+                position="absolute"
                 top="0.5rem"
                 left="0.5rem"
+                boxShadow="0px 0px 10px -6px grey"
                 fontSize="3xl"
-                width={isFollowerShowing ? "100%" : "fit-content"}
+                width="fit-content"
                 cursor="pointer"
-                height="7%"
+                height="fit-content"
                 onClick={followerVisibilityHandler}
+                color={isFollowerShowing ? "white" : "black"}
               >
                 <IoReorderThreeOutline />
               </Box>
+              {/* Search Box for following User in Chat */}
+              {isFollowerShowing && (
+                <Box
+                  position="relative"
+                  top="3rem"
+                  width="97%"
+                  display="flex"
+                  boxShadow="0px 0px 5px -1px white"
+                  flexDir="row"
+                  justifyContent="center"
+                  alignItems="center"
+                  cursor="pointer"
+                  borderRadius="3px"
+                  border="0px solid transparent"
+                  backgroundColor="white"
+                  // mx="7px"
+                  margin="auto"
+                  color="black"
+                >
+                  <Input
+                    width="90%"
+                    height="1.7rem"
+                    focusBorderColor="transparent"
+                    borderRadius="3px"
+                    pl="5px"
+                    value={searchValue}
+                    onChange={(e) => setSearchValue(e.target.value)}
+                  />
+                  <AiOutlineSearch size="1.3rem" />
+                </Box>
+              )}
+
               <Box
-                height="93%"
+                position="relative"
+                top="3rem"
+                height="80%"
                 width="100%"
+                mt="1rem"
                 display={isFollowerShowing ? "flex" : "none"}
                 flexDir="column"
                 gap="0.5rem"
@@ -173,81 +257,104 @@ const ChatContainer = () => {
                 }}
               >
                 {/* Call Api here */}
-
-                {following.map((followingUser, i) => {
-                  return (
-                    <Box
-                      key={i}
-                      width="100%"
-                      height="fit-content"
-                      // border="0.5px solid lightgrey"
-                      boxShadow="0px 1px 5px -2px grey "
-                      backgroundColor={
-                        clickedFollowingUser._id === followingUser._id
-                          ? "lightgrey"
-                          : ""
-                      }
-                      onClick={() => SetRoom(followingUser,socket)}
-                    >
-                      <FollowingUser
-                        border={false}
-                        userdata={followingUser}
-                        wantToNavigate={false}
-                      />
-                    </Box>
-                  );
-                })}
+                {followingUserState.length > 0 ? (
+                  followingUserState.map((followingUser, i) => {
+                    return (
+                      <Box
+                        key={i}
+                        width="100%"
+                        height="fit-content"
+                        // border="0.5px solid lightgrey"
+                        boxShadow="0px 0px 6px -3px black "
+                        backgroundColor={
+                          clickedFollowingUser._id === followingUser._id
+                            ? "lightgrey"
+                            : ""
+                        }
+                        onClick={() => {
+                          SetRoom(followingUser);
+                          dispatch(chatAction.changeFollowerShowing());
+                        }}
+                      >
+                        <FollowingUser
+                          border={false}
+                          userdata={followingUser}
+                          wantToNavigate={false}
+                          showChatIcon={false}
+                        />
+                      </Box>
+                    );
+                  })
+                ) : (
+                  <Text
+                    marginTop="20px"
+                    fontSize="0.7rem"
+                    color="gray"
+                    fontStyle="italic"
+                  >
+                    No User Found.
+                  </Text>
+                )}
               </Box>
             </Box>
 
             {/* Main Parent Component for Input and Chats */}
             <Box
-              display="flex"
-              width={isFollowerShowing ? "75%" : "100%"}
+              display={
+                isFollowerShowing
+                  ? ["none", "flex", "flex", "flex", "flex", "flex"]
+                  : "flex"
+              }
+              width={
+                isFollowerShowing
+                  ? ["0%", "60%", "75%", "75%", "75%", "75%"]
+                  : "100%"
+              }
               height="100%"
               flexDir="column"
               // border="2px solid lightgrey"
             >
               {/* Main Chat Container */}
               <Box width="100%" height="100%">
-                {(clickedFollowingUser && chatId) && (
+                {clickedFollowingUser && roomId ? (
                   <AllChatContainer
-                  socket = {socket}
+                    roomId={roomId}
+                    socket={socket}
                     clickedFollowingUser={clickedFollowingUser}
                     user={user}
                     isUserAuthenticated={isUserAuthenticated}
                   />
+                ) : (
+                  <Box
+                    width="100%"
+                    height="100%"
+                    display="flex"
+                    flexDir="column"
+                    justifyContent="center"
+                    alignItems="center"
+                    textAlign="center"
+                    color="grey"
+                    fontStyle="italic"
+                  >
+                    <Text fontSize="0.8rem" height="fit-content" mb="-7px">
+                      Hello {user?.name}.
+                    </Text>
+                    <Text height="fit-content">
+                      Click User to chat with them.
+                    </Text>
+                  </Box>
                 )}
               </Box>
-
-              {/* Box for Input Chat Container */}
-              {/*(clickedFollowingUser && chatId) && (
-                <Box
-                  width="100%"
-                  height="10%"
-                  backgroundColor="lightgray"
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <InputContainer
-                    socket = {socket}
-                    chatId = {chatId}
-                    clickedFollowingUser={clickedFollowingUser}
-                    user={user}
-                  />
-                </Box>
-              )*/}
             </Box>
           </Box>
 
           {/* Profile Box */}
           <Box
-            width="25%"
+            width={["80%", "40%", "35%", "30%", "30%", "30%"]}
             display={isProfileOpen ? "flex" : "none"}
             justifyContent="center"
             alignItems="center"
-            transition="250ms"
+            height="100%"
           >
             <Profile showUser={displayedUser} />
           </Box>
@@ -257,9 +364,10 @@ const ChatContainer = () => {
   );
 };
 
-const InputContainer = ({ socket,clickedFollowingUser, user }) => {
+const InputContainer = ({ socket, roomId, clickedFollowingUser, user }) => {
+  //const roomId = useSelector((state)=>state.chat.roomId)
+
   const dispatch = useDispatch();
-  const chatId = useSelector((state)=>state.chat.chatId)
   const [showEmojji, setShowEmoji] = useState(false);
   const [msg, setMsg] = useState("");
   const enterKeyPressed = (e) => {
@@ -267,7 +375,6 @@ const InputContainer = ({ socket,clickedFollowingUser, user }) => {
       submitMessage();
     }
   };
-  //console.log('ChatId : ',chatId)
   const newMessage = (e) => {
     setMsg(e.target.value);
   };
@@ -283,18 +390,23 @@ const InputContainer = ({ socket,clickedFollowingUser, user }) => {
       // Call dispatch here for send msg
       const data = {
         text: msg,
-        sender : user.id,
-        chatId:chatId,
+        sender: user._id,
+        //roomId:roomId,
         receiver: clickedFollowingUser._id,
-        token: user.token,
+        //token: user.token,
       };
       //dispatch(addOneChatAsync(data));
-      socket.emit('sendMessage',{
-        text:data.text,
-        sender:data.sender,
-        receiver:data.receiver,
-        chatId:data.chatId
-      })
+      socket.emit(
+        "sendMessage",
+        {
+          text: data.text,
+          sender: data.sender,
+          receiver: data.receiver,
+        },
+        (data) => {
+          dispatch(addOneChatAsync(data));
+        }
+      );
       setMsg("");
     }
   };
@@ -313,17 +425,32 @@ const InputContainer = ({ socket,clickedFollowingUser, user }) => {
         position="relative"
         boxShadow="0px 0px 6px -3px grey"
       >
-        <BsEmojiSmileFill
-          cursor="pointer"
-          fontSize="1.3rem"
-          onClick={() => setShowEmoji(!showEmojji)}
-        />
+        <Box width="fit-content" height="fit-content">
+          <BsEmojiSmileFill
+            cursor="pointer"
+            fontSize={[
+              "0.8rem",
+              "1rem",
+              "1.1rem",
+              "1.3rem",
+              "1.3rem",
+              "1.3rem",
+            ]}
+            onClick={() => setShowEmoji(!showEmojji)}
+          />
+        </Box>
 
-        <Box position="absolute" bottom="80%" left="0%" className="emoji">
+        <Box
+          position="absolute"
+          bottom="80%"
+          left="0%"
+          display={["none", "block", "block", "block", "block", "block"]}
+          className="emoji"
+        >
           {showEmojji && (
             <EmojiPicker
               width="20rem"
-              height="30rem"
+              height="20rem"
               onEmojiClick={emojiClicked}
             />
           )}
@@ -332,7 +459,7 @@ const InputContainer = ({ socket,clickedFollowingUser, user }) => {
         <Input
           placeholder="Aa"
           variant="flushed"
-          width="70%"
+          width={["60%", "65%", "65%", "70%", "70%", "70%"]}
           borderRadius="5px"
           height="50%"
           backgroundColor="white"
@@ -346,7 +473,7 @@ const InputContainer = ({ socket,clickedFollowingUser, user }) => {
           width="fit-content"
           justifyContent="center"
           alignItems="center"
-          fontSize="1.5rem"
+          fontSize={["1rem", "1rem", "1.2rem", "1.5rem", "1.5rem", "1.5rem"]}
           transition="100ms"
           cursor="pointer"
           _hover={{ fontSize: "1.7rem" }}
@@ -359,8 +486,8 @@ const InputContainer = ({ socket,clickedFollowingUser, user }) => {
   );
 };
 
-
 const AllChatContainer = ({
+  roomId,
   socket,
   clickedFollowingUser,
   user,
@@ -368,47 +495,87 @@ const AllChatContainer = ({
 }) => {
   const dispatch = useDispatch();
   const chats = useSelector((state) => state.chat.chat);
-  const chatId = useSelector((state)=>state.chat.chatId)
-  console.log("chatId : ",chatId)
-  //console.log("chatid all:", chatId)
-  
-  /*useEffect(()=>{
-    socket = io.connect('http://localhost:8000')
-    socket.emit('setup',user.id)
-    socket.on("connected",()=>{
-      //console.log("connected")
-    })
-    return ()=>{
-      socket.disconnect()
-    }
-  },[])*/
-  useEffect(()=>{
-    socket.on('MessagesUpdated',(data)=>{
-      if(!data.message){
-        dispatch(setAllChatAsync(data));  
-      }else if(data.message.chat === chatId){
-        console.log("Msg-chat : ",data.message.chat)
-      console.log("real-chat : ",chatId)
-        dispatch(setAllChatAsync(data.messages));  
+  const [isRead, setIsRead] = useState(false);
+  useEffect(() => {
+    //console.log('Current Room : ',roomId)
+    socket.on("MessagesUpdated", async (data) => {
+      console.log(data.newMessage);
+      //console.log('Current Room : ',roomId)
+      //console.log('sender id : ',data.newMessage.sender)
+      if (
+        data.newMessage.sender.toString() === roomId &&
+        data.newMessage.receiver.toString() === user._id.toString()
+      ) {
+        dispatch(addOneChatAsync(data.newMessage));
+        let resp = await fetch("http://localhost:8000/api/chat/markRead", {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${user.token}`,
+          },
+          method: "POST",
+          body: JSON.stringify({
+            id: data.newMessage._id,
+          }),
+        });
+        if (resp.status === 500) {
+          console.log("Error");
+        } else if (resp.status === 200) {
+          setIsRead(true);
+        }
+      } else {
+        //console.log('New message from user : ',data.newMessage.sender.toString())
+        //setNotification(data.newMessage.sender.toString())
+        //dispatch(chatAction.setNotificationCount(parseInt(notificationCount)+1))
+        if (
+          data.newMessage.sender.toString() !== user._id.toString() &&
+          data.newMessage.receiver.toString() === user._id.toString()
+        ) {
+          //console.log(data.newMessage)
+          const resp = await fetch(FindUserByIdApi, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${user.token}`,
+            },
+            method: "POST",
+            body: JSON.stringify({
+              id: data.newMessage.sender,
+            }),
+          });
+          if (resp.status === 500) {
+            console.log("Error");
+          }
+          const messageSenderUser = await resp.json();
+          //console.log(messageSenderUser)
+          toast.info(`New Message From : ${messageSenderUser.user.name}`);
+          //console.log('not')
+        }
       }
-    })
-    //console.log(chats)
-  },[chats,clickedFollowingUser])
-
-  /*useEffect(()=>{
-    const chatReqData = {
-      receiver: clickedFollowingUser._id,
-      sender: user.id,
-      chatId : chatId,
-      token: user.token,
+    });
+    return () => {
+      socket.off("MessagesUpdated");
     };
-    console.log(chatReqData)
-    dispatch(setAllChatAsync(chatReqData));
-  },[clickedFollowingUser])*/
-  
+  }, [clickedFollowingUser]);
+
+  const getTime = (createdAt) => {
+    const hours = new Date(createdAt).getHours();
+    const minutes = new Date(createdAt).getMinutes();
+    if (hours <= 12) {
+      const time = `${hours}:${minutes < 10 ? "0" + minutes : minutes} AM`;
+      return time;
+    } else {
+      const time = `${hours - 12}:${minutes < 10 ? "0" + minutes : minutes} PM`;
+      return time;
+    }
+  };
+
+  const scrollRef = useRef();
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chats]);
 
   return (
     <>
+      <ToastContainer autoClose={2000}></ToastContainer>
       {/* Main Box for chats */}
       <Box
         width="100%"
@@ -416,6 +583,7 @@ const AllChatContainer = ({
         display="flex"
         flexDir="column"
         alignItems="center"
+        justifyContent="space-between"
       >
         {/* Box for Following User Ingo */}
 
@@ -424,7 +592,7 @@ const AllChatContainer = ({
           flexDir="row"
           justifyContent="space-evenly"
           alignItems="center"
-          width="85%"
+          width="100%"
           height="17%"
         >
           {/* Box for Following User Avatar amd Name, Bio */}
@@ -437,20 +605,56 @@ const AllChatContainer = ({
             gap="0.5rem"
             pl="0.5rem"
           >
-            <Box width="3.5rem" height="3.5rem" borderRadius="50%">
+            <Box
+              width={[
+                "2.5rem",
+                "2.5rem",
+                "3.5rem",
+                "3.5rem",
+                "3.5rem",
+                "3.5rem",
+              ]}
+              height={[
+                "2.5rem",
+                "2.5rem",
+                "3.5rem",
+                "3.5rem",
+                "3.5rem",
+                "3.5rem",
+              ]}
+              borderRadius="50%"
+            >
               <Img src={clickedFollowingUser.avatar} borderRadius="50%" />
             </Box>
             <Box width="fit-content" display="flex" flexDir="column">
-              <Text width="fit-content" fontSize="1.2rem" height="fit-content">
+              <Text
+                width="fit-content"
+                fontSize={[
+                  "0.8rem",
+                  "0.8rem",
+                  "1rem",
+                  "1.2rem",
+                  "1.2rem",
+                  "1.2rem",
+                ]}
+                height="fit-content"
+              >
                 {clickedFollowingUser.name}
               </Text>
               <Text
                 width="fit-content"
-                fontSize="0.8rem"
+                fontSize={[
+                  "0.6rem",
+                  "0.6rem",
+                  "0.8rem",
+                  "0.8rem",
+                  "0.8rem",
+                  "0.8rem",
+                ]}
                 color="grey"
                 height="fit-content"
               >
-                {clickedFollowingUser.bio}kfffff
+                {clickedFollowingUser.bio}
               </Text>
             </Box>
 
@@ -458,16 +662,14 @@ const AllChatContainer = ({
           </Box>
 
           {/* User Name */}
-          {/* Followers and Post Container */}
+          {/* Followers and Followings Container */}
           <Box
             width="fit-content"
             display="flex"
             flexDir="row"
             justifyContent="space-evenly"
-            gap="1rem"
-            // backgroundColor="lightgray"
+            gap={["0.6rem", "0.7rem", "0.8rem", "1rem", "1rem", "1rem"]}
           >
-            {/* posts */}
             <Box
               display="flex"
               flexDir="column"
@@ -478,45 +680,9 @@ const AllChatContainer = ({
               <Box
                 fontWeight="bold"
                 fontSize={[
-                  "0.7rem",
-                  "0.7rem",
-                  "0.7rem",
-                  "0.9rem",
-                  "0.9rem",
-                  "0.9rem",
-                ]}
-              >
-                {0}
-              </Box>
-              <Box
-                fontSize={[
                   "0.6rem",
-                  "0.6rem",
-                  "0.6rem",
-                  "0.8rem",
-                  "0.8rem",
-                  "0.8rem",
-                ]}
-                color="grey"
-              >
-                Posts
-              </Box>
-            </Box>
-
-            {/* Followers */}
-            <Box
-              display="flex"
-              flexDir="column"
-              gap="0"
-              alignItems="center"
-              cursor="pointer"
-            >
-              <Box
-                fontWeight="bold"
-                fontSize={[
                   "0.7rem",
-                  "0.7rem",
-                  "0.7rem",
+                  "0.8rem",
                   "0.9rem",
                   "0.9rem",
                   "0.9rem",
@@ -528,8 +694,8 @@ const AllChatContainer = ({
               </Box>
               <Box
                 fontSize={[
-                  "0.6rem",
-                  "0.6rem",
+                  "0.5rem",
+                  "0.5rem",
                   "0.6rem",
                   "0.8rem",
                   "0.8rem",
@@ -552,9 +718,9 @@ const AllChatContainer = ({
               <Box
                 fontWeight="bold"
                 fontSize={[
+                  "0.6rem",
                   "0.7rem",
-                  "0.7rem",
-                  "0.7rem",
+                  "0.8rem",
                   "0.9rem",
                   "0.9rem",
                   "0.9rem",
@@ -566,8 +732,8 @@ const AllChatContainer = ({
               </Box>
               <Box
                 fontSize={[
-                  "0.6rem",
-                  "0.6rem",
+                  "0.5rem",
+                  "0.5rem",
                   "0.6rem",
                   "0.8rem",
                   "0.8rem",
@@ -605,7 +771,7 @@ const AllChatContainer = ({
             },
           }}
         >
-          {/* Map here */}
+          {/* all chats being Map here */}
           <Box
             width="100%"
             height="100%"
@@ -618,61 +784,84 @@ const AllChatContainer = ({
                 <Box
                   key={i}
                   width="100%"
-                  height="2rem"
+                  height="fit-content"
                   display="flex"
                   alignItems={
-                    chat.sender === user.id ? "flex-end" : "flex-start"
+                    chat.sender === user._id ? "flex-end" : "flex-start"
                   }
                   flexDir="column"
                 >
                   <Box
                     width="fit-content"
-                    maxWidth="40%"
-                    minWidth="7%"
+                    maxWidth="65%"
+                    minWidth="10%"
                     height="fit-content"
-                    backgroundColor="lightgrey"
+                    backgroundColor="#ebebeb"
                     px="10px"
                     py="3px"
-                    display="flex"
-                    justifyContent="center"
+                    // display="flex"
+                    // justifyContent="center"
                     borderRadius="3px"
                     fontSize="0.9rem"
                     mb="-2px"
+                    cursor="pointer"
                   >
                     {chat.text}
+                    <Box
+                      display="flex"
+                      flexDir="row"
+                      justifyContent="flex-end"
+                      alignItems="end"
+                      fontSize="0.65rem"
+                      mt="-5px"
+                      mr="-5px"
+                    >
+                      {/* {new Date(chat.createdAt).getHours()}:
+                      {new Date(chat.createdAt).getMinutes() < 10
+                        ? `0${new Date(chat.createdAt).getMinutes()}`
+                        : new Date(chat.createdAt).getMinutes()} */}
+                      {getTime(chat.createdAt)}
+                      {chat.sender === user._id ? (
+                        isRead ? (
+                          <Box fontSize="0.8rem" ml="0px" mr="-2px" mb="1px">
+                            <BsCheck2All color="#00a3e6" />
+                          </Box>
+                        ) : (
+                          <Box fontSize="0.8rem" ml="0px" mr="-2px" mb="1px">
+                            <BsCheck />
+                          </Box>
+                        )
+                      ) : null}
+                    </Box>
                   </Box>
-                  {/* Time stamp Box */}
-                  {/* 2023-02-20T09:28:41.985Z */}
-                  {/*<Box fontSize="0.7rem" textColor="darkgrey">
-                    {chat.createdAt.split("T")[1].split(":")[0]}:
-                    {chat.createdAt.split("T")[1].split(":")[1]}
-                </Box>*/}
                 </Box>
               );
             })}
+            <div ref={scrollRef} />
           </Box>
         </Box>
-        {(clickedFollowingUser && chatId) && (
-                <Box
-                  width="100%"
-                  height="10%"
-                  backgroundColor="lightgray"
-                  display="flex"
-                  justifyContent="center"
-                  alignItems="center"
-                >
-                  <InputContainer
-                    socket = {socket}
-                    chatId = {chatId}
-                    clickedFollowingUser={clickedFollowingUser}
-                    user={user}
-                  />
-                </Box>
-              )}
+
+        {clickedFollowingUser && roomId && (
+          <Box
+            width={["90%", "95%", "95%", "100%", "100%", "100%"]}
+            height="10%"
+            backgroundColor="lightgray"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            mt="0.2rem"
+          >
+            <InputContainer
+              socket={socket}
+              roomId={roomId}
+              clickedFollowingUser={clickedFollowingUser}
+              user={user}
+            />
+          </Box>
+        )}
       </Box>
     </>
   );
 };
-
 
 export default ChatContainer;

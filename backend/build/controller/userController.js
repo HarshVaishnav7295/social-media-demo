@@ -9,16 +9,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.findUserById = exports.changePassword = exports.getMyFollowers = exports.getMyFollowings = exports.updateUser = exports.followUnfollowUser = void 0;
+exports.getAllUser = exports.findUserById = exports.changePassword = exports.getMyFollowers = exports.getMyFollowings = exports.updateUser = exports.followUnfollowUser = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const User_1 = require("../models/User");
 const followUnfollowUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const id = req.params.id;
+        const id = req.body.id;
         const currUserId = req.body.user.id;
         if (id === currUserId) {
             res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
-                "errorMessage": "You can not follow/unfollow yourself"
+                errorMessage: "You can not follow/unfollow yourself",
+                status: false,
             });
         }
         else {
@@ -26,7 +27,7 @@ const followUnfollowUser = (req, res) => __awaiter(void 0, void 0, void 0, funct
             const currUser = yield User_1.User.findById(currUserId);
             if (!user) {
                 res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
-                    "errorMessage": "No user with this id"
+                    errorMessage: "No user with this id",
                 });
             }
             else {
@@ -42,27 +43,40 @@ const followUnfollowUser = (req, res) => __awaiter(void 0, void 0, void 0, funct
                     // following so need to remove
                     currUsersFollowings = currUsersFollowings === null || currUsersFollowings === void 0 ? void 0 : currUsersFollowings.filter((item) => item._id.toString() != id);
                     usersFollowers = usersFollowers.filter((item) => item._id != currUserId);
-                    const updatedCurrUser = yield User_1.User.findByIdAndUpdate(currUserId, { followings: currUsersFollowings });
-                    const updatedUser = yield User_1.User.findByIdAndUpdate(id, { followers: usersFollowers });
+                    const updatedCurrUser = yield User_1.User.findByIdAndUpdate(currUserId, {
+                        followings: currUsersFollowings,
+                    });
+                    const updatedUser = yield User_1.User.findByIdAndUpdate(id, {
+                        followers: usersFollowers,
+                    });
                     isFollowing = false;
                 }
                 else {
                     currUsersFollowings === null || currUsersFollowings === void 0 ? void 0 : currUsersFollowings.push(id);
                     usersFollowers === null || usersFollowers === void 0 ? void 0 : usersFollowers.push(currUserId);
-                    const updatedCurrUser = yield User_1.User.findByIdAndUpdate(currUserId, { followings: currUsersFollowings });
-                    const updatedUser = yield User_1.User.findByIdAndUpdate(id, { followers: usersFollowers });
+                    const updatedCurrUser = yield User_1.User.findByIdAndUpdate(currUserId, {
+                        followings: currUsersFollowings,
+                    });
+                    const updatedUser = yield User_1.User.findByIdAndUpdate(id, {
+                        followers: usersFollowers,
+                    });
                     isFollowing = true;
                 }
+                const updatedLoggedUser = yield User_1.User.findById(currUserId);
                 if (isFollowing) {
                     res.status(http_status_codes_1.StatusCodes.OK).json({
-                        "isFollowing": true,
-                        "message": "Following successful"
+                        isFollowing: true,
+                        followings: updatedLoggedUser === null || updatedLoggedUser === void 0 ? void 0 : updatedLoggedUser.followings,
+                        status: true,
+                        message: "Following successful",
                     });
                 }
                 else {
                     res.status(http_status_codes_1.StatusCodes.OK).json({
-                        "isFollowing": false,
-                        "message": "UnFollowing successful"
+                        isFollowing: false,
+                        followings: updatedLoggedUser === null || updatedLoggedUser === void 0 ? void 0 : updatedLoggedUser.followings,
+                        status: true,
+                        message: "UnFollowing successful",
                     });
                 }
             }
@@ -70,7 +84,7 @@ const followUnfollowUser = (req, res) => __awaiter(void 0, void 0, void 0, funct
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
+            errorMessage: error,
         });
     }
 });
@@ -79,15 +93,15 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     try {
         const { name, bio, avatar } = req.body;
         /*const user = await User.findByIdAndUpdate(req.body.user.id,{
-            name:name,
-            bio:bio,
-            avatar:avatar
-        })
-        need to use one and update, made pre on findoneandupdate*/
+                name:name,
+                bio:bio,
+                avatar:avatar
+            })
+            need to use one and update, made pre on findoneandupdate*/
         const user = yield User_1.User.findById(req.body.user.id);
         if (!user) {
             res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
-                "errorMessage": "No user with this id"
+                errorMessage: "No user with this id",
             });
         }
         else {
@@ -97,17 +111,17 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             yield user.save();
             const updatedUser = yield User_1.User.findById(user === null || user === void 0 ? void 0 : user._id);
             res.status(http_status_codes_1.StatusCodes.OK).json({
-                "updatedUser": {
+                updatedUser: {
                     name: updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser.name,
                     bio: updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser.bio,
-                    avatar: updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser.avatar
-                }
+                    avatar: updatedUser === null || updatedUser === void 0 ? void 0 : updatedUser.avatar,
+                },
             });
         }
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
+            errorMessage: error,
         });
     }
 });
@@ -140,14 +154,14 @@ const getMyFollowings = (req, res) => __awaiter(void 0, void 0, void 0, function
              */
             if (myFollowings.length === currUser.followings.length) {
                 res.status(http_status_codes_1.StatusCodes.OK).json({
-                    "Myfollowings": myFollowings
+                    Myfollowings: myFollowings,
                 });
             }
         }));
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
+            errorMessage: error,
         });
     }
 });
@@ -174,14 +188,14 @@ const getMyFollowers = (req, res) => __awaiter(void 0, void 0, void 0, function*
             }
             if (myFollowers.length === currUser.followers.length) {
                 res.status(http_status_codes_1.StatusCodes.OK).json({
-                    "MyFollowers": myFollowers
+                    MyFollowers: myFollowers,
                 });
             }
         }));
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
+            errorMessage: error,
         });
     }
 });
@@ -191,8 +205,8 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
         const { oldPassword, newPassword } = req.body;
         if (!oldPassword || !newPassword) {
             res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
-                "errorMessage": "Please provide both old and new passwords",
-                isPasswordChanged: false
+                errorMessage: "Please provide both old and new passwords",
+                isPasswordChanged: false,
             });
         }
         else {
@@ -200,8 +214,8 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
             const match = yield (user === null || user === void 0 ? void 0 : user.comparePassword(oldPassword));
             if (!match) {
                 res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
-                    "errorMessage": "Invalid Credentials",
-                    isPasswordChanged: false
+                    errorMessage: "Invalid Credentials",
+                    isPasswordChanged: false,
                 });
             }
             else {
@@ -209,8 +223,8 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
                     user.password = newPassword;
                     yield (user === null || user === void 0 ? void 0 : user.save());
                     res.status(http_status_codes_1.StatusCodes.OK).json({
-                        "message": "Password changed.!",
-                        isPasswordChanged: true
+                        message: "Password changed.!",
+                        isPasswordChanged: true,
                     });
                 }
             }
@@ -218,33 +232,42 @@ const changePassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
+            errorMessage: error,
         });
     }
 });
 exports.changePassword = changePassword;
 const findUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
+        const loggedUserId = req.body.user.id;
         const { id } = req.body;
-        const user = yield User_1.User.findById(id);
-        if (!user) {
-            res.status(http_status_codes_1.StatusCodes.NOT_FOUND).json({
-                errorMessage: "user not found",
-            });
+        const loggedUser = yield User_1.User.findById(loggedUserId);
+        if (loggedUser) {
+            const user = yield User_1.User.findById(id);
+            if (!user) {
+                res.status(http_status_codes_1.StatusCodes.NOT_FOUND).json({
+                    errorMessage: "user not found",
+                });
+            }
+            else {
+                res.status(http_status_codes_1.StatusCodes.OK).json({
+                    user: {
+                        _id: user._id,
+                        name: user.name,
+                        email: user.email,
+                        dob: user.dob,
+                        gender: user.gender,
+                        bio: user.bio,
+                        avatar: user.avatar,
+                        followings: user.followings,
+                        followers: user.followers,
+                    },
+                });
+            }
         }
         else {
-            res.status(http_status_codes_1.StatusCodes.OK).json({
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email,
-                    dob: user.dob,
-                    gender: user.gender,
-                    bio: user.bio,
-                    avatar: user.avatar,
-                    followings: user.followings,
-                    followers: user.followers,
-                },
+            res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
+                errorMessage: "Please Login First",
             });
         }
     }
@@ -255,3 +278,26 @@ const findUserById = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
 });
 exports.findUserById = findUserById;
+const getAllUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const loggedUserId = req.body.user.id;
+        const loggedUser = yield User_1.User.findById(loggedUserId);
+        if (loggedUser) {
+            const allUser = yield User_1.User.find({});
+            res.status(http_status_codes_1.StatusCodes.OK).json({
+                allUser,
+            });
+        }
+        else {
+            res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
+                errorMessage: "Please Login first.",
+            });
+        }
+    }
+    catch (error) {
+        res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+            errorMessage: error,
+        });
+    }
+});
+exports.getAllUser = getAllUser;

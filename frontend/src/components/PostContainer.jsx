@@ -1,3 +1,5 @@
+/* eslint-disable array-callback-return */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Box, Img, Text } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { AiOutlineHeart } from "react-icons/ai";
@@ -6,19 +8,25 @@ import { useDispatch, useSelector } from "react-redux";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsCheck2 } from "react-icons/bs";
 import { userAction } from "../Redux/userReducer";
-import { findUserByIdAsync, followUnfollowAsync } from "../Redux/userAction";
+import {
+  findUserByIdAsync,
+  followUnfollowAsync,
+  setFollowingAsync,
+} from "../Redux/userAction";
 import { toast, ToastContainer } from "react-toastify";
 import { ToastOption } from "./Register";
+import { likeUnLikeAsync } from "../Redux/postAction";
 
 const PostContainer = ({ image, description, post, user }) => {
   const [postUser, setPostUser] = useState({});
   const dispatch = useDispatch();
   const [isFollowed, setIsFollowed] = useState(false);
+  const [isLiked, setIsLiked] = useState(false);
+  const [likedCount, setLikedCount] = useState(post?.likedBy.length);
   const isUserAuthenticated = useSelector(
     (state) => state.user.isUserAuthenticated
   );
 
-  // const follower = useSelector((state) => state.user.follower);
   useEffect(() => {
     const data = {
       id: post.createdBy,
@@ -28,7 +36,6 @@ const PostContainer = ({ image, description, post, user }) => {
       setPostUser(postUser);
     });
   }, []);
-  const [isLiked, setIsLiked] = useState(false);
 
   const userProfileHandler = () => {
     dispatch(userAction.changeProfileVisiblity());
@@ -42,8 +49,33 @@ const PostContainer = ({ image, description, post, user }) => {
           setIsFollowed(true);
         }
       });
+
+      post.likedBy.map((likedId) => {
+        if (user._id === likedId._id) {
+          setIsLiked(true);
+        }
+      });
     }
-  }, []);
+  }, [post, user]);
+
+  const likeDisLikeHandler = () => {
+    const data = {
+      id: post._id,
+      token: user.token,
+    };
+    dispatch(likeUnLikeAsync(data)).then((res) => {
+      if (res === "Like successful") {
+        setIsLiked(true);
+        setLikedCount(likedCount + 1);
+      } else if (res === "Unlike successful") {
+        setIsLiked(false);
+        setLikedCount(likedCount - 1);
+      } else {
+        setIsLiked(false);
+        setLikedCount(post?.likedBy.length);
+      }
+    });
+  };
 
   return (
     <>
@@ -51,7 +83,7 @@ const PostContainer = ({ image, description, post, user }) => {
       <ToastContainer />
       <Box
         // width={["30rem", "30rem", "30rem", "40rem", "40rem", "40rem"]}
-        width={["80%", "80%", "80%", "70%", "70%", "70%"]}
+        width={["90%", "85%", "80%", "70%", "70%", "70%"]}
         height="35rem"
         display="flex"
         alignItems="center"
@@ -71,7 +103,7 @@ const PostContainer = ({ image, description, post, user }) => {
           height="5%"
           justifyContent="space-between"
           alignItems="center"
-          px="2rem"
+          px={["0.5rem", "0.5rem", "1.5rem", "1.5rem", "1.5rem", "1.5rem"]}
         >
           {/* Avatar */}
           <Box
@@ -81,6 +113,7 @@ const PostContainer = ({ image, description, post, user }) => {
             backgroundColor="transparent"
             alignItems="center"
             gap="0.2rem"
+            py="5px"
             cursor="pointer"
             onClick={() => userProfileHandler()}
           >
@@ -90,15 +123,29 @@ const PostContainer = ({ image, description, post, user }) => {
                   ? postUser?.avatar
                   : "https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
               }
-              alt="user name"
-              width="2.5rem"
-              height="2.5rem"
+              alt={postUser?.name}
+              width={[
+                "1.5rem",
+                "1.5rem",
+                "1.5rem",
+                "2.5rem",
+                "2.5rem",
+                "2.5rem",
+              ]}
+              height={[
+                "1.5rem",
+                "1.5rem",
+                "1.5rem",
+                "2.5rem",
+                "2.5rem",
+                "2.5rem",
+              ]}
               borderRadius="50%"
               p="0px"
             />
             <Text
               width="fit-content"
-              fontSize={["0.8rem", "0.8rem", "0.8rem", "1rem", "1rem", "1rem"]}
+              fontSize={["0.6rem", "1rem", "1rem", "1rem", "1rem", "1rem"]}
             >
               {postUser?.name}
             </Text>
@@ -109,23 +156,33 @@ const PostContainer = ({ image, description, post, user }) => {
               display="flex"
               flexDir="row"
               alignItems="center"
-              fontSize={["0.8rem", "0.8rem", "0.8rem", "1rem", "1rem", "1rem"]}
+              fontSize={["0.8rem", "0.8rem", "0.9rem", "1rem", "1rem", "1rem"]}
               cursor="pointer"
               onClick={() => {
-                setIsFollowed(false);
-                const data = {
-                  token: user.token,
-                  id: post.createdBy,
-                };
-                dispatch(followUnfollowAsync(data)).then((res) => {
-                  if (res.status) {
-                    setIsFollowed(!isFollowed);
-                  } else {
-                    toast.error(res.errorMessage, ToastOption);
-                  }
-                });
+                if (postUser._id !== user._id) {
+                  setIsFollowed(false);
+                  const data = {
+                    token: user.token,
+                    id: post.createdBy,
+                  };
+                  dispatch(followUnfollowAsync(data)).then((res) => {
+                    if (res.status) {
+                      setIsFollowed(!isFollowed);
+                      dispatch(setFollowingAsync(user?.token));
+                    } else {
+                      setIsFollowed(isFollowed);
+                      toast.error(res.errorMessage, ToastOption);
+                    }
+                  });
+                } else {
+                  toast.error("You can't Unfollow YourSelf.", ToastOption);
+                }
               }}
-              color={isUserAuthenticated ? "black" : "grey"}
+              color={
+                isUserAuthenticated && postUser._id !== user._id
+                  ? "black"
+                  : "lightgrey"
+              }
             >
               <BsCheck2 />
               <Text width="fit-content">Followed</Text>
@@ -136,23 +193,33 @@ const PostContainer = ({ image, description, post, user }) => {
               display="flex"
               flexDir="row"
               alignItems="center"
-              fontSize={["0.8rem", "0.8rem", "0.8rem", "1rem", "1rem", "1rem"]}
+              fontSize={["0.8rem", "0.8rem", "0.9rem", "1rem", "1rem", "1rem"]}
               cursor="pointer"
               onClick={() => {
-                setIsFollowed(true);
-                const data = {
-                  token: user.token,
-                  id: post.createdBy,
-                };
-                dispatch(followUnfollowAsync(data)).then((res) => {
-                  if (res.status) {
-                    setIsFollowed(!isFollowed);
-                  } else {
-                    toast.error(res.errorMessage, ToastOption);
-                  }
-                });
+                if (postUser._id !== user._id) {
+                  setIsFollowed(true);
+                  const data = {
+                    token: user.token,
+                    id: post.createdBy,
+                  };
+                  dispatch(followUnfollowAsync(data)).then((res) => {
+                    if (res.status) {
+                      setIsFollowed(!isFollowed);
+                      dispatch(setFollowingAsync(user?.token));
+                    } else {
+                      setIsFollowed(isFollowed);
+                      toast.error(res.errorMessage, ToastOption);
+                    }
+                  });
+                } else {
+                  toast.error("You can't Follow YourSelf.", ToastOption);
+                }
               }}
-              color={isUserAuthenticated ? "black" : "grey"}
+              color={
+                isUserAuthenticated && postUser._id !== user._id
+                  ? "black"
+                  : "grey"
+              }
             >
               <AiOutlinePlus />
               <Text width="fit-content">Follow</Text>
@@ -161,12 +228,13 @@ const PostContainer = ({ image, description, post, user }) => {
         </Box>
         {/* Post image Box */}
         <Box
-          width="100%"
+          minWidth="100%"
+          maxWidth="100%"
           minHeight="70%"
           maxHeight="70%"
           display="flex"
           justifyContent="center"
-          px="1.5rem"
+          px={["0.2rem", "0.7rem", "0.7rem", "1.5rem", "1.5rem", "1.5rem"]}
           py="1rem"
         >
           <Img
@@ -232,13 +300,14 @@ const PostContainer = ({ image, description, post, user }) => {
         {isUserAuthenticated && (
           <Box
             cursor="pointer"
-            width="100%"
+            width="fit-content"
+            alignSelf="start"
             display="flex"
             height="5%"
             justifyContent="flex-start"
             flexDir="row"
             gap="0.2rem"
-            onClick={() => setIsLiked(!isLiked)}
+            onClick={() => likeDisLikeHandler()}
           >
             {isLiked ? (
               <FcLike size="1.3rem" />
@@ -250,7 +319,7 @@ const PostContainer = ({ image, description, post, user }) => {
               width="fit-content"
               fontSize={["0.9rem", "0.9rem", "0.9rem", "1rem", "1rem", "1rem"]}
             >
-              {post?.likedBy?.length}
+              {likedCount}
             </Box>
           </Box>
         )}

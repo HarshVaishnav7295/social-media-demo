@@ -39,33 +39,31 @@ function NewPasswordInput({ resetConform }) {
     setConfPassword(e.target.value);
   };
   function handleSubmit(e) {
-    console.log("called ");
     e.preventDefault();
     if (validateInput) {
-      if(OTP === ""){
+      if (OTP === "") {
         toast({
-            title: "OTP is required",
-            description: "",
-            status: "error",
-            duration: 2000,
-            isClosable: true,
-            position: "top",
-          });
+          title: "OTP is required",
+          description: "",
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
       }
-      if(password === "" || confPassword === "" || password !== confPassword){
+      if (password === "" || confPassword === "" || password !== confPassword) {
         toast({
-            title: "password and Conform password is must and must be same !",
-            description: "",
-            status: "error",
-            duration: 2000,
-            isClosable: true,
-            position: "top",
-          });
+          title: "password and Conform password is must and must be same !",
+          description: "",
+          status: "error",
+          duration: 2000,
+          isClosable: true,
+          position: "top",
+        });
       }
       setIsError(true);
       return;
     }
-    console.log(OTP, password, confPassword);
     // reset logic here
     resetConform();
     setOtp("");
@@ -157,7 +155,13 @@ const NewPassword = ({ resetConform }) => {
       <Text fontSize="1.3rem" fontWeight="600">
         Change Password
       </Text>
-      <Text textAlign='center' as="p" color="gray" fontSize=".8rem" fontWeight="semibold">
+      <Text
+        textAlign="center"
+        as="p"
+        color="gray"
+        fontSize=".8rem"
+        fontWeight="semibold"
+      >
         we sent a password reset OTP to user@gmail.com
       </Text>
       <NewPasswordInput resetConform={resetConform} />

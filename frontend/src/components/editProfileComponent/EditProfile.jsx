@@ -4,7 +4,7 @@ import FormInput from "./FormInput";
 import SubmitBtn from "./SubmitBtn";
 import UserDetail from "./UserDetail";
 import { updateUserAsync } from "../../Redux/userAction";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, } from "react-redux";
 
 const EditProfile = (props) => {
   const dispatch = useDispatch();

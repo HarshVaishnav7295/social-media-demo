@@ -3,6 +3,7 @@ import {
   FollowUnFollowApi,
   GetFollowerApi,
   GetFollowingApi,
+  setAllUserApi,
   UpdateUserApi,
   UpdateUserPasswordApi,
 } from "../utils/ApiRoutes";
@@ -106,6 +107,7 @@ export const followUnfollowAsync = (data) => {
         }),
       });
       const isFollowed = await newData.json();
+      dispatch(userAction.updateUserFollowings(isFollowed.followings));
       return isFollowed;
     } catch (error) {
       console.log(error);
@@ -130,6 +132,24 @@ export const findUserByIdAsync = (data) => {
       return user.user;
     } catch (error) {
       return error;
+    }
+  };
+};
+
+export const setAllUserAsync = (token) => {
+  return async (dispatch) => {
+    try {
+      const allUserData = await fetch(setAllUserApi, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        method: "GET",
+      });
+      const data = await allUserData.json();
+      dispatch(userAction.setAllUser(data.allUser));
+    } catch (error) {
+      console.log(error);
     }
   };
 };

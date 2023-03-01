@@ -9,31 +9,32 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getAllPost = exports.LikeUnlikePost = exports.getMyPosts = exports.deletePost = exports.updatePost = exports.getPost = exports.createPost = void 0;
+exports.getFeed = exports.getUserPost = exports.LikeUnlikePost = exports.getMyPosts = exports.deletePost = exports.updatePost = exports.getPost = exports.createPost = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const Post_1 = require("../models/Post");
+const User_1 = require("../models/User");
 const createPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { desc, img } = req.body;
         if (!desc) {
             res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
-                "errorMessage": "Description is required."
+                errorMessage: "Description is required.",
             });
         }
         else {
             const post = yield Post_1.Post.create({
                 description: desc,
                 image: img,
-                createdBy: req.body.user.id
+                createdBy: req.body.user.id,
             });
             res.status(http_status_codes_1.StatusCodes.CREATED).json({
-                "post": post
+                post: post,
             });
         }
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
+            errorMessage: error,
         });
     }
 });
@@ -44,18 +45,18 @@ const getPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const post = yield Post_1.Post.findById(id);
         if (post) {
             res.status(http_status_codes_1.StatusCodes.OK).json({
-                "post": post
+                post: post,
             });
         }
         else {
             res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
-                "errorMessage": 'No post with this id'
+                errorMessage: "No post with this id",
             });
         }
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
+            errorMessage: error,
         });
     }
 });
@@ -66,26 +67,26 @@ const updatePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const { desc, img } = req.body;
         const post = yield Post_1.Post.findOneAndUpdate({
             _id: id,
-            createdBy: req.body.user.id
+            createdBy: req.body.user.id,
         }, {
             description: desc,
-            image: img
+            image: img,
         });
         if (post) {
             const updatedPost = yield Post_1.Post.findById(post === null || post === void 0 ? void 0 : post._id);
             res.status(http_status_codes_1.StatusCodes.OK).json({
-                "updatedPost": updatedPost
+                updatedPost: updatedPost,
             });
         }
         else {
             res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
-                "errorMessage": 'You are not allowed to update this post'
+                errorMessage: "You are not allowed to update this post",
             });
         }
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
+            errorMessage: error,
         });
     }
 });
@@ -96,23 +97,23 @@ const deletePost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         const { desc, img } = req.body;
         const post = yield Post_1.Post.findOneAndDelete({
             _id: id,
-            createdBy: req.body.user.id
+            createdBy: req.body.user.id,
         });
         if (post) {
             const updatedPost = yield Post_1.Post.findById(post === null || post === void 0 ? void 0 : post._id);
             res.status(http_status_codes_1.StatusCodes.OK).json({
-                "message": "Post deleted"
+                message: "Post deleted",
             });
         }
         else {
             res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
-                "errorMessage": 'You are not allowed to delete this post'
+                errorMessage: "You are not allowed to delete this post",
             });
         }
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
+            errorMessage: error,
         });
     }
 });
@@ -120,15 +121,15 @@ exports.deletePost = deletePost;
 const getMyPosts = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const posts = yield Post_1.Post.find({
-            createdBy: req.body.user.id
+            createdBy: req.body.user.id,
         });
         res.status(http_status_codes_1.StatusCodes.OK).json({
-            "posts": posts
+            posts: posts,
         });
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
+            errorMessage: error,
         });
     }
 });
@@ -149,10 +150,12 @@ const LikeUnlikePost = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 const newlen = newlikedby.length;
                 const posttemp = yield Post_1.Post.findByIdAndUpdate(id, {
                     likedBy: newlikedby,
-                    likes: newlen
+                    likes: newlen,
                 });
+                const updatedPost = yield Post_1.Post.findById(id);
                 res.status(http_status_codes_1.StatusCodes.OK).json({
-                    "message": "Unlike successful"
+                    message: "Unlike successful",
+                    likedBy: updatedPost === null || updatedPost === void 0 ? void 0 : updatedPost.likedBy,
                 });
             }
             else {
@@ -161,32 +164,20 @@ const LikeUnlikePost = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 const newlen = newlikedby.length;
                 const posttemp = yield Post_1.Post.findByIdAndUpdate(id, {
                     likedBy: newlikedby,
-                    likes: newlen
+                    likes: newlen,
                 });
+                const updatedPost = yield Post_1.Post.findById(id);
                 res.status(http_status_codes_1.StatusCodes.OK).json({
-                    "message": "Like successful"
+                    message: "Like successful",
+                    likedBy: updatedPost === null || updatedPost === void 0 ? void 0 : updatedPost.likedBy,
                 });
             }
         }
         else {
             res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
-                "errorMessage": "No post with this id"
+                errorMessage: "No post with this id",
             });
         }
-    }
-    catch (error) {
-        res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
-            "errorMessage": error
-        });
-    }
-});
-exports.LikeUnlikePost = LikeUnlikePost;
-const getAllPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const allPost = yield Post_1.Post.find({});
-        res.status(http_status_codes_1.StatusCodes.OK).json({
-            posts: allPost,
-        });
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
@@ -194,4 +185,64 @@ const getAllPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
         });
     }
 });
-exports.getAllPost = getAllPost;
+exports.LikeUnlikePost = LikeUnlikePost;
+const getUserPost = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const loggedUserId = yield req.body.user.id;
+        const _id = yield req.body._id;
+        if (!loggedUserId || !_id) {
+            res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
+                errorMessage: "User Id Required.",
+            });
+        }
+        else {
+            const loggedUser = yield User_1.User.findById(loggedUserId);
+            if (loggedUser) {
+                const userposts = yield Post_1.Post.find({ createdBy: _id });
+                res.status(http_status_codes_1.StatusCodes.OK).json({
+                    status: true,
+                    posts: userposts,
+                });
+            }
+            else {
+                res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
+                    errorMessage: "User not Found.",
+                });
+            }
+        }
+    }
+    catch (error) {
+        res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+            errorMessage: error,
+        });
+    }
+});
+exports.getUserPost = getUserPost;
+const getFeed = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const currUser = yield User_1.User.findById(req.body.user.id);
+        var currUsersFollowingsIds = currUser === null || currUser === void 0 ? void 0 : currUser.followings;
+        var feed = [];
+        var counter = 0;
+        const myPosts = yield Post_1.Post.find({ createdBy: req.body.user.id });
+        currUsersFollowingsIds === null || currUsersFollowingsIds === void 0 ? void 0 : currUsersFollowingsIds.map((user) => __awaiter(void 0, void 0, void 0, function* () {
+            const posts = yield Post_1.Post.find({
+                createdBy: user,
+            });
+            feed = feed.concat(posts);
+            counter += 1;
+            if (counter === (currUsersFollowingsIds === null || currUsersFollowingsIds === void 0 ? void 0 : currUsersFollowingsIds.length)) {
+                feed = feed.concat(myPosts);
+                res.status(http_status_codes_1.StatusCodes.OK).json({
+                    feed: feed,
+                });
+            }
+        }));
+    }
+    catch (error) {
+        res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+            errorMessage: error,
+        });
+    }
+});
+exports.getFeed = getFeed;

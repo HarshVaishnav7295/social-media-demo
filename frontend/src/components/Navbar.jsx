@@ -15,18 +15,20 @@ import {
   Textarea,
 } from "@chakra-ui/react";
 import { HiUpload } from "react-icons/hi";
-import React, { useCallback, useState } from "react";
-import { AiOutlineHome, AiOutlineSearch, AiOutlineHeart } from "react-icons/ai";
+import React, { useState } from "react";
+import { AiOutlineHome, AiOutlineSearch } from "react-icons/ai";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { MdOutlineAddToQueue } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { userAction } from "../Redux/userReducer";
+import { BsFillBellFill } from "react-icons/bs";
 
 import MyDropzone from "../components/UploadPost/Dropzone";
-import { setNewPostAsync } from "../Redux/postAction";
+import { getFeedAsync, setNewPostAsync } from "../Redux/postAction";
+import { chatAction } from "../Redux/chatReducer";
 
-const Navbar = () => {
+const Navbar = ({ showBell, notificationCount }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const [caption, setCaption] = useState("");
@@ -38,10 +40,13 @@ const Navbar = () => {
   const isUserAuthenticated = useSelector(
     (state) => state.user.isUserAuthenticated
   );
+  const isProfileOpen = useSelector((state) => state.user.isProfileOpen);
+
   const user = useSelector((state) => state.user.user);
 
   const changeProfileVisibility = () => {
     dispatch(userAction.changeProfileVisiblity());
+    dispatch(userAction.setDisplayedUser(user));
   };
   const uploadPostHandler = () => {
     // Call dispatch here
@@ -51,7 +56,6 @@ const Navbar = () => {
       desc: caption,
       token: user.token,
     };
-
     dispatch(setNewPostAsync(data));
     setCaption("");
     setImgLink("");
@@ -67,6 +71,7 @@ const Navbar = () => {
           <ModalBody>
             {/* image sectino  */}
             <MyDropzone imgLink={imgLink} setImgLink={setImgLink} />
+
             {/* caption */}
             <Text my="1rem">Caption : </Text>
             <Textarea
@@ -104,8 +109,8 @@ const Navbar = () => {
                   isClosable: true,
                   position: "top",
                 });
-                onClose();
                 uploadPostHandler();
+                onClose();
               }}
             >
               <HiUpload
@@ -126,42 +131,123 @@ const Navbar = () => {
         width="100%"
         display="flex"
         justifyContent="space-between"
+        backgroundColor="#636363"
+        // backgroundColor="#636363"
+        borderBottomRadius="7px"
         flexDir="row"
+        px={["0.5rem", "0.5rem", "1rem", "1rem", "1rem", "1rem"]}
+        py="0.5rem"
       >
         {/* Navbar Icon and Logo */}
         <Box
           display="flex"
           flexDirection="row"
           alignItems="center"
-          gap="0.7rem"
+          color="white"
+          // fontSize={["0.8rem", "1rem", "1.5rem", "1.5rem", "1.5rem", "1.5rem"]}
         >
-          <Box cursor="pointer" display="flex">
-            <Text>Logo</Text>
+          <Box cursor="pointer" display="flex" onClick={() => navigate("/")}>
+            {/* <Img
+              width="8rem"
+              height="3.3rem"
+              src="./img/logo.png"
+              transition="200ms"
+              backgroundColor="transparent"
+              _hover={{ width: "8.2rem", height: "3.5rem" }}
+            /> */}
+            <Text>Media</Text>
           </Box>
         </Box>
         {/* Home, Search, AddPost and Notification */}
-        <Box display="flex" flexDir="row" gap="1.3rem" alignItems="center">
+        <Box
+          display="flex"
+          flexDir="row"
+          color="white"
+          fontWeight="bold"
+          gap={["0.5rem", "1rem", "1.3rem", "1.3rem", "1.3rem", "1.3rem"]}
+          alignItems="center"
+        >
           <Box
             cursor="pointer"
-            fontSize="1.5rem"
-            _hover={{ fontSize: "1.6rem" }}
+            fontSize={[
+              "1rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+            ]}
+            _hover={{
+              fontSize: [
+                "1.1rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+              ],
+            }}
             transition="200ms"
-            onClick={() => navigate("/")}
+            onClick={() => {
+              isUserAuthenticated && dispatch(getFeedAsync(user.token));
+              if (isProfileOpen) {
+                dispatch(userAction.changeProfileVisiblity());
+              }
+              navigate("/");
+            }}
           >
             <AiOutlineHome />
           </Box>
           <Box
             cursor="pointer"
-            fontSize="1.5rem"
-            _hover={{ fontSize: "1.6rem" }}
+            fontSize={[
+              "1rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+            ]}
+            _hover={{
+              fontSize: [
+                "1.1rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+              ],
+            }}
             transition="200ms"
+            onClick={() => {
+              navigate("/search");
+              if (isProfileOpen) {
+                dispatch(userAction.changeProfileVisiblity());
+              }
+            }}
           >
             <AiOutlineSearch />
           </Box>
           <Box
             cursor="pointer"
-            fontSize="1.5rem"
-            _hover={{ fontSize: "1.6rem" }}
+            fontSize={[
+              "1rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+            ]}
+            _hover={{
+              fontSize: [
+                "1.1rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+              ],
+            }}
             transition="200ms"
             onClick={() =>
               isUserAuthenticated
@@ -178,24 +264,68 @@ const Navbar = () => {
           >
             <MdOutlineAddToQueue />
           </Box>
-          <Box
+          {/* <Box
             cursor="pointer"
-            fontSize="1.5rem"
-            _hover={{ fontSize: "1.6rem" }}
+            fontSize={[
+              "1rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+              "1.5rem",
+            ]}
+            _hover={{
+              fontSize: [
+                "1.1rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+                "1.6rem",
+              ],
+            }}
             transition="200ms"
           >
             <AiOutlineHeart />
-          </Box>
+          </Box> */}
         </Box>
         {/* Progile and Chat */}
-        <Box display="flex" flexDir="row" gap="1rem" alignItems="center">
+        <Box
+          display="flex"
+          flexDir="row"
+          gap={["0.5rem", "0.8rem", "1rem", "1rem", "1rem", "1rem"]}
+          alignItems="center"
+          color="white"
+          fontWeight="bold"
+        >
           {isUserAuthenticated && (
             <Box
               cursor="pointer"
-              fontSize="1.5rem"
-              _hover={{ fontSize: "1.6rem" }}
+              fontSize={[
+                "1rem",
+                "1.5rem",
+                "1.5rem",
+                "1.5rem",
+                "1.5rem",
+                "1.5rem",
+              ]}
+              _hover={{
+                fontSize: [
+                  "1.1rem",
+                  "1.6rem",
+                  "1.6rem",
+                  "1.6rem",
+                  "1.6rem",
+                  "1.6rem",
+                ],
+              }}
               transition="200ms"
-              onClick={() => navigate("/chat")}
+              onClick={() => {
+                navigate("/chat");
+                if (isProfileOpen) {
+                  dispatch(userAction.changeProfileVisiblity());
+                }
+              }}
             >
               <RiSendPlaneFill />
             </Box>
@@ -215,9 +345,27 @@ const Navbar = () => {
                       ? user.avatar
                       : "https://media.istockphoto.com/id/1300845620/vector/user-icon-flat-isolated-on-white-background-user-symbol-vector-illustration.jpg?s=612x612&w=0&k=20&c=yBeyba0hUkh14_jgv1OKqIH0CCSWU_4ckRkAoy2p73o="
                   }
-                  width="2rem"
+                  width={["1rem", "1.5rem", "2rem", "2rem", "2rem", "2rem"]}
+                  height={["1rem", "1.5rem", "2rem", "2rem", "2rem", "2rem"]}
                   transition="200ms"
-                  _hover={{ width: "2.1rem" }}
+                  _hover={{
+                    width: [
+                      "1.1rem",
+                      "1.6rem",
+                      "2.1rem",
+                      "2.1rem",
+                      "2.1rem",
+                      "2.1rem",
+                    ],
+                    height: [
+                      "1.1rem",
+                      "1.6rem",
+                      "2.1rem",
+                      "2.1rem",
+                      "2.1rem",
+                      "2.1rem",
+                    ],
+                  }}
                 />
               </Box>
             ) : (

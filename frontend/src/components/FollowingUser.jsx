@@ -1,14 +1,24 @@
+/* eslint-disable no-unused-vars */
 import { Box, Img, Text } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import { RiSendPlaneFill } from "react-icons/ri";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { userAction } from "../Redux/userReducer";
 
-const FollowingUser = ({ border, userdata, wantToNavigate }) => {
+const FollowingUser = ({ userdata, wantToNavigate, showChatIcon }) => {
+  //const [unReadCount, setunReadCount] = useState(10);
+  const isProfileOpen = useSelector((state) => state.user.isProfileOpen);
+
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
   const userClicked = () => {
     if (wantToNavigate) {
       navigate("/chat");
+      if (isProfileOpen) {
+        dispatch(userAction.changeProfileVisiblity());
+      }
     }
   };
   return (
@@ -18,9 +28,10 @@ const FollowingUser = ({ border, userdata, wantToNavigate }) => {
         flexDir="row"
         width="100%"
         cursor="pointer"
-        justifyContent="space-between"
-        border={border ? "2px" : "0px"}
         gap="0.3rem"
+        justifyContent="space-between"
+        alignItems="center"
+        color="white"
         px={["3px", "3px", "3px", "0.3rem", "0.3rem", "0.3rem"]}
       >
         {/*Image Box  */}
@@ -32,7 +43,7 @@ const FollowingUser = ({ border, userdata, wantToNavigate }) => {
           flexDirection="row"
           height="3.5rem"
           borderRadius="50%"
-          gap="0.5rem"
+          gap="0.7rem"
         >
           <Img
             src={
@@ -42,10 +53,11 @@ const FollowingUser = ({ border, userdata, wantToNavigate }) => {
             }
             // src="https://www.shutterstock.com/image-vector/default-avatar-profile-icon-vector-260nw-1725655669.jpg"
             borderRadius="50%"
-            width="80%"
-            border="1px solid red"
+            width="3.5rem"
+            border="1px solid #636363"
             p="3px"
-            height="80%"
+            gap="0.5rem"
+            height="3.5rem"
           />
 
           {/* User Info like Name and Bio */}
@@ -65,16 +77,20 @@ const FollowingUser = ({ border, userdata, wantToNavigate }) => {
         </Box>
 
         {/* Chat User Icon */}
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          fontSize="2xl"
-          width="fit-content"
-          onClick={userClicked}
-        >
-          <RiSendPlaneFill />
-        </Box>
+        {showChatIcon && (
+          <Box
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            fontSize="2xl"
+            px="5px"
+            width="fit-content"
+            onClick={userClicked}
+            color="black"
+          >
+            <RiSendPlaneFill />
+          </Box>
+        )}
       </Box>
     </>
   );

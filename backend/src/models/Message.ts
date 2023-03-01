@@ -1,31 +1,34 @@
-import mongoose,{Schema,Document} from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import { IUserRef } from "./User";
 
-export interface IMessage{
-    text : string
-    sender : IUserRef,
-    receiver : IUserRef
+export interface IMessage {
+  text: string;
+  sender: IUserRef;
+  receiver: IUserRef;
 }
 
-const messageSchema = new Schema({
-    text : {
-        type : String,
-        required : [true,'Please provide trxt']
+const messageSchema = new Schema(
+  {
+    text: {
+      type: String,
+      required: [true, "Please provide trxt"],
     },
-    sender : {
-        type : mongoose.Types.ObjectId,
-        ref : 'User'
+    sender: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
     },
-    receiver : {
-        type : mongoose.Types.ObjectId,
-        ref : 'User'
+    receiver: {
+      type: mongoose.Types.ObjectId,
+      ref: "User",
     },
-    chat : {
-        type : mongoose.Types.ObjectId,
-        ref : 'Chat'
+    isRead : {
+     type : Boolean,
+     default : false
     }
-},{timestamps:true})
+  },
+  { timestamps: true }
+);
 
-interface IMessageModel extends IMessage,Document{}
+export interface IMessageModel extends IMessage, Document {}
 
-export const Message = mongoose.model<IMessageModel>('Message',messageSchema)
+export const Message = mongoose.model<IMessageModel>("Message", messageSchema);
