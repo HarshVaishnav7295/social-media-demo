@@ -340,7 +340,7 @@ const Navbar = ({ showBell, notificationCount }: INavbarProps) => {
               ) : (
                 <Box position="relative">
                   <BsFillBellFill />
-                  {notificationCount !== 0 ? null : (
+                  {notificationCount === 0 ? null : (
                     <Box
                       position="absolute"
                       top="-5px"

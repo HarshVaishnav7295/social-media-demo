@@ -1,3 +1,4 @@
+/* eslint-disable array-callback-return */
 import { Box, Button, Img, Text } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import FollowingUser from "./FollowingUser";
@@ -41,35 +42,39 @@ const Profile = ({ showUser }: IProfileProps) => {
   const [isFollowerSelected, setIsFollowerSelected] = useState<boolean>(true);
 
   useEffect(() => {
-    if (showUser?._id !== user?._id) {
-      showUser?.followers.map((_followerId) => {
-        dispatch(
-          findUserByIdAsync({ id: _followerId._id, token: user?.token })
-          // @ts-ignore
-        ).then((res: IUser) => {
-          // console.log(res);
-          dispatch(userAction.setFollowerOfDisp(res));
+    if (isUserAuthenticated) {
+      if (showUser?._id !== user?._id) {
+        showUser?.followers.map((_followerId) => {
+          dispatch(
+            findUserByIdAsync({ id: _followerId._id, token: user?.token })
+            // @ts-ignore
+          ).then((res: IUser) => {
+            // console.log(res);
+            dispatch(userAction.setFollowerOfDisp(res));
+          });
         });
-      });
 
-      showUser?.followings.map((_followingId) => {
-        dispatch(
-          findUserByIdAsync({ id: _followingId._id, token: user?.token })
-          //@ts-ignore
-        ).then((res: IUser) => {
-          dispatch(userAction.setFollowingOfDisp(res));
+        showUser?.followings.map((_followingId) => {
+          dispatch(
+            findUserByIdAsync({ id: _followingId._id, token: user?.token })
+            //@ts-ignore
+          ).then((res: IUser) => {
+            dispatch(userAction.setFollowingOfDisp(res));
+          });
         });
-      });
+      }
     }
-  }, [dispatch, showUser, user]);
+  }, [dispatch, isUserAuthenticated, showUser, user]);
 
   useEffect(() => {
-    if (showUser?._id === user?._id) {
-      setLocalFollower(follower);
-      setLocalFollowing(following);
-    } else {
-      setLocalFollower(followerOfDisp);
-      setLocalFollowing(followingOfDisp);
+    if (isUserAuthenticated) {
+      if (showUser?._id === user?._id) {
+        setLocalFollower(follower);
+        setLocalFollowing(following);
+      } else {
+        setLocalFollower(followerOfDisp);
+        setLocalFollowing(followingOfDisp);
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
@@ -85,13 +90,23 @@ const Profile = ({ showUser }: IProfileProps) => {
     if (isUserAuthenticated && showUser && user) {
       // eslint-disable-next-line array-callback-return
       dispatch(userAction.setDispFollowerFollowingEmpty());
-      user?.followings.map((followingId) => {
-        if (followingId._id.toString() === showUser?._id) {
-          setIsFollowed(true);
-        } else {
-          setIsFollowed(false);
-        }
-      });
+
+      // decides Following status here
+      // user?.followings.map((followingId) => {
+      //   if (followingId._id === showUser?._id) {
+      //     setIsFollowed(true);
+      //   } else {
+      //     setIsFollowed(false);
+      //   }
+      // });
+      setIsFollowed(false);
+      const checkFollowing = user.followings.find(
+        (item) => item._id === showUser._id
+      );
+      if (checkFollowing?._id) {
+        setIsFollowed(true);
+      }
+
       if (user) {
         const data = {
           token: user.token,
