@@ -161,7 +161,7 @@ export const forgotPassword = async(req:Request,res:Response):Promise<void>=>{
                     "errorMessage":error
                 })
             }else{
-                console.log('Message sent : ',info.messageId)
+                //console.log('Message sent : ',info.messageId)
                 res.status(StatusCodes.OK).json({
                     "status":info.messageId
                 })

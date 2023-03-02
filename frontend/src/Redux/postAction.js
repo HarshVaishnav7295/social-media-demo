@@ -51,7 +51,7 @@ export const setNewPostAsync = (data) => {
       }),
     });
     const newdata = await newPost.json();
-    console.log(newdata.post);
+    //console.log(newdata.post);
     dispatch(postAction.setNewPost(newdata.post));
   };
 };

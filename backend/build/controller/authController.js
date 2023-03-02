@@ -158,7 +158,7 @@ const forgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 });
             }
             else {
-                console.log('Message sent : ', info.messageId);
+                //console.log('Message sent : ',info.messageId)
                 res.status(http_status_codes_1.StatusCodes.OK).json({
                     "status": info.messageId
                 });

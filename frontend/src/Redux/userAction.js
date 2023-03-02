@@ -12,7 +12,7 @@ import { userAction } from "./userReducer";
 export const updateUserAsync = (data) => {
   return async (dispatch) => {
     try {
-      console.log(data);
+      //console.log(data);
       const newUser = await fetch(UpdateUserApi, {
         headers: {
           "Content-Type": "application/json",

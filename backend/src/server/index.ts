@@ -30,17 +30,17 @@ const io = new Server(server,{
 })
 
 io.on('connection',(socket)=>{
-    console.log('Connection successful with : ',socket.id)
+    //console.log('Connection successful with : ',socket.id)
 
     socket.on('setup',(id:string)=>{
         // creating room for current user
         socket.join(id)
-        console.log("User : ",id," has joined the room : ",id)
+        //console.log("User : ",id," has joined the room : ",id)
         //console.log(data)
     })
     socket.on('Leave Room',(data:string)=>{
         socket.leave(data)
-        console.log('User has left the room : ',data)
+        //console.log('User has left the room : ',data)
     })
 
     /*socket.on('Join Room',async(data:{chatId : string,users:{_id : string}[]})=>{
@@ -57,7 +57,7 @@ io.on('connection',(socket)=>{
     })*/
     socket.on('Join Room',async function(data:{roomId:string}){
         socket.join(data.roomId)
-        console.log("User has joined the room : ",data.roomId)
+        //console.log("User has joined the room : ",data.roomId)
         /*const messages = await Message.find({
             sender : { $in : [ data.roomId,data.currUserId ] },
             receiver : { $in : [ data.roomId,data.currUserId ] }
@@ -93,7 +93,7 @@ io.on('connection',(socket)=>{
     })*/
     socket.on('sendMessage',async function(data:{text:string,sender:mongoose.Types.ObjectId,receiver:mongoose.Types.ObjectId},cb){
         
-        console.log(data)
+        //console.log(data)
         
         const message = await Message.create({
             text : data.text,

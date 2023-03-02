@@ -40,16 +40,16 @@ const io = new socket_io_1.Server(server, {
     }
 });
 io.on('connection', (socket) => {
-    console.log('Connection successful with : ', socket.id);
+    //console.log('Connection successful with : ',socket.id)
     socket.on('setup', (id) => {
         // creating room for current user
         socket.join(id);
-        console.log("User : ", id, " has joined the room : ", id);
+        //console.log("User : ",id," has joined the room : ",id)
         //console.log(data)
     });
     socket.on('Leave Room', (data) => {
         socket.leave(data);
-        console.log('User has left the room : ', data);
+        //console.log('User has left the room : ',data)
     });
     /*socket.on('Join Room',async(data:{chatId : string,users:{_id : string}[]})=>{
         socket.join(data.chatId)
@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
     socket.on('Join Room', function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             socket.join(data.roomId);
-            console.log("User has joined the room : ", data.roomId);
+            //console.log("User has joined the room : ",data.roomId)
             /*const messages = await Message.find({
                 sender : { $in : [ data.roomId,data.currUserId ] },
                 receiver : { $in : [ data.roomId,data.currUserId ] }
@@ -102,7 +102,7 @@ io.on('connection', (socket) => {
     })*/
     socket.on('sendMessage', function (data, cb) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(data);
+            //console.log(data)
             const message = yield Message_1.Message.create({
                 text: data.text,
                 sender: data.sender,

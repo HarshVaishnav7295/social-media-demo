@@ -65,9 +65,9 @@ const ChatContainer = () => {
           socket.emit("Leave Room", clickedFollowingUser._id);
         }
       }
-      console.log("FollowingUserId:", followingUserProp._id);
+      //console.log("FollowingUserId:", followingUserProp._id);
       dispatch(chatAction.setRoomId(followingUserProp._id));
-      console.log("RoomId:", followingUserProp._id);
+      //console.log("RoomId:", followingUserProp._id);
 
       setClickedFollowingUser(followingUserProp);
       // if (socket) {
@@ -499,7 +499,7 @@ const AllChatContainer = ({
   useEffect(() => {
     //console.log('Current Room : ',roomId)
     socket.on("MessagesUpdated", async (data) => {
-      console.log(data.newMessage);
+      //console.log(data.newMessage);
       //console.log('Current Room : ',roomId)
       //console.log('sender id : ',data.newMessage.sender)
       if (
@@ -822,15 +822,9 @@ const AllChatContainer = ({
                         : new Date(chat.createdAt).getMinutes()} */}
                       {getTime(chat.createdAt)}
                       {chat.sender === user._id ? (
-                        isRead ? (
-                          <Box fontSize="0.8rem" ml="0px" mr="-2px" mb="1px">
-                            <BsCheck2All color="#00a3e6" />
-                          </Box>
-                        ) : (
-                          <Box fontSize="0.8rem" ml="0px" mr="-2px" mb="1px">
-                            <BsCheck />
-                          </Box>
-                        )
+                        <Box fontSize="0.8rem" ml="0px" mr="-2px" mb="1px">
+                          <BsCheck />
+                        </Box>
                       ) : null}
                     </Box>
                   </Box>
