@@ -59,14 +59,14 @@ export const addMessageToChatAsync = (data) => {
     }
   };
 };
-
+/*
 export const setRoomIdAsync = (data) => {
   return async (dispatch) => {
     try {
       //console.log('Data:',data)
-      dispatch(chatAction.setRoomId(data));
+      dispatch(chatAction.setChatId(data));
     } catch (error) {
       console.log(error);
     }
   };
-};
+};*/

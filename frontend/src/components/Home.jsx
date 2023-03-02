@@ -17,15 +17,13 @@ const Home = () => {
         flexDir="column"
         width="100vw"
         margin="auto"
-        height="90vh"
+        height="100vh"
         alignItems="center"
       >
         {/* Navbar Box */}
         <Box
           width={["100%", "100%", "100%", "95%", "95%", "95%"]}
-          
           // backgroundColor="grey"
-          py="0.3rem"
         >
           <Navbar />
         </Box>
@@ -51,7 +49,7 @@ const Home = () => {
             justifyContent="center"
             margin="auto"
             width={isProfileOpen ? "100%" : "70%"}
-            height="90%"
+            height="90vh"
             // p="1.5rem"
             overflowY="scroll"
             css={{

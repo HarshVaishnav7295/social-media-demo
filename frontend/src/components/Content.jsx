@@ -35,7 +35,7 @@ const Content = () => {
       dispatch(setFollowerAsync(user.token));
       setIsLoading(false);
     }
-  }, [dispatch, isUserAuthenticated, user.token]);
+  }, [dispatch, isUserAuthenticated, user]);
 
   return (
     <>
