@@ -1,4 +1,4 @@
-import { Box, Button, Input, Text } from "@chakra-ui/react";
+import { Box, Button, Text } from "@chakra-ui/react";
 import React from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
@@ -6,7 +6,7 @@ import { userAction } from "../Redux/userReducer";
 import useInput from "../Hook/UserInput";
 
 import { toast, ToastContainer } from "react-toastify";
-import { ToastOption } from "./Register";
+import { CustomInputContainer, ToastOption } from "./Register";
 import "react-toastify/dist/ReactToastify.css";
 import { LoginAPI } from "../utils/ApiRoutes";
 import { BsDot } from "react-icons/bs";
@@ -112,51 +112,34 @@ const Login = () => {
             gap="0.6rem"
           >
             {/* Email Box */}
-            <Box
-              display="flex"
-              flexDir="column"
-              justifyContent="flex-end"
-              alignItems="start"
-              width="75%"
-            >
-              <Text fontSize="0.9rem">Email:</Text>
-              <Input
-                fontSize="0.8rem"
-                variant="flushed"
-                placeholder="Enter Email"
-                focusBorderColor={emailInputHasError ? "red.300" : ""}
-                borderBottomColor={emailInputHasError ? "red.300" : ""}
-                value={emailInputValue}
-                onChange={handleEmailChnage}
-                onBlur={handleEmailBlur}
-              />
-            </Box>
+            <CustomInputContainer
+              name="Email"
+              type="email"
+              placeHolder="Enter Email here."
+              inputHasError={emailInputHasError}
+              inputValue={emailInputValue}
+              handleChnage={handleEmailChnage}
+              handleBlur={handleEmailBlur}
+            />
+
             {/* Password Field */}
             <Box
               display="flex"
               justifyContent="center"
               alignItems="center"
               flexDir="column"
-              width="100%"
+              width="91%"
             >
               {/* Password Box */}
-              <Box
-                display="flex"
-                flexDir="column"
-                justifyContent="flex-end"
-                alignItems="start"
-                width="75%"
-              >
-                <Text fontSize="0.9rem">Password:</Text>
-                <Input
-                  fontSize="0.8rem"
-                  variant="flushed"
-                  placeholder="Enter Password"
-                  value={passwordInputValue}
-                  onChange={handlePasswordChnage}
-                  onBlur={handlePasswordBlur}
-                />
-              </Box>
+              <CustomInputContainer
+                name="Password"
+                type="password"
+                placeHolder="Enter Password here."
+                inputHasError={passwordInputHasError}
+                inputValue={passwordInputValue}
+                handleChnage={handlePasswordChnage}
+                handleBlur={handlePasswordBlur}
+              />
             </Box>
 
             {/* redirect Link Box */}

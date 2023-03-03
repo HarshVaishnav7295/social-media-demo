@@ -1,5 +1,5 @@
 import { Box, Button, Input, Select, Text } from "@chakra-ui/react";
-import React from "react";
+import React, { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { userAction } from "../Redux/userReducer";
@@ -7,6 +7,7 @@ import useInput from "../Hook/UserInput";
 import { toast, ToastContainer, ToastOptions } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { RegisterAPI } from "../utils/ApiRoutes";
+import { BiHide, BiShow } from "react-icons/bi";
 export const ToastOption: ToastOptions = {
   position: "top-left",
   autoClose: 5000,
@@ -169,50 +170,28 @@ const Register = () => {
             gap="0.6rem"
           >
             {/* Input Box */}
-            <Box
-              display="flex"
-              flexDir="column"
-              justifyContent="flex-end"
-              alignItems="start"
-              width="75%"
-            >
-              <Text fontSize="0.9rem">Name:</Text>
-              <Input
-                pb="0rem"
-                fontSize="0.8rem"
-                variant="flushed"
-                focusBorderColor={nameInputHasError ? "red.300" : ""}
-                borderBottomColor={nameInputHasError ? "red.300" : ""}
-                placeholder="Enter Name"
-                value={nameInputValue}
-                onChange={handleNameChnage}
-                onBlur={handleNameBlur}
-              />
-            </Box>
+            <CustomInputContainer
+              name="Name"
+              type="text"
+              placeHolder="Enter Your Name."
+              inputHasError={nameInputHasError}
+              inputValue={nameInputValue}
+              handleChnage={handleNameChnage}
+              handleBlur={handleNameBlur}
+            />
 
             {/* Email Box */}
-            <Box
-              display="flex"
-              flexDir="column"
-              justifyContent="flex-end"
-              alignItems="start"
-              width="75%"
-            >
-              <Text fontSize="0.9rem">Email:</Text>
-              <Input
-                fontSize="0.8rem"
-                variant="flushed"
-                placeholder="Enter Email"
-                focusBorderColor={emailInputHasError ? "red.300" : ""}
-                borderBottomColor={emailInputHasError ? "red.300" : ""}
-                value={emailInputValue}
-                onChange={handleEmailChnage}
-                onBlur={handleEmailBlur}
-              />
-            </Box>
+            <CustomInputContainer
+              name="Email"
+              type="email"
+              placeHolder="Enter Email here."
+              inputHasError={emailInputHasError}
+              inputValue={emailInputValue}
+              handleChnage={handleEmailChnage}
+              handleBlur={handleEmailBlur}
+            />
+
             {/* Dob and Gender box */}
-            {/* 5:51 */}
-            {/* 3:48 */}
             <Box
               display="flex"
               flexDir="row"
@@ -253,49 +232,29 @@ const Register = () => {
               justifyContent="center"
               alignItems="center"
               flexDir="column"
-              width="100%"
+              width="91%"
             >
               {/* Password Box */}
-              <Box
-                display="flex"
-                flexDir="column"
-                justifyContent="flex-end"
-                alignItems="start"
-                width="75%"
-              >
-                <Text fontSize="0.9rem">Password:</Text>
-                <Input
-                  fontSize="0.8rem"
-                  variant="flushed"
-                  placeholder="Enter Password"
-                  focusBorderColor={passwordInputHasError ? "red.300" : ""}
-                  borderBottomColor={passwordInputHasError ? "red.300" : ""}
-                  value={passwordInputValue}
-                  onChange={handlePasswordChnage}
-                  onBlur={handlePasswordBlur}
-                />
-              </Box>
+              <CustomInputContainer
+                name="Password"
+                type="password"
+                placeHolder="Enter Password here"
+                inputHasError={passwordInputHasError}
+                inputValue={passwordInputValue}
+                handleChnage={handlePasswordChnage}
+                handleBlur={handlePasswordBlur}
+              />
 
               {/* ConfirmPassword Box */}
-              <Box
-                display="flex"
-                flexDir="column"
-                justifyContent="flex-end"
-                alignItems="start"
-                width="75%"
-              >
-                <Text fontSize="0.9rem">Confirm Password:</Text>
-                <Input
-                  fontSize="0.8rem"
-                  variant="flushed"
-                  placeholder="Enter Password"
-                  focusBorderColor={passwordConfInputHasError ? "red.300" : ""}
-                  borderBottomColor={passwordConfInputHasError ? "red.300" : ""}
-                  value={passwordConfInputValue}
-                  onChange={handleConfPasswordChnage}
-                  onBlur={handleConfPasswordBlur}
-                />
-              </Box>
+              <CustomInputContainer
+                name="Confirm Password"
+                type="password"
+                placeHolder="Enter Password again.."
+                inputHasError={passwordConfInputHasError}
+                inputValue={passwordConfInputValue}
+                handleChnage={handleConfPasswordChnage}
+                handleBlur={handleConfPasswordBlur}
+              />
             </Box>
 
             {/* redirect to login box */}
@@ -337,6 +296,81 @@ const Register = () => {
         </Box>
       </Box>
     </>
+  );
+};
+
+interface ICustomInputContainerProps {
+  name: string;
+  type: string;
+  placeHolder: string;
+  inputHasError: boolean;
+  inputValue: string;
+  handleChnage: (
+    event:
+      | React.ChangeEvent<HTMLInputElement>
+      | React.ChangeEvent<HTMLSelectElement>
+      | undefined
+  ) => void;
+  handleBlur: () => void;
+}
+
+export const CustomInputContainer = ({
+  name,
+  type,
+  placeHolder,
+  inputHasError,
+  inputValue,
+  handleChnage,
+  handleBlur,
+}: ICustomInputContainerProps) => {
+  const [isShow, setIsShow] = useState<boolean>(false);
+  return (
+    <Box
+      width="100%"
+      height="fit-content"
+      display="flex"
+      justifyContent="center"
+    >
+      <Box
+        display="flex"
+        flexDir="column"
+        justifyContent="flex-end"
+        alignItems="start"
+        width="75%"
+      >
+        <Text fontSize="0.9rem">{name}:</Text>
+        <Input
+          pb="0rem"
+          type={type === "password" ? (isShow ? "text" : "password") : type}
+          fontSize="0.8rem"
+          variant="flushed"
+          focusBorderColor={inputHasError ? "red.300" : ""}
+          borderBottomColor={inputHasError ? "red.300" : ""}
+          placeholder={placeHolder}
+          value={inputValue}
+          onChange={handleChnage}
+          onBlur={handleBlur}
+        />
+      </Box>
+      {type === "password" ? (
+        <Box
+          alignSelf="end"
+          fontSize="1.2rem"
+          height="fit-content"
+          width="fit-content"
+          px="5px"
+          py="3px"
+          _hover={{
+            backgroundColor: "#e7e7e7",
+            boxShadow: "0px 0px 5px 1px lightgray",
+          }}
+          cursor="pointer"
+          onClick={() => setIsShow(!isShow)}
+        >
+          {isShow ? <BiHide /> : <BiShow />}
+        </Box>
+      ) : null}
+    </Box>
   );
 };
 
