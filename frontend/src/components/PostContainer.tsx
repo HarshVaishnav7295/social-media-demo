@@ -41,7 +41,7 @@ const PostContainer = ({ post, user }: IPostContainerProps) => {
       };
       dispatch(findUserByIdAsync(data)).then((res) => {
         //@ts-ignore
-        setPostUser(res);
+        setPostUser(res.payload);
       });
     }
   }, []);
@@ -180,13 +180,14 @@ const PostContainer = ({ post, user }: IPostContainerProps) => {
                       id: post.createdBy,
                     };
                     dispatch(followUnfollowAsync(data)).then((res) => {
-                      if (res?.status) {
-                        setIsFollowed(!isFollowed);
-                        dispatch(setFollowingAsync(user?.token));
+                      //@ts-ignore
+                      if (res.payload.isFollowing) {
+                        setIsFollowed(true);
                       } else {
-                        setIsFollowed(isFollowed);
-                        toast.error(res?.errorMessage, ToastOption);
+                        setIsFollowed(false);
                       }
+
+                      dispatch(setFollowingAsync(user.token));
                     });
                   } else {
                     toast.error("You can't Unfollow YourSelf.", ToastOption);
@@ -219,13 +220,14 @@ const PostContainer = ({ post, user }: IPostContainerProps) => {
                       id: post.createdBy,
                     };
                     dispatch(followUnfollowAsync(data)).then((res) => {
-                      if (res?.status) {
-                        setIsFollowed(!isFollowed);
-                        dispatch(setFollowingAsync(user?.token));
+                      //@ts-ignore
+                      if (res.payload.isFollowing) {
+                        setIsFollowed(true);
                       } else {
-                        setIsFollowed(isFollowed);
-                        toast.error(res?.errorMessage, ToastOption);
+                        setIsFollowed(false);
                       }
+
+                      dispatch(setFollowingAsync(user.token));
                     });
                   } else {
                     toast.error("You can't Follow YourSelf.", ToastOption);

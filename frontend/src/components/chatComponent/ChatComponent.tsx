@@ -13,6 +13,7 @@ import { useAppDispatch, useAppSelector } from "../../Redux/store";
 import { IUser } from "../../types/reduxTypes";
 import AllChatContainer from "./AllChatContainer";
 import UserChat from "./UserChat";
+import { AccessChatApi } from "../../utils/ApiRoutes";
 const ChatContainer = () => {
   const dispatch = useAppDispatch();
   const displayedUser = useAppSelector((state) => state.user.displayedUser);
@@ -69,7 +70,7 @@ const ChatContainer = () => {
         }, 500);
       }
       if (user) {
-        const resp = await fetch("http://localhost:8000/api/chat/accessChat", {
+        const resp = await fetch(AccessChatApi, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user.token}`,

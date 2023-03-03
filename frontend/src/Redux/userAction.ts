@@ -1,5 +1,6 @@
-import { Dispatch } from "@reduxjs/toolkit";
-import { IFollow, IUser } from "../types/reduxTypes";
+import { createAsyncThunk } from "@reduxjs/toolkit";
+import { IUser } from "../types/reduxTypes";
+import axios from "axios";
 import {
   FindUserByIdApi,
   FollowUnFollowApi,
@@ -9,169 +10,157 @@ import {
   UpdateUserApi,
   UpdateUserPasswordApi,
 } from "../utils/ApiRoutes";
-import { userAction } from "./userReducer";
 
-export const updateUserAsync = (data: {
-  token: string;
-  name: string;
-  avatar: string;
-  bio: string;
-}) => {
-  return async (dispatch: Dispatch) => {
-    try {
-      console.log(data);
-      const newUser = await fetch(UpdateUserApi, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${data.token}`,
-        },
-        method: "PATCH",
-        body: JSON.stringify({
+export const updateUserAsync = createAsyncThunk(
+  "user/updateUserAsync",
+  async (data: {
+    token: string;
+    name: string;
+    avatar: string;
+    bio: string;
+  }) => {
+    const newUser = await axios
+      .patch(
+        UpdateUserApi,
+        JSON.stringify({
           name: data.name,
           avatar: data.avatar,
           bio: data.bio ? data.bio : "",
         }),
-      });
-      const newData: { updatedUser: IUser } = await newUser.json();
-      dispatch(userAction.updateUser(newData.updatedUser));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-};
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${data.token}`,
+          },
+        }
+      )
+      .then((res) => res.data)
+      .catch((error) => error);
 
-export const updateUserPasswordAsync = (data: {
-  token: string;
-  oldPassword: string;
-  newPassword: string;
-}) => {
-  return async (dispatch: Dispatch) => {
-    try {
-      const updatedUser = await fetch(UpdateUserPasswordApi, {
-        headers: {
-          Authorization: `Bearer ${data.token}`,
-          "Content-Type": "application/json",
-        },
-        method: "PATCH",
-        body: JSON.stringify({
+    return newUser.updatedUser;
+  }
+);
+
+export const updateUserPasswordAsync = createAsyncThunk(
+  "user/updateUserPasswordAsync",
+  async (data: { token: string; oldPassword: string; newPassword: string }) => {
+    const updatedUser = await axios
+      .patch(
+        UpdateUserPasswordApi,
+        JSON.stringify({
           oldPassword: data.oldPassword,
           newPassword: data.newPassword,
         }),
-      });
-      const newData: {
-        isPasswordChanged: boolean;
-        message: string;
-        errorMessage: string;
-      } = await updatedUser.json();
-      if (newData.isPasswordChanged) {
-        return newData.message;
-      } else {
-        return newData.errorMessage;
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  };
-};
+        {
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((res) => res.data)
+      .catch((error) => error);
+    return updatedUser;
+  }
+);
 
-export const setFollowingAsync = (token: string) => {
-  return async (dispatch: Dispatch) => {
-    try {
-      const following = await fetch(GetFollowingApi, {
+export const setFollowingAsync = createAsyncThunk(
+  "user/setFollowingAsync",
+  async (token: string) => {
+    const followingData = await axios
+      .get(GetFollowingApi, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        method: "GET",
-      });
-      const data: { Myfollowings: IUser[] } = await following.json();
-      dispatch(userAction.setFollowing(data.Myfollowings));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-};
+      })
+      .then((res) => res.data)
+      .catch((error) => error);
 
-export const setFollowerAsync = (token: string) => {
-  return async (dispatch: Dispatch) => {
-    try {
-      const follower = await fetch(GetFollowerApi, {
+    return followingData.Myfollowings;
+  }
+);
+
+export const setFollowerAsync = createAsyncThunk(
+  "user/setFollowerAsync",
+  async (token: string) => {
+    const followerData = await axios
+      .get(GetFollowerApi, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        method: "GET",
-      });
-      let data: { MyFollowers: IUser[] } = await follower.json();
-      dispatch(userAction.setFollower(data.MyFollowers));
-    } catch (error) {}
-  };
-};
+      })
+      .then((res) => res.data)
+      .catch((error) => error);
 
-export const followUnfollowAsync = (data: { token: string; id: string }) => {
-  return async (dispatch: Dispatch) => {
-    try {
-      const newData = await fetch(FollowUnFollowApi, {
-        headers: {
-          Authorization: `Bearer ${data.token}`,
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify({
+    return followerData.MyFollowers;
+  }
+);
+
+export const followUnfollowAsync = createAsyncThunk(
+  "user/followUnfollowAsync",
+  async (data: { token: string; id: string }) => {
+    const followData: {
+      followings: IUser[];
+      isFollowing: boolean;
+      message: string;
+      status: boolean;
+    } = await axios
+      .post(
+        FollowUnFollowApi,
+        JSON.stringify({
           id: data.id,
         }),
-      });
-      const isFollowed: {
-        status: boolean;
-        errorMessage: string;
-        followings: IFollow[];
-      } = await newData.json();
-      dispatch(userAction.updateUserFollowings(isFollowed.followings));
-      return isFollowed;
-    } catch (error) {
-      console.log(error);
-    }
-  };
-};
+        {
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((res) => res.data)
+      .catch((error) => error);
 
-export const findUserByIdAsync = (data: {
-  token: string | undefined;
-  id: string;
-}) => {
-  return async (dispatch: Dispatch) => {
-    try {
-      const postUser = await fetch(FindUserByIdApi, {
-        headers: {
-          Authorization: `Bearer ${data.token}`,
-          "Content-Type": "application/json",
-        },
-        method: "POST",
-        body: JSON.stringify({
+    return followData;
+  }
+);
+
+export const findUserByIdAsync = createAsyncThunk(
+  "user/findUserByIdAsync",
+  async (data: { token: string | undefined; id: string }) => {
+    const userData: { user: IUser } = await axios
+      .post(
+        FindUserByIdApi,
+        JSON.stringify({
           id: data.id,
         }),
-      });
-      const user: { user: IUser } = await postUser.json();
-      return user.user;
-    } catch (error) {
-      return error;
-    }
-  };
-};
+        {
+          headers: {
+            Authorization: `Bearer ${data.token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((res) => res.data)
+      .catch((error) => error);
+    return userData.user;
+  }
+);
 
-export const setAllUserAsync = (token: string) => {
-  return async (dispatch: Dispatch) => {
-    try {
-      const allUserData = await fetch(setAllUserApi, {
+export const setAllUserAsync = createAsyncThunk(
+  "user/setAllUserAsync",
+  async (token: string) => {
+    const allUserData: { allUser: IUser[] } = await axios
+      .get(setAllUserApi, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-        method: "GET",
-      });
-      const data: { allUser: IUser[] } = await allUserData.json();
-      dispatch(userAction.setAllUser(data.allUser));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-};
+      })
+      .then((res) => res.data)
+      .catch((error) => error);
+
+    return allUserData.allUser;
+  }
+);

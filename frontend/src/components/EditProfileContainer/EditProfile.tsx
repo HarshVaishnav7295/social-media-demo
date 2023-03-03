@@ -6,6 +6,8 @@ import UserDetail from "./UserDetail";
 import { updateUserAsync } from "../../Redux/userAction";
 import { IUser } from "../../types/reduxTypes";
 import { useAppDispatch } from "../../Redux/store";
+import { ToastOption } from "../Register";
+import { toast, ToastContainer } from "react-toastify";
 
 interface IEditProfileProps {
   user: IUser | undefined;
@@ -44,11 +46,24 @@ const EditProfile = ({ user }: IEditProfileProps) => {
       bio: bio ? bio : "",
       token: user?.token || "",
     };
-    dispatch(updateUserAsync(data));
+    dispatch(updateUserAsync(data))
+      .then((res) => {
+        if (res.payload) {
+          console.log(res);
+
+          toast.info("Your profile has been updated.", ToastOption);
+        } else {
+          toast.error("Something went wrong.", ToastOption);
+        }
+      })
+      .catch((error: Error) => {
+        toast.error(error.message, ToastOption);
+      });
   }
 
   return (
     <Box flexBasis="80%" paddingTop="20px">
+      <ToastContainer />
       {/* userprofile and changeimg */}
       <UserDetail
         user={user}

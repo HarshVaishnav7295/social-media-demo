@@ -1,4 +1,4 @@
-import { Dispatch } from "@reduxjs/toolkit";
+import { createAsyncThunk, Dispatch } from "@reduxjs/toolkit";
 import axios from "axios";
 import { IPost } from "../types/reduxTypes";
 import {
@@ -9,16 +9,6 @@ import {
   UploadPost,
 } from "../utils/ApiRoutes";
 import { postAction } from "./postReducer";
-
-export const getPersonalPostAsync = (token: string) => {
-  return async (dispatch: Dispatch) => {
-    const userPosts: { data: { posts: IPost[] } } = await axios.get(GetMyPost, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    //   console.log(userPosts.data.posts);
-    dispatch(postAction.setPersonalPost(userPosts.data.posts));
-  };
-};
 
 export const getFeedAsync = (token: string) => {
   return async (dispatch: Dispatch) => {
@@ -38,6 +28,24 @@ export const getFeedAsync = (token: string) => {
     }
   };
 };
+
+// export const getFeedAsync = createAsyncThunk(
+//   "post/getFeedAsync",
+//   async (token: string) => {
+//     const feedData = await axios
+//       .get(GetFeedApi, {
+//         headers: {
+//           Authorization: `Bearer ${token}`,
+//           "Content-Type": "application/json",
+//         },
+//       })
+//       .then((res) => res.data)
+//       .catch((error) => error);
+
+//     console.log(feedData.feed);
+//     return feedData.feed;
+//   }
+// );
 
 export const setNewPostAsync = (data: {
   token: string;

@@ -1,6 +1,6 @@
 import { Box, Text } from "@chakra-ui/react";
 import { useEffect } from "react";
-import { getFeedAsync, getPersonalPostAsync } from "../Redux/postAction";
+import { getFeedAsync } from "../Redux/postAction";
 import { useAppDispatch, useAppSelector } from "../Redux/store";
 import { setFollowerAsync, setFollowingAsync } from "../Redux/userAction";
 import PostContainer from "./PostContainer";
@@ -17,11 +17,10 @@ const Content = () => {
 
   useEffect(() => {
     if (isUserAuthenticated && user) {
-      dispatch(getPersonalPostAsync(user.token));
       dispatch(getFeedAsync(user.token));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, user]);
+  }, [user]);
 
   useEffect(() => {
     if (isUserAuthenticated && user) {

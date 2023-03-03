@@ -22,7 +22,7 @@ export const ToastOption: ToastOptions = {
 const Register = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  //const [isFormInvalid,setIsFormInvalid] = useState(true)
+  const [gender, setGender] = useState<string>("male");
 
   const {
     value: nameInputValue,
@@ -64,21 +64,13 @@ const Register = () => {
     reset: passwordConfReset,
   } = useInput((value) => value === passwordInputValue);
 
-  const {
-    value: genderInputValue,
-    // hasError: genderInputHasError,
-    handleEnteredValueChange: handleGenderChnage,
-    handleBlur: handleGenderBlur,
-    // reset: genderReset,
-  } = useInput((value) => value === "true");
-
   const Submitted = async () => {
     const localUserData = {
       name: nameInputValue,
       email: emailInputValue,
       password: passwordInputValue,
       dob: dobInputValue,
-      gender: genderInputValue,
+      gender,
     };
 
     let response = await fetch(RegisterAPI, {
@@ -203,13 +195,11 @@ const Register = () => {
                 <Text fontSize="0.9rem">Gender:</Text>
                 <Select
                   variant="flushed"
-                  value={genderInputValue}
-                  onChange={handleGenderChnage}
-                  onBlur={handleGenderBlur}
+                  value={gender}
+                  onChange={(e) => setGender(e.target.value)}
                 >
                   <option value="male">Male</option>
                   <option value="female">Female</option>
-                  <option value="other">Other</option>
                 </Select>
               </Box>
               <Box display="flex" flexDir="column" width="45%">

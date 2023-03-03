@@ -1,24 +1,30 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { IFollow, IInitialUserState, IUser } from "../types/reduxTypes";
-
-const storedUserString = localStorage.getItem("CLONE");
-const storedUser = (): IUser | undefined => {
-  if (typeof storedUserString === "string") {
-    const user: IUser = JSON.parse(storedUserString);
-    return user;
-  }
-};
+import { IInitialUserState, IUser } from "../types/reduxTypes";
+import {
+  followUnfollowAsync,
+  setAllUserAsync,
+  setFollowerAsync,
+  setFollowingAsync,
+  updateUserAsync,
+} from "./userAction";
 
 const initialUserState: IInitialUserState = {
-  isUserAuthenticated: storedUser() ? true : false,
+  isUserAuthenticated: localStorage.getItem("CLONE") ? true : false,
   isProfileOpen: false,
-  user: storedUser() ? storedUser() : undefined,
+  user:
+    localStorage.getItem("CLONE") === null
+      ? undefined
+      : JSON.parse(localStorage.getItem("CLONE")!),
   follower: [],
   following: [],
-  displayedUser: storedUser() ? storedUser() : undefined,
+  displayedUser:
+    localStorage.getItem("CLONE") === null
+      ? undefined
+      : JSON.parse(localStorage.getItem("CLONE")!),
   followerOfDisp: [],
   followingOfDisp: [],
   allUser: [],
+  isLoading: false,
 };
 
 const userSlice = createSlice({
@@ -41,33 +47,8 @@ const userSlice = createSlice({
       state.isProfileOpen = !state.isProfileOpen;
       state.displayedUser = state.user;
     },
-    updateUser: (state, action: { payload: IUser }) => {
-      state.user = { ...state.user, ...action.payload };
-      localStorage.removeItem("CLONE");
-      localStorage.setItem("CLONE", JSON.stringify(state.user));
-      state.isUserAuthenticated = true;
-    },
-    setFollower: (state, action: { payload: IUser[] }) => {
-      state.follower = action.payload;
-    },
-    setFollowing: (state, action: { payload: IUser[] }) => {
-      state.following = action.payload;
-    },
     setDisplayedUser: (state, action: { payload: IUser }) => {
       state.displayedUser = action.payload;
-    },
-    updateUserFollowings: (state, action: { payload: IFollow[] }) => {
-      if (state.user) {
-        state.user = {
-          ...state.user,
-          followings: action.payload,
-        };
-        localStorage.setItem("CLONE", JSON.stringify(state.user));
-        state.isUserAuthenticated = true;
-      }
-    },
-    setAllUser: (state, action: { payload: IUser[] }) => {
-      state.allUser = action.payload;
     },
     setFollowerOfDisp: (state, action: { payload: IUser }) => {
       state.followerOfDisp.push(action.payload);
@@ -84,6 +65,95 @@ const userSlice = createSlice({
     setDispFollowerFollowingEmpty: (state) => {
       state.followerOfDisp = [];
       state.followingOfDisp = [];
+    },
+  },
+  extraReducers: {
+    // ExtraReducer for UpdateUser
+    [updateUserAsync.pending.type]: (state) => {
+      state.isLoading = true;
+    },
+    [updateUserAsync.fulfilled.type]: (state, action: { payload: IUser }) => {
+      state.user = { ...state.user, ...action.payload };
+      localStorage.removeItem("CLONE");
+      localStorage.setItem("CLONE", JSON.stringify(state.user));
+      state.isUserAuthenticated = true;
+      state.isLoading = false;
+    },
+    [updateUserAsync.rejected.type]: (state) => {
+      state.isLoading = false;
+    },
+    // ExtraReducers for setFollowings
+    [setFollowingAsync.pending.type]: (state, action: { payload: IUser[] }) => {
+      state.isLoading = true;
+    },
+    [setFollowingAsync.fulfilled.type]: (
+      state,
+      action: { payload: IUser[] }
+    ) => {
+      state.following = action.payload;
+
+      state.isLoading = false;
+    },
+    [setFollowingAsync.rejected.type]: (
+      state,
+      action: { payload: IUser[] }
+    ) => {
+      state.isLoading = false;
+    },
+    // ExtraReducer for setFollowerz
+    [setFollowerAsync.pending.type]: (state) => {
+      state.isLoading = true;
+    },
+    [setFollowerAsync.fulfilled.type]: (
+      state,
+      action: { payload: IUser[] }
+    ) => {
+      state.follower = action.payload;
+      state.isLoading = false;
+    },
+    [setFollowerAsync.rejected.type]: (state) => {
+      state.isLoading = false;
+    },
+    // ExtraReducers for Follow unFollow
+    [followUnfollowAsync.pending.type]: (state) => {
+      state.isLoading = true;
+    },
+    [followUnfollowAsync.fulfilled.type]: (
+      state,
+      action: {
+        payload: {
+          followings: IUser[];
+          isFollowing: boolean;
+          message: string;
+          status: boolean;
+        };
+      }
+    ) => {
+      if (state.user) {
+        state.user = {
+          ...state.user,
+          followings: action.payload.followings,
+        };
+        localStorage.setItem("CLONE", JSON.stringify(state.user));
+        state.isUserAuthenticated = true;
+      }
+
+      state.isLoading = true;
+    },
+    [followUnfollowAsync.rejected.type]: (state) => {
+      state.isLoading = false;
+    },
+    // ExtraReducer for getAllUser
+    [setAllUserAsync.pending.type]: (state) => {
+      state.isLoading = true;
+    },
+    [setAllUserAsync.fulfilled.type]: (state, action: { payload: IUser[] }) => {
+      state.allUser = action.payload;
+
+      state.isLoading = false;
+    },
+    [setAllUserAsync.rejected.type]: (state) => {
+      state.isLoading = false;
     },
   },
 });

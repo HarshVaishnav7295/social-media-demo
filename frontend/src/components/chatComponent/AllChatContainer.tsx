@@ -6,7 +6,7 @@ import { Socket } from "socket.io-client";
 import { addOneChatAsync } from "../../Redux/chatAction";
 import { useAppDispatch, useAppSelector } from "../../Redux/store";
 import { IChat, IUser } from "../../types/reduxTypes";
-import { FindUserByIdApi } from "../../utils/ApiRoutes";
+import { FindUserByIdApi, MarkAsReadApi } from "../../utils/ApiRoutes";
 import InputContainer from "./InputContainer";
 
 interface IAllChatContainerProps {
@@ -38,7 +38,7 @@ const AllChatContainer = ({
         data.newMessage.receiver.toString() === user?._id.toString()
       ) {
         dispatch(addOneChatAsync(data.newMessage));
-        let resp = await fetch("http://localhost:8000/api/chat/markRead", {
+        let resp = await fetch(MarkAsReadApi, {
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${user?.token}`,

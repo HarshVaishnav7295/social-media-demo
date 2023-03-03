@@ -48,15 +48,14 @@ const EditPassword = ({ user }: IEditPasswordProps) => {
         newPassword: confPassInputValue,
       };
 
-      dispatch(updateUserPasswordAsync(data))
-        .then((newdata) => {
-          if (newdata === "Invalid Credentials") {
-            toast.error(newdata, ToastOption);
-          } else {
-            toast.info("Password has been changed.", ToastOption);
-          }
-        })
-        .catch((error) => {});
+      dispatch(updateUserPasswordAsync(data)).then((res) => {
+        //@ts-ignore
+        if (res.payload.isPasswordChanged) {
+          toast.info("Password has been changed", ToastOption);
+        } else {
+          toast.error("something went wrong.", ToastOption);
+        }
+      });
 
       handleOldPasswordReset();
       handleConfPassReset();
