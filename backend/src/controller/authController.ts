@@ -1,7 +1,7 @@
 import {Request,Response} from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { User } from '../models/User'
-import { generateToken } from '../utils/tokenGenerator'
+import { generateToken, refreshTokenSecret } from '../utils/tokenGenerator'
 import jwt from 'jsonwebtoken'
 import nodemailer from 'nodemailer'
 //const SEND_GRID_KEY = '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'
@@ -38,7 +38,7 @@ export const signupUser = async(req:Request,res:Response):Promise<void>=>{
                 })
             }
             else{
-                const user = await User.create({
+                const userWithoutToken = await User.create({
                     name:name,
                     email:email,
                     password:password,
@@ -48,22 +48,24 @@ export const signupUser = async(req:Request,res:Response):Promise<void>=>{
                     avatar:avatar
                 })
                 
-                //const {accessToken,refreshToken} = await generateToken(user._id)
-                const token = await generateToken(user._id)
+                const {accessToken,refreshToken} = await generateToken(userWithoutToken._id)
+                const user = await User.findByIdAndUpdate(userWithoutToken._id,{
+                    refreshToken : refreshToken
+                })
+                //const token = await generateToken(user._id)
                 res.status(StatusCodes.CREATED).json({
                     user : {
-                        _id : user._id,
-                        name : user.name,
-                        email : user.email,
-                        dob : user.dob,
-                        gender : user.gender,
-                        bio : user.bio,
-                        avatar:user.avatar,
-                        followings : user.followings,
-                        followers : user.followers,
-                        token:token
-                        //accessToken : accessToken,
-                        //refreshToken : refreshToken
+                        _id : user?._id,
+                        name : user?.name,
+                        email : user?.email,
+                        dob : user?.dob,
+                        gender : user?.gender,
+                        bio : user?.bio,
+                        avatar:user?.avatar,
+                        followings : user?.followings,
+                        followers : user?.followers,
+                        accessToken : accessToken,
+                        refreshToken : refreshToken
                     }
                 })
             }
@@ -84,33 +86,34 @@ export const loginUser = async(req:Request,res:Response):Promise<void>=>{
                 "errorMessage":"email,password are required."
             })
         }else{
-            const user = await User.findOne({
+            const userWithoutToken = await User.findOne({
                 email : email
             })
-            if(!user){
+            if(!userWithoutToken){
                 res.status(StatusCodes.BAD_REQUEST).json({
                     "errorMessage":"No user with provided email."
                 })
             }
             else{
-                const correctCredentials = await user.comparePassword(password)
+                const correctCredentials = await userWithoutToken.comparePassword(password)
                 if(correctCredentials){
-                    const token = await generateToken(user._id)
-                    //const {accessToken,refreshToken} = await generateToken(user._id)
+                    const {accessToken,refreshToken} = await generateToken(userWithoutToken._id)
+                    const user = await User.findByIdAndUpdate(userWithoutToken._id,{
+                        refreshToken : refreshToken
+                    })
                     res.status(StatusCodes.OK).json({
                         user : {
-                            _id : user._id,
-                            name : user.name,
-                            email : user.email,
-                            dob : user.dob,
-                            gender : user.gender,
-                            bio : user.bio,
-                            avatar : user.avatar,
-                            followings : user.followings,
-                            followers : user.followers,
-                            token:token
-                            //accessToken : accessToken,
-                            //refreshToken : refreshToken
+                            _id : user?._id,
+                            name : user?.name,
+                            email : user?.email,
+                            dob : user?.dob,
+                            gender : user?.gender,
+                            bio : user?.bio,
+                            avatar : user?.avatar,
+                            followings : user?.followings,
+                            followers : user?.followers,
+                            accessToken : accessToken,
+                            refreshToken : refreshToken
                         }
                     })
                 }
@@ -161,7 +164,7 @@ export const forgotPassword = async(req:Request,res:Response):Promise<void>=>{
                     "errorMessage":error
                 })
             }else{
-                console.log('Message sent : ',info.messageId)
+                //console.log('Message sent : ',info.messageId)
                 res.status(StatusCodes.OK).json({
                     "status":info.messageId
                 })
@@ -226,3 +229,29 @@ export const refreshToken = async(req:Request,res:Response):Promise<void>=>{
         })
     }
 }*/
+
+
+export const getNewAccessToken = async(req:Request,res:Response):Promise<void>=>{
+    try{
+        const {accessToken,refreshToken} = req.body as {accessToken:string,refreshToken:string}
+        const decoded = jwt.verify(refreshToken,refreshTokenSecret)
+        if(decoded.data.id){
+            const {accessToken} = await generateToken(decoded.data.id)
+
+            console.log('New token generated')
+            res.status(StatusCodes.OK).json({
+                "accessToken":accessToken,
+                "refreshToken":refreshToken
+            })
+        }else{
+            res.status(StatusCodes.BAD_REQUEST).json({
+                "errorMessage":"Invalid refresh token"
+            })
+        }
+
+    }catch(error){
+        res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+            "errorMessage":error
+        })
+    }
+}

@@ -20,8 +20,9 @@ const Content = () => {
   useEffect(() => {
     if (isUserAuthenticated && user) {
       setIsLoading(true);
-      dispatch(getPersonalPostAsync(user.token));
-      dispatch(getFeedAsync(user.token));
+      dispatch(getPersonalPostAsync(user.accessToken));
+      dispatch(getFeedAsync(user.accessToken));
+      console.log(allPosts)
       setIsLoading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -31,8 +32,8 @@ const Content = () => {
     if (isUserAuthenticated) {
       setIsLoading(true);
 
-      dispatch(setFollowingAsync(user.token));
-      dispatch(setFollowerAsync(user.token));
+      dispatch(setFollowingAsync(user.accessToken));
+      dispatch(setFollowerAsync(user.accessToken));
       setIsLoading(false);
     }
   }, [dispatch, isUserAuthenticated, user]);

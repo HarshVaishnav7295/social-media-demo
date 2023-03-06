@@ -28,7 +28,7 @@ const EditProfile = (props) => {
       name,
       avatar: avatar ? avatar : "",
       bio: bio ? bio : "",
-      token: props.user.token,
+      token: props.user.accessToken,
     };
     dispatch(updateUserAsync(data));
   }

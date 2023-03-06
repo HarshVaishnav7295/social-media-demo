@@ -12,10 +12,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.forgotPassword = exports.checkProtectedRoute = exports.loginUser = exports.signupUser = void 0;
+exports.getNewAccessToken = exports.forgotPassword = exports.checkProtectedRoute = exports.loginUser = exports.signupUser = void 0;
 const http_status_codes_1 = require("http-status-codes");
 const User_1 = require("../models/User");
 const tokenGenerator_1 = require("../utils/tokenGenerator");
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const nodemailer_1 = __importDefault(require("nodemailer"));
 const signupUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -35,7 +36,7 @@ const signupUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                 });
             }
             else {
-                const user = yield User_1.User.create({
+                const userWithoutToken = yield User_1.User.create({
                     name: name,
                     email: email,
                     password: password,
@@ -44,22 +45,24 @@ const signupUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
                     bio: bio,
                     avatar: avatar
                 });
-                //const {accessToken,refreshToken} = await generateToken(user._id)
-                const token = yield (0, tokenGenerator_1.generateToken)(user._id);
+                const { accessToken, refreshToken } = yield (0, tokenGenerator_1.generateToken)(userWithoutToken._id);
+                const user = yield User_1.User.findByIdAndUpdate(userWithoutToken._id, {
+                    refreshToken: refreshToken
+                });
+                //const token = await generateToken(user._id)
                 res.status(http_status_codes_1.StatusCodes.CREATED).json({
                     user: {
-                        _id: user._id,
-                        name: user.name,
-                        email: user.email,
-                        dob: user.dob,
-                        gender: user.gender,
-                        bio: user.bio,
-                        avatar: user.avatar,
-                        followings: user.followings,
-                        followers: user.followers,
-                        token: token
-                        //accessToken : accessToken,
-                        //refreshToken : refreshToken
+                        _id: user === null || user === void 0 ? void 0 : user._id,
+                        name: user === null || user === void 0 ? void 0 : user.name,
+                        email: user === null || user === void 0 ? void 0 : user.email,
+                        dob: user === null || user === void 0 ? void 0 : user.dob,
+                        gender: user === null || user === void 0 ? void 0 : user.gender,
+                        bio: user === null || user === void 0 ? void 0 : user.bio,
+                        avatar: user === null || user === void 0 ? void 0 : user.avatar,
+                        followings: user === null || user === void 0 ? void 0 : user.followings,
+                        followers: user === null || user === void 0 ? void 0 : user.followers,
+                        accessToken: accessToken,
+                        refreshToken: refreshToken
                     }
                 });
             }
@@ -81,33 +84,34 @@ const loginUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             });
         }
         else {
-            const user = yield User_1.User.findOne({
+            const userWithoutToken = yield User_1.User.findOne({
                 email: email
             });
-            if (!user) {
+            if (!userWithoutToken) {
                 res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
                     "errorMessage": "No user with provided email."
                 });
             }
             else {
-                const correctCredentials = yield user.comparePassword(password);
+                const correctCredentials = yield userWithoutToken.comparePassword(password);
                 if (correctCredentials) {
-                    const token = yield (0, tokenGenerator_1.generateToken)(user._id);
-                    //const {accessToken,refreshToken} = await generateToken(user._id)
+                    const { accessToken, refreshToken } = yield (0, tokenGenerator_1.generateToken)(userWithoutToken._id);
+                    const user = yield User_1.User.findByIdAndUpdate(userWithoutToken._id, {
+                        refreshToken: refreshToken
+                    });
                     res.status(http_status_codes_1.StatusCodes.OK).json({
                         user: {
-                            _id: user._id,
-                            name: user.name,
-                            email: user.email,
-                            dob: user.dob,
-                            gender: user.gender,
-                            bio: user.bio,
-                            avatar: user.avatar,
-                            followings: user.followings,
-                            followers: user.followers,
-                            token: token
-                            //accessToken : accessToken,
-                            //refreshToken : refreshToken
+                            _id: user === null || user === void 0 ? void 0 : user._id,
+                            name: user === null || user === void 0 ? void 0 : user.name,
+                            email: user === null || user === void 0 ? void 0 : user.email,
+                            dob: user === null || user === void 0 ? void 0 : user.dob,
+                            gender: user === null || user === void 0 ? void 0 : user.gender,
+                            bio: user === null || user === void 0 ? void 0 : user.bio,
+                            avatar: user === null || user === void 0 ? void 0 : user.avatar,
+                            followings: user === null || user === void 0 ? void 0 : user.followings,
+                            followers: user === null || user === void 0 ? void 0 : user.followers,
+                            accessToken: accessToken,
+                            refreshToken: refreshToken
                         }
                     });
                 }
@@ -158,7 +162,7 @@ const forgotPassword = (req, res) => __awaiter(void 0, void 0, void 0, function*
                 });
             }
             else {
-                console.log('Message sent : ', info.messageId);
+                //console.log('Message sent : ',info.messageId)
                 res.status(http_status_codes_1.StatusCodes.OK).json({
                     "status": info.messageId
                 });
@@ -222,4 +226,29 @@ export const refreshToken = async(req:Request,res:Response):Promise<void>=>{
             "errorMessage":error
         })
     }
-}*/ 
+}*/
+const getNewAccessToken = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const { accessToken, refreshToken } = req.body;
+        const decoded = jsonwebtoken_1.default.verify(refreshToken, tokenGenerator_1.refreshTokenSecret);
+        if (decoded.data.id) {
+            const { accessToken } = yield (0, tokenGenerator_1.generateToken)(decoded.data.id);
+            console.log('New token generated');
+            res.status(http_status_codes_1.StatusCodes.OK).json({
+                "accessToken": accessToken,
+                "refreshToken": refreshToken
+            });
+        }
+        else {
+            res.status(http_status_codes_1.StatusCodes.BAD_REQUEST).json({
+                "errorMessage": "Invalid refresh token"
+            });
+        }
+    }
+    catch (error) {
+        res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({
+            "errorMessage": error
+        });
+    }
+});
+exports.getNewAccessToken = getNewAccessToken;

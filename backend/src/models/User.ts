@@ -12,6 +12,7 @@ export interface IUser {
   avatar: string;
   followers: IUserRef[];
   followings: IUserRef[];
+  refreshtoken : string;
   comparePassword(enteredPassword: string): Promise<boolean>;
 }
 
@@ -59,6 +60,7 @@ const userSchema = new Schema(
         },
       },
     ],
+    refreshToken : String,
   },
   { timestamps: true }
 );

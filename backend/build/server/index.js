@@ -25,7 +25,7 @@ const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const Message_1 = require("../models/Message");
 const app = (0, express_1.default)();
-app.use(express_1.default.json());
+app.use(express_1.default.json({ limit: '50mb' }));
 app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));
 app.use((0, cors_1.default)());
 app.use('/api/auth', authRouter_1.router);
@@ -40,16 +40,16 @@ const io = new socket_io_1.Server(server, {
     }
 });
 io.on('connection', (socket) => {
-    console.log('Connection successful with : ', socket.id);
+    //console.log('Connection successful with : ',socket.id)
     socket.on('setup', (id) => {
         // creating room for current user
         socket.join(id);
-        console.log("User : ", id, " has joined the room : ", id);
+        //console.log("User : ",id," has joined the room : ",id)
         //console.log(data)
     });
     socket.on('Leave Room', (data) => {
         socket.leave(data);
-        console.log('User has left the room : ', data);
+        //console.log('User has left the room : ',data)
     });
     /*socket.on('Join Room',async(data:{chatId : string,users:{_id : string}[]})=>{
         socket.join(data.chatId)
@@ -66,7 +66,7 @@ io.on('connection', (socket) => {
     socket.on('Join Room', function (data) {
         return __awaiter(this, void 0, void 0, function* () {
             socket.join(data.roomId);
-            console.log("User has joined the room : ", data.roomId);
+            //console.log("User has joined the room : ",data.roomId)
             /*const messages = await Message.find({
                 sender : { $in : [ data.roomId,data.currUserId ] },
                 receiver : { $in : [ data.roomId,data.currUserId ] }
@@ -102,13 +102,13 @@ io.on('connection', (socket) => {
     })*/
     socket.on('sendMessage', function (data, cb) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(data);
+            //console.log(data)
             const message = yield Message_1.Message.create({
                 text: data.text,
                 sender: data.sender,
                 receiver: data.receiver
             });
-            io.to(data.receiver.toString()).emit('MessagesUpdated', { "newMessage": message });
+            socket.to(data.receiver.toString()).emit('MessagesUpdated', { "newMessage": message });
             cb(message);
             /*console.log("Message : ",message)
             console.log("RoomID : ",roomId)

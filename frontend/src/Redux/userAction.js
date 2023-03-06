@@ -8,11 +8,11 @@ import {
   UpdateUserPasswordApi,
 } from "../utils/ApiRoutes";
 import { userAction } from "./userReducer";
-
+import { setNewAccessToken } from "../utils/setNewAccessToken";
 export const updateUserAsync = (data) => {
   return async (dispatch) => {
     try {
-      console.log(data);
+      //console.log(data);
       const newUser = await fetch(UpdateUserApi, {
         headers: {
           "Content-Type": "application/json",
@@ -25,8 +25,18 @@ export const updateUserAsync = (data) => {
           bio: data.bio,
         }),
       });
-      const newData = await newUser.json();
-      dispatch(userAction.updateUser(newData.updatedUser));
+      if(newUser.status === 401){
+        const error =await newUser.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          data.token = newToken
+          dispatch(updateUserAsync(data))
+        }
+        console.log(error.errorMessage)
+      }else{
+        const newData = await newUser.json();
+        dispatch(userAction.updateUser(newData.updatedUser));
+      }
     } catch (error) {
       console.log(error);
     }
@@ -47,11 +57,23 @@ export const updateUserPasswordAsync = (data) => {
           newPassword: data.newPassword,
         }),
       });
-      const newData = await updatedUser.json();
-      if (newData.isPasswordChanged) {
-        return newData.message;
-      } else {
-        return newData.errorMessage;
+      if(updatedUser.status === 401){
+        const error =await updatedUser.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          data.token = newToken
+          dispatch(updateUserPasswordAsync(data))
+        }
+        else{
+          return error.errorMessage;
+        }
+      }else{
+        const newData = await updatedUser.json();
+        if (newData.isPasswordChanged) {
+          return newData.message;
+        } else {
+          return newData.errorMessage;
+        }
       }
     } catch (error) {
       console.log(error);
@@ -69,8 +91,17 @@ export const setFollowingAsync = (token) => {
         },
         method: "GET",
       });
-      let data = await following.json();
-      dispatch(userAction.setFollowing(data.Myfollowings));
+      if(following.status === 401){
+        const error =await following.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          dispatch(setFollowingAsync(newToken))
+        }
+      }else{
+
+        let data = await following.json();
+        dispatch(userAction.setFollowing(data.Myfollowings));
+      }
     } catch (error) {
       console.log(error);
     }
@@ -87,8 +118,17 @@ export const setFollowerAsync = (token) => {
         },
         method: "GET",
       });
-      let data = await follower.json();
-      dispatch(userAction.setFollower(data.MyFollowers));
+      if(follower.status === 401){
+        const error =await follower.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          dispatch(setFollowerAsync(newToken))
+        }
+      }else{
+
+        let data = await follower.json();
+        dispatch(userAction.setFollower(data.MyFollowers));
+      }
     } catch (error) {}
   };
 };
@@ -106,9 +146,19 @@ export const followUnfollowAsync = (data) => {
           id: data.id,
         }),
       });
-      const isFollowed = await newData.json();
-      dispatch(userAction.updateUserFollowings(isFollowed.followings));
-      return isFollowed;
+      if(newData.status === 401){
+        const error =await newData.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          data.token = newToken
+          dispatch(followUnfollowAsync(data))
+        }
+      }else{
+
+        const isFollowed = await newData.json();
+        dispatch(userAction.updateUserFollowings(isFollowed.followings));
+        return isFollowed;
+      }
     } catch (error) {
       console.log(error);
     }
@@ -128,8 +178,18 @@ export const findUserByIdAsync = (data) => {
           id: data.id,
         }),
       });
-      const user = await postUser.json();
-      return user.user;
+      if(postUser.status === 401){
+        const error =await postUser.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          data.token = newToken
+          dispatch(findUserByIdAsync(data))
+        }
+      }else{
+
+        const user = await postUser.json();
+        return user.user;
+      }
     } catch (error) {
       return error;
     }
@@ -146,8 +206,18 @@ export const setAllUserAsync = (token) => {
         },
         method: "GET",
       });
-      const data = await allUserData.json();
-      dispatch(userAction.setAllUser(data.allUser));
+      if(allUserData.status === 401){
+        const error =await allUserData.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          
+          dispatch(setAllUserAsync(newToken))
+        }
+      }else{
+
+        const data = await allUserData.json();
+        dispatch(userAction.setAllUser(data.allUser));
+      }
     } catch (error) {
       console.log(error);
     }

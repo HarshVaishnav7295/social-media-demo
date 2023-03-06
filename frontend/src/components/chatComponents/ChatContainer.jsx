@@ -11,7 +11,7 @@ import FollowingUser from "../FollowingUser";
 import { RiSendPlaneFill } from "react-icons/ri";
 import { BsEmojiSmileFill, BsCheck2All, BsCheck } from "react-icons/bs";
 import EmojiPicker from "emoji-picker-react";
-import { addOneChatAsync } from "../../Redux/chatAction";
+import { addOneChatAsync, markReadAsync, setNotificationAsync,accessChatAsync } from "../../Redux/chatAction";
 import { setFollowingAsync, setFollowerAsync } from "../../Redux/userAction";
 import { io } from "socket.io-client";
 import { Img, Text } from "@chakra-ui/react";
@@ -19,6 +19,7 @@ import { setAllChatAsync } from "../../Redux/chatAction";
 import { AiOutlineSearch } from "react-icons/ai";
 import { ToastContainer, toast } from "react-toastify";
 import { FindUserByIdApi } from "../../utils/ApiRoutes";
+import { setNewAccessToken } from "../../utils/setNewAccessToken";
 const ChatContainer = () => {
   const dispatch = useDispatch();
   const displayedUser = useSelector((state) => state.user.displayedUser);
@@ -34,6 +35,7 @@ const ChatContainer = () => {
   const [clickedFollowingUser, setClickedFollowingUser] = useState({});
   const roomId = useSelector((state)=>state.chat.roomId)
   //const [roomId, setRoomId] = useState("");
+  const chats = useSelector((state)=>state.chat.chat)
 
   useEffect(() => {
     if (socket === null) {
@@ -65,9 +67,9 @@ const ChatContainer = () => {
           socket.emit("Leave Room", clickedFollowingUser._id);
         }
       }
-      console.log("FollowingUserId:", followingUserProp._id);
+      //console.log("FollowingUserId:", followingUserProp._id);
       dispatch(chatAction.setRoomId(followingUserProp._id));
-      console.log("RoomId:", followingUserProp._id);
+      //console.log("RoomId:", followingUserProp._id);
 
       setClickedFollowingUser(followingUserProp);
       // if (socket) {
@@ -77,29 +79,9 @@ const ChatContainer = () => {
       //     console.log(roomId);
       //   }, 500);
       // }
-      let resp = await fetch("http://localhost:8000/api/chat/accessChat", {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${user.token}`,
-        },
-        method: "POST",
-        body: JSON.stringify({
-          users: [followingUserProp._id, user._id],
-        }),
-      });
-      if (resp.status === 500) {
-        let error = await resp.json();
-        console.log(error.errorMessage);
-      } else if (resp.status === 200) {
-        let data = await resp.json();
-        // console.log(data.chat)
-        if (socket) {
-          if(followingUserProp._id !== undefined){
-            socket.emit("Join Room", {roomId : followingUserProp._id});
-          }
-        }
-        dispatch(setAllChatAsync(data.chat));
-      }
+      
+      dispatch(accessChatAsync({socket,followingUserProp,user}))
+      console.log(chats)
     }
   const isUserAuthenticated = useSelector(
     (state) => state.user.isUserAuthenticated
@@ -116,8 +98,8 @@ const ChatContainer = () => {
       dispatch(chatAction.changeFollowerShowing());
     }
     if (isUserAuthenticated) {
-      dispatch(setFollowingAsync(user.token));
-      dispatch(setFollowerAsync(user.token));
+      dispatch(setFollowingAsync(user.accessToken));
+      dispatch(setFollowerAsync(user.accessToken));
     }
   }, [dispatch]);
 
@@ -507,21 +489,7 @@ const AllChatContainer = ({
         data.newMessage.receiver.toString() === user._id.toString()
       ) {
         dispatch(addOneChatAsync(data.newMessage));
-        let resp = await fetch("http://localhost:8000/api/chat/markRead", {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-          method: "POST",
-          body: JSON.stringify({
-            id: data.newMessage._id,
-          }),
-        });
-        if (resp.status === 500) {
-          console.log("Error");
-        } else if (resp.status === 200) {
-          setIsRead(true);
-        }
+        dispatch(markReadAsync({data,user,setIsRead}))
       } else {
         //console.log('New message from user : ',data.newMessage.sender.toString())
         //setNotification(data.newMessage.sender.toString())
@@ -530,24 +498,7 @@ const AllChatContainer = ({
           data.newMessage.sender.toString() !== user._id.toString() &&
           data.newMessage.receiver.toString() === user._id.toString()
         ) {
-          //console.log(data.newMessage)
-          const resp = await fetch(FindUserByIdApi, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${user.token}`,
-            },
-            method: "POST",
-            body: JSON.stringify({
-              id: data.newMessage.sender,
-            }),
-          });
-          if (resp.status === 500) {
-            console.log("Error");
-          }
-          const messageSenderUser = await resp.json();
-          //console.log(messageSenderUser)
-          toast.info(`New Message From : ${messageSenderUser.user.name}`);
-          //console.log('not')
+          dispatch(setNotificationAsync({data,user}))
         }
       }
     });
@@ -822,15 +773,9 @@ const AllChatContainer = ({
                         : new Date(chat.createdAt).getMinutes()} */}
                       {getTime(chat.createdAt)}
                       {chat.sender === user._id ? (
-                        isRead ? (
-                          <Box fontSize="0.8rem" ml="0px" mr="-2px" mb="1px">
-                            <BsCheck2All color="#00a3e6" />
-                          </Box>
-                        ) : (
-                          <Box fontSize="0.8rem" ml="0px" mr="-2px" mb="1px">
-                            <BsCheck />
-                          </Box>
-                        )
+                        <Box fontSize="0.8rem" ml="0px" mr="-2px" mb="1px">
+                          <BsCheck />
+                        </Box>
                       ) : null}
                     </Box>
                   </Box>

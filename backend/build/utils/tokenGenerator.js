@@ -12,11 +12,13 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.generateToken = exports.PK = void 0;
+exports.generateToken = exports.accessTokenSecret = exports.refreshTokenSecret = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
-exports.PK = "tsnodeexpress@1234@1234";
+exports.refreshTokenSecret = 'tsnodeexpress@refresh@1234@1234';
+exports.accessTokenSecret = 'tsnodeexpress@access@1234@1234';
 const generateToken = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const token = jsonwebtoken_1.default.sign({ data: { id: id } }, exports.PK, { expiresIn: "24h" });
-    return token;
+    const accessToken = jsonwebtoken_1.default.sign({ data: { id: id } }, exports.accessTokenSecret, { expiresIn: "120s" });
+    const refreshToken = jsonwebtoken_1.default.sign({ data: { id: id } }, exports.refreshTokenSecret, { expiresIn: "3d" });
+    return { accessToken, refreshToken };
 });
 exports.generateToken = generateToken;

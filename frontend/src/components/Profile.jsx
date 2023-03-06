@@ -42,7 +42,7 @@ const Profile = ({ showUser }) => {
       if (showUser?._id !== user?._id) {
         showUser?.followers.map((_followerId) => {
         dispatch(
-          findUserByIdAsync({ id: _followerId._id, token: user?.token })
+          findUserByIdAsync({ id: _followerId._id, token: user?.accessToken })
           // @ts-ignore
           ).then((res) => {
             // console.log(res);
@@ -52,7 +52,7 @@ const Profile = ({ showUser }) => {
         
         showUser?.followings.map((_followingId) => {
           dispatch(
-            findUserByIdAsync({ id: _followingId._id, token: user?.token })
+            findUserByIdAsync({ id: _followingId._id, token: user?.accessToken })
             //@ts-ignore
             ).then((res) => {
               dispatch(userAction.setFollowingOfDisp(res));
@@ -106,7 +106,7 @@ const Profile = ({ showUser }) => {
 
       if (user) {
         const data = {
-          token: user.token,
+          token: user.accessToken,
           _id: showUser._id,
         };
         dispatch(getUserPostAsync(data)).then((res) => {
@@ -129,8 +129,8 @@ const Profile = ({ showUser }) => {
   const handleUserClick = (followUser) => {
     dispatch(userAction.setDisplayedUser(followUser));
     if (user) {
-      dispatch(setFollowingAsync(user.token));
-      dispatch(setFollowerAsync(user.token));
+      dispatch(setFollowingAsync(user.accessToken));
+      dispatch(setFollowerAsync(user.accessToken));
     }
   };
 
@@ -244,7 +244,7 @@ const Profile = ({ showUser }) => {
             cursor="pointer"
             onClick={() => {
               setIsFollowerSelected(true);
-              if (user) dispatch(setFollowerAsync(user?.token));
+              if (user) dispatch(setFollowerAsync(user?.accessToken));
             }}
           >
             <Box
@@ -285,7 +285,7 @@ const Profile = ({ showUser }) => {
             cursor="pointer"
             onClick={() => {
               setIsFollowerSelected(false);
-              if (user) dispatch(setFollowingAsync(user?.token));
+              if (user) dispatch(setFollowingAsync(user?.accessToken));
             }}
           >
             <Box
@@ -339,7 +339,7 @@ const Profile = ({ showUser }) => {
                     setIsFollowed(false);
                     if (user && showUser) {
                       const followdata = {
-                        token: user.token,
+                        token: user.accessToken,
                         id: showUser._id,
                       };
                       dispatch(followUnfollowAsync(followdata)).then((res) => {
@@ -368,7 +368,7 @@ const Profile = ({ showUser }) => {
                     setIsFollowed(true);
                     if (user && showUser) {
                       const followdata = {
-                        token: user.token,
+                        token: user.accessToken,
                         id: showUser._id,
                       };
                       dispatch(followUnfollowAsync(followdata)).then((res) => {
