@@ -59,7 +59,7 @@ const Navbar = ({ showBell, notificationCount }: INavbarProps) => {
       const data = {
         img: imgLink,
         desc: caption,
-        token: user.token,
+        token: user.accessToken,
       };
       dispatch(setNewPostAsync(data));
       setCaption("");
@@ -196,7 +196,7 @@ const Navbar = ({ showBell, notificationCount }: INavbarProps) => {
             transition="200ms"
             onClick={() => {
               if (user) {
-                isUserAuthenticated && dispatch(getFeedAsync(user.token));
+                isUserAuthenticated && dispatch(getFeedAsync(user.accessToken));
                 if (isProfileOpen) {
                   dispatch(userAction.changeProfileVisiblity());
                 }

@@ -1,6 +1,3 @@
-import { createAsyncThunk } from "@reduxjs/toolkit";
-import { IUser } from "../types/reduxTypes";
-import axios from "axios";
 import {
   FindUserByIdApi,
   FollowUnFollowApi,
@@ -10,157 +7,241 @@ import {
   UpdateUserApi,
   UpdateUserPasswordApi,
 } from "../utils/ApiRoutes";
-
-export const updateUserAsync = createAsyncThunk(
-  "user/updateUserAsync",
-  async (data: {
-    token: string;
-    name: string;
-    avatar: string;
-    bio: string;
-  }) => {
-    const newUser = await axios
-      .patch(
-        UpdateUserApi,
-        JSON.stringify({
+import { userAction } from "./userReducer";
+import { setNewAccessToken } from "../utils/setNewAccessToken";
+import { Dispatch } from "@reduxjs/toolkit";
+export const updateUserAsync = (data: {token:string,name:string,avatar:string,bio:string}) => {
+  return async (dispatch:Dispatch) => {
+    try {
+      //console.log(data);
+      const newUser = await fetch(UpdateUserApi, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data.token}`,
+        },
+        method: "PATCH",
+        body: JSON.stringify({
           name: data.name,
           avatar: data.avatar,
-          bio: data.bio ? data.bio : "",
+          bio: data.bio,
         }),
-        {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${data.token}`,
-          },
+      });
+      if(newUser.status === 401){
+        const error =await newUser.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          const newProp = {
+            token: newToken,
+            name: data.name,
+            avatar: data.avatar,
+            bio: data.bio
+          }
+          // @ts-ignore
+          dispatch(updateUserAsync(newProp))
         }
-      )
-      .then((res) => res.data)
-      .catch((error) => error);
+        console.log(error.errorMessage)
+      }else{
+        const newData = await newUser.json();
+        dispatch(userAction.updateUser(newData.updatedUser));
+        return newData.updatedUser
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
 
-    return newUser.updatedUser;
-  }
-);
-
-export const updateUserPasswordAsync = createAsyncThunk(
-  "user/updateUserPasswordAsync",
-  async (data: { token: string; oldPassword: string; newPassword: string }) => {
-    const updatedUser = await axios
-      .patch(
-        UpdateUserPasswordApi,
-        JSON.stringify({
+export const updateUserPasswordAsync = (data: {token:string, oldPassword: string, newPassword:string}) => {
+  return async (dispatch:Dispatch) => {
+    try {
+      const updatedUser = await fetch(UpdateUserPasswordApi, {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+          "Content-Type": "application/json",
+        },
+        method: "PATCH",
+        body: JSON.stringify({
           oldPassword: data.oldPassword,
           newPassword: data.newPassword,
         }),
-        {
-          headers: {
-            Authorization: `Bearer ${data.token}`,
-            "Content-Type": "application/json",
-          },
+      });
+      if(updatedUser.status === 401){
+        const error =await updatedUser.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken:string = await setNewAccessToken(dispatch)
+          const newProp = {
+            ...data,
+            token:newToken
+          }
+          // @ts-ignore
+          dispatch(updateUserPasswordAsync(newProp))
         }
-      )
-      .then((res) => res.data)
-      .catch((error) => error);
-    return updatedUser;
-  }
-);
+        else{
+          return error.errorMessage;
+        }
+      }else{
+        const newData = await updatedUser.json();
+        if (newData.isPasswordChanged) {
+          return newData.message;
+        } else {
+          return newData.errorMessage;
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
 
-export const setFollowingAsync = createAsyncThunk(
-  "user/setFollowingAsync",
-  async (token: string) => {
-    const followingData = await axios
-      .get(GetFollowingApi, {
+export const setFollowingAsync = (token:string) => {
+  return async (dispatch:Dispatch) => {
+    try {
+      const following = await fetch(GetFollowingApi, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      })
-      .then((res) => res.data)
-      .catch((error) => error);
+        method: "GET",
+      });
+      if(following.status === 401){
+        const error =await following.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          // @ts-ignore
+          dispatch(setFollowingAsync(newToken))
+        }
+      }else{
 
-    return followingData.Myfollowings;
-  }
-);
+        let data = await following.json();
+        dispatch(userAction.setFollowing(data.Myfollowings));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
 
-export const setFollowerAsync = createAsyncThunk(
-  "user/setFollowerAsync",
-  async (token: string) => {
-    const followerData = await axios
-      .get(GetFollowerApi, {
+export const setFollowerAsync = (token:string) => {
+  return async (dispatch:Dispatch) => {
+    try {
+      const follower = await fetch(GetFollowerApi, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      })
-      .then((res) => res.data)
-      .catch((error) => error);
+        method: "GET",
+      });
+      if(follower.status === 401){
+        const error =await follower.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          // @ts-ignore
+          dispatch(setFollowerAsync(newToken))
+        }
+      }else{
 
-    return followerData.MyFollowers;
-  }
-);
+        let data = await follower.json();
+        dispatch(userAction.setFollower(data.MyFollowers));
+      }
+    } catch (error) {}
+  };
+};
 
-export const followUnfollowAsync = createAsyncThunk(
-  "user/followUnfollowAsync",
-  async (data: { token: string; id: string }) => {
-    const followData: {
-      followings: IUser[];
-      isFollowing: boolean;
-      message: string;
-      status: boolean;
-    } = await axios
-      .post(
-        FollowUnFollowApi,
-        JSON.stringify({
+export const followUnfollowAsync = (data:{token: string, id: string}) => {
+  return async(dispatch:Dispatch) => {
+    try {
+      const newData = await fetch(FollowUnFollowApi, {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
           id: data.id,
         }),
-        {
-          headers: {
-            Authorization: `Bearer ${data.token}`,
-            "Content-Type": "application/json",
-          },
+      });
+      if(newData.status === 401){
+        const error =await newData.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          const newPorp = {
+            ...data,
+            token: newToken
+          }
+          // @ts-ignore
+          dispatch(followUnfollowAsync(newPorp))
         }
-      )
-      .then((res) => res.data)
-      .catch((error) => error);
+      }else{
 
-    return followData;
-  }
-);
+        const isFollowed = await newData.json();
+        dispatch(userAction.updateUserFollowings(isFollowed.followings));
+        return isFollowed;
+      }
+    } catch (error) {
+      console.log(error);
+      
+    }
+  };
+};
 
-export const findUserByIdAsync = createAsyncThunk(
-  "user/findUserByIdAsync",
-  async (data: { token: string | undefined; id: string }) => {
-    const userData: { user: IUser } = await axios
-      .post(
-        FindUserByIdApi,
-        JSON.stringify({
+export const findUserByIdAsync = (data: {token: string,id:string}) => {
+  return async (dispatch:Dispatch) => {
+    try {
+      const postUser = await fetch(FindUserByIdApi, {
+        headers: {
+          Authorization: `Bearer ${data.token}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify({
           id: data.id,
         }),
-        {
-          headers: {
-            Authorization: `Bearer ${data.token}`,
-            "Content-Type": "application/json",
-          },
+      });
+      if(postUser.status === 401){
+        const error =await postUser.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken = await setNewAccessToken(dispatch)
+          const newProp = {
+            ...data,
+            token:newToken
+          }
+          // @ts-ignore
+          dispatch(findUserByIdAsync(newProp))
         }
-      )
-      .then((res) => res.data)
-      .catch((error) => error);
-    return userData.user;
-  }
-);
+      }else{
+        const user = await postUser.json();
+        return user.user;
+      }
+    } catch (error) {
+      return error;
+    }
+  };
+};
 
-export const setAllUserAsync = createAsyncThunk(
-  "user/setAllUserAsync",
-  async (token: string) => {
-    const allUserData: { allUser: IUser[] } = await axios
-      .get(setAllUserApi, {
+export const setAllUserAsync = (token:string) => {
+  return async (dispatch:Dispatch) => {
+    try {
+      const allUserData = await fetch(setAllUserApi, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
-      })
-      .then((res) => res.data)
-      .catch((error) => error);
+        method: "GET",
+      });
+      if(allUserData.status === 401){
+        const error =await allUserData.json()
+        if(error.errorMessage === 'jwt expired'){
+          const newToken:string = await setNewAccessToken(dispatch)
+          // @ts-ignore
+          dispatch(setAllUserAsync(newToken))
+        }
+      }else{
 
-    return allUserData.allUser;
-  }
-);
+        const data = await allUserData.json();
+        dispatch(userAction.setAllUser(data.allUser));
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};

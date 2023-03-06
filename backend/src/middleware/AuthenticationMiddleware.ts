@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User";
-import { PK } from "../utils/tokenGenerator";
+import { accessTokenSecret } from "../utils/tokenGenerator";
 interface JwtPayload {
   data: {
     id: string;
@@ -26,21 +26,28 @@ export const authenticaton = async (
         errorMessage: "Please provide authentication token",
       });
     } else {
-      const {
-        data: { id: id },
-      } = jwt.verify(token, PK) as JwtPayload;
-      const user = await User.findById(id);
-      if (!user) {
-        res.status(StatusCodes.UNAUTHORIZED).json({
-          errorMessage: "You are not authorized to use this route",
-        });
-      } else {
-        req.body["user"] = {
-          id: id,
-        };
+      let id;
+      jwt.verify(token, accessTokenSecret, async (err, decoded) => {
+        if (err) {
+          res.status(StatusCodes.UNAUTHORIZED).json({
+            errorMessage: err.message,
+          });
+        } else {
+          id = decoded?.data.id;
 
-        next();
-      }
+          const user = await User.findById(id);
+          if (!user) {
+            res.status(StatusCodes.UNAUTHORIZED).json({
+              errorMessage: "You are not authorized to use this route",
+            });
+          } else {
+            req.body["user"] = {
+              id: id,
+            };
+            next();
+          }
+        }
+      });
     }
   }
 };

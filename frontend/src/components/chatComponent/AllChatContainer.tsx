@@ -1,12 +1,11 @@
 import { Box, Img, Text } from "@chakra-ui/react";
 import { useEffect, useRef, useState } from "react";
 import { BsCheck, BsCheck2All } from "react-icons/bs";
-import { toast, ToastContainer } from "react-toastify";
+import {  ToastContainer } from "react-toastify";
 import { Socket } from "socket.io-client";
-import { addOneChatAsync } from "../../Redux/chatAction";
+import { addOneChatAsync, markReadAsync, setNotificationAsync } from "../../Redux/chatAction";
 import { useAppDispatch, useAppSelector } from "../../Redux/store";
 import { IChat, IUser } from "../../types/reduxTypes";
-import { FindUserByIdApi, MarkAsReadApi } from "../../utils/ApiRoutes";
 import InputContainer from "./InputContainer";
 
 interface IAllChatContainerProps {
@@ -24,12 +23,12 @@ const AllChatContainer = ({
   user,
   isUserAuthenticated,
 }: IAllChatContainerProps) => {
-  const dispatch = useAppDispatch();
+   const dispatch = useAppDispatch();
   const chats = useAppSelector((state) => state.chat.chat);
   const [isRead, setIsRead] = useState(false);
   useEffect(() => {
     //console.log('Current Room : ',roomId)
-    socket?.on("MessagesUpdated", async (data: any) => {
+    socket?.on("MessagesUpdated", async (data:{newMessage: IChat}) => {
       console.log(data.newMessage);
       //console.log('Current Room : ',roomId)
       //console.log('sender id : ',data.newMessage.sender)
@@ -38,54 +37,25 @@ const AllChatContainer = ({
         data.newMessage.receiver.toString() === user?._id.toString()
       ) {
         dispatch(addOneChatAsync(data.newMessage));
-        let resp = await fetch(MarkAsReadApi, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user?.token}`,
-          },
-          method: "POST",
-          body: JSON.stringify({
-            id: data.newMessage._id,
-          }),
-        });
-        if (resp.status === 500) {
-          console.log("Error");
-        } else if (resp.status === 200) {
-          setIsRead(true);
-        }
+        dispatch(markReadAsync({data,user,setIsRead}))
       } else {
+        //console.log('New message from user : ',data.newMessage.sender.toString())
+        //setNotification(data.newMessage.sender.toString())
+        //dispatch(chatAction.setNotificationCount(parseInt(notificationCount)+1))
         if (
           data.newMessage.sender.toString() !== user?._id.toString() &&
           data.newMessage.receiver.toString() === user?._id.toString()
         ) {
-          //console.log(data.newMessage)
-          const resp = await fetch(FindUserByIdApi, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${user?.token}`,
-            },
-            method: "POST",
-            body: JSON.stringify({
-              id: data.newMessage.sender,
-            }),
-          });
-          if (resp.status === 500) {
-            console.log("Error");
-          }
-          const messageSenderUser = await resp.json();
-          //console.log(messageSenderUser)
-          toast.info(`New Message From : ${messageSenderUser.user.name}`);
-          //console.log('not')
+          dispatch(setNotificationAsync({data,user}))
         }
       }
     });
     return () => {
       socket?.off("MessagesUpdated");
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clickedFollowingUser]);
 
-  const getTime = (createdAt: string) => {
+  const getTime = (createdAt:string) => {
     const hours = new Date(createdAt).getHours();
     const minutes = new Date(createdAt).getMinutes();
     if (hours <= 12) {
@@ -96,7 +66,6 @@ const AllChatContainer = ({
       return time;
     }
   };
-
   const scrollRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });

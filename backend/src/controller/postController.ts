@@ -229,19 +229,28 @@ export const getFeed = async (req: Request, res: Response): Promise<void> => {
     var feed: IPostModel[] = [];
     var counter = 0;
     const myPosts = await Post.find({ createdBy: req.body.user.id });
-    currUsersFollowingsIds?.map(async (user) => {
-      const posts = await Post.find({
-        createdBy: user,
+    
+    if(currUsersFollowingsIds?.length === 0){
+      res.status(StatusCodes.OK).json({
+        feed: myPosts,
       });
-      feed = feed.concat(posts);
-      counter += 1;
-      if (counter === currUsersFollowingsIds?.length) {
-        feed = feed.concat(myPosts);
-        res.status(StatusCodes.OK).json({
-          feed: feed,
+    }
+    else{
+      currUsersFollowingsIds?.map(async (user) => {
+        const posts = await Post.find({
+          createdBy: user,
         });
-      }
-    });
+        feed = feed.concat(posts);
+        counter += 1;
+        if (counter === currUsersFollowingsIds?.length) {
+          feed = feed.concat(myPosts);
+          res.status(StatusCodes.OK).json({
+            feed: feed,
+          });
+        }
+      });
+    }
+    
   } catch (error) {
     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
       errorMessage: error,

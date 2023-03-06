@@ -43,19 +43,19 @@ const EditPassword = ({ user }: IEditPasswordProps) => {
   function handleBtnClick() {
     if (user) {
       const data = {
-        token: user.token,
+        token: user.accessToken,
         oldPassword: oldPasswordInputValue,
         newPassword: confPassInputValue,
       };
-
-      dispatch(updateUserPasswordAsync(data)).then((res) => {
-        //@ts-ignore
-        if (res.payload.isPasswordChanged) {
-          toast.info("Password has been changed", ToastOption);
-        } else {
-          toast.error("something went wrong.", ToastOption);
-        }
-      });
+      dispatch(updateUserPasswordAsync(data))
+        .then((newdata) => {
+          if (newdata === "Invalid Credentials") {
+            toast.error(newdata, ToastOption);
+          } else {
+            toast.info("Password has been changed.", ToastOption);
+          }
+        })
+        .catch((error) => {});
 
       handleOldPasswordReset();
       handleConfPassReset();

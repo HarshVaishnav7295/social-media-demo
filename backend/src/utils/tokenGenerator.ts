@@ -1,6 +1,10 @@
 import jwt from "jsonwebtoken";
-export const PK = "tsnodeexpress@1234@1234";
-export const generateToken = async (id: string): Promise<string> => {
-  const token = jwt.sign({ data: { id: id } }, PK, { expiresIn: "24h" });
-  return token;
+export const refreshTokenSecret = 'tsnodeexpress@refresh@1234@1234'
+export const accessTokenSecret = 'tsnodeexpress@access@1234@1234'
+
+export const generateToken = async (id: string): Promise<{accessToken:string,refreshToken:string}> => {
+
+  const accessToken = jwt.sign({ data: { id: id } }, accessTokenSecret, { expiresIn: "24h" });
+  const refreshToken = jwt.sign({ data: { id: id } }, refreshTokenSecret, { expiresIn: "1y" });
+  return {accessToken,refreshToken};
 };

@@ -11,7 +11,8 @@ export interface IUser {
   avatar?: string;
   followers: IFollow[];
   followings: IFollow[];
-  token: string;
+  accessToken: string,
+  refreshToken:string
 }
 
 export interface IPost {
@@ -42,13 +43,11 @@ export interface IInitialUserState {
   allUser: IUser[];
   followerOfDisp: IUser[];
   followingOfDisp: IUser[];
-  isLoading: boolean;
 }
 
 export interface IInitialPostState {
   personalPosts: IPost[];
   allPosts: IPost[];
-  isLoading: boolean;
 }
 
 export interface IInitialChatState {

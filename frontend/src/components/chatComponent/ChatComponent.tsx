@@ -1,42 +1,44 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 
 import { Box } from "@chakra-ui/react";
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, } from "react";
 import Navbar from "../Navbar";
 import Profile from "../Profile";
 import { chatAction } from "../../Redux/chatReducer";
 import { setFollowingAsync, setFollowerAsync } from "../../Redux/userAction";
-import io, { Socket } from "socket.io-client";
+import  { connect, Socket } from "socket.io-client";
 import { Text } from "@chakra-ui/react";
-import { setAllChatAsync } from "../../Redux/chatAction";
 import { useAppDispatch, useAppSelector } from "../../Redux/store";
-import { IUser } from "../../types/reduxTypes";
 import AllChatContainer from "./AllChatContainer";
 import UserChat from "./UserChat";
-import { AccessChatApi } from "../../utils/ApiRoutes";
+import { IUser } from "../../types/reduxTypes";
+import { accessChatAsync } from "../../Redux/chatAction";
 const ChatContainer = () => {
   const dispatch = useAppDispatch();
   const displayedUser = useAppSelector((state) => state.user.displayedUser);
 
   const user = useAppSelector((state) => state.user.user);
+  //const roomId = useSelector((state)=>state.chat.roomId)
   const isProfileOpen = useAppSelector((state) => state.user.isProfileOpen);
   const following = useAppSelector((state) => state.user.following);
   const [socket, setSocket] = useState<Socket>();
-  const [searchValue, setSearchValue] = useState<string>("");
-  const [followingUserState, setFollowingUserState] = useState<IUser[]>();
+  //const [roomId, setroomId] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  const [followingUserState, setFollowingUserState] = useState<IUser[]>([]);
   const [clickedFollowingUser, setClickedFollowingUser] = useState<IUser>();
-
-  const [roomId, setRoomId] = useState("");
+  const roomId = useAppSelector((state)=>state.chat.roomId)
+  //const [roomId, setRoomId] = useState("");
+  const chats = useAppSelector((state)=>state.chat.chat)
 
   useEffect(() => {
     if (socket === undefined) {
-      setSocket(io("http://localhost:8000"));
+      setSocket(connect("http://localhost:8000"));
       //console.log('Connection made')
     }
     setTimeout(() => {
       if (socket != null) {
         //console.log('setup called')
-        if (user) socket.emit("setup", user._id);
+        socket.emit("setup", user?._id);
       }
     }, 200);
   }, [socket]);
@@ -52,49 +54,28 @@ const ChatContainer = () => {
     }
   }, [following, searchValue]);
 
-  const SetRoom = useCallback(
-    async (followingUserProp: IUser) => {
+  const SetRoom = async (followingUserProp: IUser) => {
       if (socket) {
-        socket.emit("Leave Room", roomId);
-      }
-      console.log("FollowingUserId:", followingUserProp._id);
-      setRoomId(followingUserProp._id);
-      console.log("RoomId:", followingUserProp._id);
-
-      setClickedFollowingUser(followingUserProp);
-      if (socket) {
-        //console.log(followingUserProp._id)
-        setTimeout(() => {
-          socket.emit("Join Room", { roomId: roomId });
-          console.log(roomId);
-        }, 500);
-      }
-      if (user) {
-        const resp = await fetch(AccessChatApi, {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${user.token}`,
-          },
-          method: "POST",
-          body: JSON.stringify({
-            users: [followingUserProp._id, user._id],
-          }),
-        });
-        if (resp.status === 500) {
-          let error = await resp.json();
-          console.log(error.errorMessage);
-        } else if (resp.status === 200) {
-          let data = await resp.json();
-          // console.log(data.chat)
-          if (socket) {
-            socket.emit("Join Room", roomId);
-          }
-          dispatch(setAllChatAsync(data.chat));
+        if(clickedFollowingUser?._id){
+          socket.emit("Leave Room", clickedFollowingUser._id);
         }
       }
-    },
-    [roomId]
-  );
+      //console.log("FollowingUserId:", followingUserProp._id);
+      dispatch(chatAction.setRoomId(followingUserProp._id));
+      //console.log("RoomId:", followingUserProp._id);
+
+      setClickedFollowingUser(followingUserProp);
+      // if (socket) {
+      //   //console.log(followingUserProp._id)
+      //   setTimeout(() => {
+      //     socket.emit("Join Room", { roomId: roomId });
+      //     console.log(roomId);
+      //   }, 500);
+      // }
+      
+      dispatch(accessChatAsync({socket,followingUserProp,user}))
+      console.log(chats)
+    }
   const isUserAuthenticated = useAppSelector(
     (state) => state.user.isUserAuthenticated
   );
@@ -102,15 +83,16 @@ const ChatContainer = () => {
     (state) => state.chat.isFollowerShowing
   );
 
+  const followerVisibilityHandler = () => {
+    dispatch(chatAction.changeFollowerShowing());
+  };
   useEffect(() => {
     if (!isFollowerShowing) {
       dispatch(chatAction.changeFollowerShowing());
     }
-    if (isUserAuthenticated) {
-      if (user) {
-        dispatch(setFollowingAsync(user.token));
-        dispatch(setFollowerAsync(user.token));
-      }
+    if (isUserAuthenticated && user) {
+      dispatch(setFollowingAsync(user.accessToken));
+      dispatch(setFollowerAsync(user.accessToken));
     }
   }, [dispatch]);
 
@@ -166,6 +148,7 @@ const ChatContainer = () => {
             <UserChat
               followingUserState={followingUserState}
               searchValue={searchValue}
+              followerVisibilityHandler={followerVisibilityHandler}
               setSearchValue={setSearchValue}
               SetRoom={SetRoom}
               clickedFollowingUser={clickedFollowingUser}

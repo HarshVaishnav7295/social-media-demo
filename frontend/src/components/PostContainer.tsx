@@ -37,11 +37,11 @@ const PostContainer = ({ post, user }: IPostContainerProps) => {
     if (user) {
       const data = {
         id: post.createdBy,
-        token: user.token,
+        token: user.accessToken,
       };
       dispatch(findUserByIdAsync(data)).then((res) => {
         //@ts-ignore
-        setPostUser(res.payload);
+        setPostUser(res);
       });
     }
   }, []);
@@ -73,7 +73,7 @@ const PostContainer = ({ post, user }: IPostContainerProps) => {
     if (user) {
       const data = {
         id: post._id,
-        token: user.token,
+        token: user.accessToken,
       };
       dispatch(likeUnLikeAsync(data)).then((res) => {
         if (res === "Like successful") {
@@ -176,18 +176,17 @@ const PostContainer = ({ post, user }: IPostContainerProps) => {
                   if (postUser._id !== user._id) {
                     setIsFollowed(false);
                     const data = {
-                      token: user.token,
+                      token: user.accessToken,
                       id: post.createdBy,
                     };
                     dispatch(followUnfollowAsync(data)).then((res) => {
-                      //@ts-ignore
-                      if (res.payload.isFollowing) {
-                        setIsFollowed(true);
+                      if (res?.status) {
+                        setIsFollowed(!isFollowed);
+                        dispatch(setFollowingAsync(user?.accessToken));
                       } else {
-                        setIsFollowed(false);
+                        setIsFollowed(isFollowed);
+                        toast.error(res?.errorMessage, ToastOption);
                       }
-
-                      dispatch(setFollowingAsync(user.token));
                     });
                   } else {
                     toast.error("You can't Unfollow YourSelf.", ToastOption);
@@ -216,18 +215,18 @@ const PostContainer = ({ post, user }: IPostContainerProps) => {
                   if (postUser._id !== user._id) {
                     setIsFollowed(true);
                     const data = {
-                      token: user.token,
+                      token: user.accessToken,
                       id: post.createdBy,
                     };
                     dispatch(followUnfollowAsync(data)).then((res) => {
-                      //@ts-ignore
-                      if (res.payload.isFollowing) {
-                        setIsFollowed(true);
+                      
+                      if (res?.status) {
+                        setIsFollowed(!isFollowed);
+                        dispatch(setFollowingAsync(user?.accessToken));
                       } else {
-                        setIsFollowed(false);
+                        setIsFollowed(isFollowed);
+                        toast.error(res?.errorMessage, ToastOption);
                       }
-
-                      dispatch(setFollowingAsync(user.token));
                     });
                   } else {
                     toast.error("You can't Follow YourSelf.", ToastOption);

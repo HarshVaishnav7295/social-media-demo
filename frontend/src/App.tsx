@@ -1,7 +1,6 @@
 import React from "react";
 import { Route, Routes } from "react-router-dom";
 import ChatContainer from "./components/chatComponent/ChatComponent";
-// import ChatContainer from "./components/chatContainer/ChatContainer";
 import EditPage from "./components/EditProfileContainer/EditPage";
 import Home from "./components/Home";
 import Login from "./components/Login";

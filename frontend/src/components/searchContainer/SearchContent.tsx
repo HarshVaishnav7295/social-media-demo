@@ -9,12 +9,12 @@ interface ISearchContentProps {
   searchValue: string;
 }
 const SearchContent = ({ allUser, searchValue }: ISearchContentProps) => {
-  const [showUser, setShowUser] = useState<IUser[] | undefined>(undefined);
+  const [showUser, setShowUser] = useState<IUser[]>(allUser);
   const dispatch = useDispatch();
 
   useEffect(() => {
     if (searchValue.trim() === "" || searchValue.length === 0) {
-      setShowUser([]);
+      setShowUser(allUser);
     } else {
       const tempUser = allUser.filter(
         (user: IUser) => user.name.indexOf(searchValue) === 0
@@ -40,7 +40,8 @@ const SearchContent = ({ allUser, searchValue }: ISearchContentProps) => {
       gap="0.2rem"
       // h="10rem"
     >
-      {showUser?.map((user) => {
+      {
+        showUser ? showUser?.map((user) => {
         return (
           <Box
             onClick={() => {
@@ -187,7 +188,8 @@ const SearchContent = ({ allUser, searchValue }: ISearchContentProps) => {
             </Box>
           </Box>
         );
-      })}
+      }) : <Text fontSize="0.8rem" color="gray" fontStyle="italic">Search users above.</Text>
+      }
     </Box>
   );
 };

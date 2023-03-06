@@ -9,13 +9,12 @@ import { router as chatRouter } from "../routers/chatRouter";
 import { authenticaton } from "../middleware/AuthenticationMiddleware";
 import http from "http";
 import { Server } from "socket.io";
-import { Chat } from "../models/Chat";
 import { Message } from "../models/Message";
 import mongoose, { ObjectId } from "mongoose";
 const app = express();
-app.use(express.json());
+app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ limit: "50mb", extended: true }));
-app.use(cors({ origin: "*" }));
+app.use(cors());
 app.use("/api/auth", AuthRouter);
 app.use("/api/user", authenticaton, UserRouter);
 app.use("/api/post", authenticaton, PostRouter);
@@ -30,17 +29,17 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("Connection successful with : ", socket.id);
+  //console.log('Connection successful with : ',socket.id)
 
   socket.on("setup", (id: string) => {
     // creating room for current user
     socket.join(id);
-    console.log("User : ", id, " has joined the room : ", id);
+    //console.log("User : ",id," has joined the room : ",id)
     //console.log(data)
   });
   socket.on("Leave Room", (data: string) => {
     socket.leave(data);
-    console.log("User has left the room : ", data);
+    //console.log('User has left the room : ',data)
   });
 
   /*socket.on('Join Room',async(data:{chatId : string,users:{_id : string}[]})=>{
@@ -57,7 +56,7 @@ io.on("connection", (socket) => {
     })*/
   socket.on("Join Room", async function (data: { roomId: string }) {
     socket.join(data.roomId);
-    console.log("User has joined the room : ", data.roomId);
+    //console.log("User has joined the room : ",data.roomId)
     /*const messages = await Message.find({
             sender : { $in : [ data.roomId,data.currUserId ] },
             receiver : { $in : [ data.roomId,data.currUserId ] }
@@ -101,16 +100,16 @@ io.on("connection", (socket) => {
       },
       cb
     ) {
-      console.log(data);
+      //console.log(data)
 
       const message = await Message.create({
         text: data.text,
         sender: data.sender,
         receiver: data.receiver,
       });
-      io.to(data.receiver.toString()).emit("MessagesUpdated", {
-        newMessage: message,
-      });
+      socket
+        .to(data.receiver.toString())
+        .emit("MessagesUpdated", { newMessage: message });
 
       cb(message);
       /*console.log("Message : ",message)

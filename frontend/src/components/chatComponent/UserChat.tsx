@@ -9,6 +9,7 @@ import FollowingUser from "../FollowingUser";
 
 interface IUserChatProps {
   followingUserState: IUser[] | undefined;
+  followerVisibilityHandler: ()=>void,
   searchValue: string;
   setSearchValue: React.Dispatch<React.SetStateAction<string>>;
   SetRoom: (followingUserProp: IUser) => Promise<void>;
@@ -18,6 +19,7 @@ interface IUserChatProps {
 const UserChat = ({
   followingUserState,
   searchValue,
+  followerVisibilityHandler,
   setSearchValue,
   SetRoom,
   clickedFollowingUser,
@@ -27,9 +29,6 @@ const UserChat = ({
     (state) => state.chat.isFollowerShowing
   );
 
-  const followerVisibilityHandler = () => {
-    dispatch(chatAction.changeFollowerShowing());
-  };
 
   return (
     <Box

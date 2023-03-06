@@ -11,9 +11,11 @@ import {
   setFollowerAsync,
   setFollowingAsync,
 } from "../Redux/userAction";
+import { ToastOption } from "./Register";
+import { toast, } from "react-toastify";
 import { getUserPostAsync } from "../Redux/postAction";
 import { postAction } from "../Redux/postReducer";
-import { IPost, IUser } from "../types/reduxTypes";
+import {  IPost, IUser } from "../types/reduxTypes";
 import { useAppDispatch, useAppSelector } from "../Redux/store";
 
 export interface IProfileProps {
@@ -40,24 +42,23 @@ const Profile = ({ showUser }: IProfileProps) => {
   const [isFollowerSelected, setIsFollowerSelected] = useState<boolean>(true);
 
   useEffect(() => {
-    if (isUserAuthenticated) {
+    if (isUserAuthenticated && user) {
       if (showUser?._id !== user?._id) {
         showUser?.followers.map((_followerId) => {
           dispatch(
-            findUserByIdAsync({ id: _followerId._id, token: user?.token })
+            findUserByIdAsync({ id: _followerId._id, token: user?.accessToken })
             // @ts-ignore
-          ).then((res: { payload: IUser }) => {
-            // console.log(res);
-            dispatch(userAction.setFollowerOfDisp(res.payload));
+          ).then((res: IUser) => {
+            dispatch(userAction.setFollowerOfDisp(res));
           });
         });
 
         showUser?.followings.map((_followingId) => {
           dispatch(
-            findUserByIdAsync({ id: _followingId._id, token: user?.token })
+            findUserByIdAsync({ id: _followingId._id, token: user?.accessToken })
             //@ts-ignore
-          ).then((res: { payload: IUser }) => {
-            dispatch(userAction.setFollowingOfDisp(res.payload));
+          ).then((res: IUser) => {
+            dispatch(userAction.setFollowingOfDisp(res));
           });
         });
       }
@@ -107,7 +108,7 @@ const Profile = ({ showUser }: IProfileProps) => {
 
       if (user) {
         const data = {
-          token: user.token,
+          token: user.accessToken,
           _id: showUser._id,
         };
         dispatch(getUserPostAsync(data)).then((res) => {
@@ -130,8 +131,8 @@ const Profile = ({ showUser }: IProfileProps) => {
   const handleUserClick = (followUser: IUser) => {
     dispatch(userAction.setDisplayedUser(followUser));
     if (user) {
-      dispatch(setFollowingAsync(user.token));
-      dispatch(setFollowerAsync(user.token));
+      dispatch(setFollowingAsync(user.accessToken));
+      dispatch(setFollowerAsync(user.accessToken));
     }
   };
 
@@ -245,7 +246,7 @@ const Profile = ({ showUser }: IProfileProps) => {
             cursor="pointer"
             onClick={() => {
               setIsFollowerSelected(true);
-              if (user) dispatch(setFollowerAsync(user?.token));
+              if (user) dispatch(setFollowerAsync(user?.accessToken));
             }}
           >
             <Box
@@ -286,7 +287,7 @@ const Profile = ({ showUser }: IProfileProps) => {
             cursor="pointer"
             onClick={() => {
               setIsFollowerSelected(false);
-              if (user) dispatch(setFollowingAsync(user?.token));
+              if (user) dispatch(setFollowingAsync(user?.accessToken));
             }}
           >
             <Box
@@ -340,19 +341,16 @@ const Profile = ({ showUser }: IProfileProps) => {
                     setIsFollowed(false);
                     if (user && showUser) {
                       const followdata = {
-                        token: user.token,
+                        token: user.accessToken,
                         id: showUser._id,
                       };
-                      dispatch(followUnfollowAsync(followdata)).then((res) => {
-                        //@ts-ignore
-                        if (res.payload.isFollowing) {
-                          setIsFollowed(true);
-                        } else {
-                          setIsFollowed(false);
+                      dispatch(followUnfollowAsync(followdata)).then(res => {
+                        if(!res || !res.status){
+                          setIsFollowed(isFollowed)
+                          toast.error("Something went wrong.",ToastOption)
                         }
-
-                        dispatch(setFollowingAsync(user.token));
-                      });
+                        
+                      })
                     }
                   }
                 }}
@@ -370,19 +368,16 @@ const Profile = ({ showUser }: IProfileProps) => {
                     setIsFollowed(true);
                     if (user && showUser) {
                       const followdata = {
-                        token: user.token,
+                        token: user.accessToken,
                         id: showUser._id,
                       };
-                      dispatch(followUnfollowAsync(followdata)).then((res) => {
-                        //@ts-ignore
-                        if (res.payload.isFollowing) {
-                          setIsFollowed(true);
-                        } else {
-                          setIsFollowed(false);
+                      dispatch(followUnfollowAsync(followdata)).then(res => {
+                        if(!res || !res.status){
+                          setIsFollowed(isFollowed)
+                          toast.error("Something went wrong.",ToastOption)
                         }
-
-                        dispatch(setFollowingAsync(user.token));
-                      });
+                        
+                      })
                     }
                   }
                 }}

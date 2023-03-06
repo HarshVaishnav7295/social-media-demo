@@ -2,12 +2,12 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "nodemon src/server/index.ts",
     "start:build": "tsc -w",
     "start:run": "nodemon build/server/index.js",
-    "start": "nodemon ./src/server/index.ts"
+    "start": "concurrently npm:start:*"
   },
   "author": "Harsh Vaishnav",
   "license": "ISC",
@@ -37,8 +37,5 @@
     "socket.io": "^4.6.0",
     "ts-node": "^10.9.1",
     "validator": "^13.9.0"
-  },
-  "devDependencies": {
-    "@types/node": "^18.14.1"
   }
 }

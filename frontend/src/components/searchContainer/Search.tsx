@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { Box } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
+import { ToastContainer } from "react-toastify";
 import { useAppDispatch, useAppSelector } from "../../Redux/store";
 import {
   setAllUserAsync,
@@ -24,9 +25,9 @@ const Search = () => {
   const [searchValue, setSearchValue] = useState<string>("");
   useEffect(() => {
     if (isUserAuthenticated && user) {
-      dispatch(setAllUserAsync(user.token));
-      dispatch(setFollowerAsync(user.token));
-      dispatch(setFollowingAsync(user.token));
+      dispatch(setAllUserAsync(user.accessToken));
+      dispatch(setFollowerAsync(user.accessToken));
+      dispatch(setFollowingAsync(user.accessToken));
     }
   }, []);
 
@@ -37,6 +38,7 @@ const Search = () => {
   return (
     <>
       {/* Home Page Container */}
+      <ToastContainer />
       <Box
         display="flex"
         flexDir="column"
