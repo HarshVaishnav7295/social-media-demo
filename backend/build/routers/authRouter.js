@@ -9,3 +9,4 @@ exports.router = express_1.default.Router();
 const authController_1 = require("../controller/authController");
 exports.router.route('/signup').post(authController_1.signupUser);
 exports.router.route('/login').post(authController_1.loginUser);
+exports.router.route('/getNewAccessToken').post(authController_1.getNewAccessToken);

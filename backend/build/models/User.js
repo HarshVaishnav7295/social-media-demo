@@ -78,6 +78,7 @@ const userSchema = new mongoose_1.Schema({
             },
         },
     ],
+    refreshToken: String,
 }, { timestamps: true });
 userSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {

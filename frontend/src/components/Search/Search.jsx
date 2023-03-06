@@ -20,7 +20,7 @@ const Search = () => {
   const [searchValue, setSearchValue] = useState("");
   useEffect(() => {
     if (isUserAuthenticated) {
-      dispatch(setAllUserAsync(user.token));
+      dispatch(setAllUserAsync(user.accessToken));
     }
   }, []);
 

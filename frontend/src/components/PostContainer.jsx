@@ -30,7 +30,7 @@ const PostContainer = ({ image, description, post, user }) => {
   useEffect(() => {
     const data = {
       id: post.createdBy,
-      token: user.token,
+      token: user.accessToken,
     };
     dispatch(findUserByIdAsync(data)).then((postUser) => {
       setPostUser(postUser);
@@ -61,7 +61,7 @@ const PostContainer = ({ image, description, post, user }) => {
   const likeDisLikeHandler = () => {
     const data = {
       id: post._id,
-      token: user.token,
+      token: user.accessToken,
     };
     dispatch(likeUnLikeAsync(data)).then((res) => {
       if (res === "Like successful") {
@@ -162,13 +162,13 @@ const PostContainer = ({ image, description, post, user }) => {
                 if (postUser._id !== user._id) {
                   setIsFollowed(false);
                   const data = {
-                    token: user.token,
+                    token: user.accessToken,
                     id: post.createdBy,
                   };
                   dispatch(followUnfollowAsync(data)).then((res) => {
                     if (res.status) {
                       setIsFollowed(!isFollowed);
-                      dispatch(setFollowingAsync(user?.token));
+                      dispatch(setFollowingAsync(user?.accessToken));
                     } else {
                       setIsFollowed(isFollowed);
                       toast.error(res.errorMessage, ToastOption);
@@ -199,13 +199,13 @@ const PostContainer = ({ image, description, post, user }) => {
                 if (postUser._id !== user._id) {
                   setIsFollowed(true);
                   const data = {
-                    token: user.token,
+                    token: user.accessToken,
                     id: post.createdBy,
                   };
                   dispatch(followUnfollowAsync(data)).then((res) => {
                     if (res.status) {
                       setIsFollowed(!isFollowed);
-                      dispatch(setFollowingAsync(user?.token));
+                      dispatch(setFollowingAsync(user?.accessToken));
                     } else {
                       setIsFollowed(isFollowed);
                       toast.error(res.errorMessage, ToastOption);

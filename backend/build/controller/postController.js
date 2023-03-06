@@ -225,19 +225,28 @@ const getFeed = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         var feed = [];
         var counter = 0;
         const myPosts = yield Post_1.Post.find({ createdBy: req.body.user.id });
-        currUsersFollowingsIds === null || currUsersFollowingsIds === void 0 ? void 0 : currUsersFollowingsIds.map((user) => __awaiter(void 0, void 0, void 0, function* () {
-            const posts = yield Post_1.Post.find({
-                createdBy: user,
+        console.log('called feed:', currUsersFollowingsIds);
+        if ((currUsersFollowingsIds === null || currUsersFollowingsIds === void 0 ? void 0 : currUsersFollowingsIds.length) === 0) {
+            res.status(http_status_codes_1.StatusCodes.OK).json({
+                feed: myPosts,
             });
-            feed = feed.concat(posts);
-            counter += 1;
-            if (counter === (currUsersFollowingsIds === null || currUsersFollowingsIds === void 0 ? void 0 : currUsersFollowingsIds.length)) {
-                feed = feed.concat(myPosts);
-                res.status(http_status_codes_1.StatusCodes.OK).json({
-                    feed: feed,
+        }
+        else {
+            currUsersFollowingsIds === null || currUsersFollowingsIds === void 0 ? void 0 : currUsersFollowingsIds.map((user) => __awaiter(void 0, void 0, void 0, function* () {
+                const posts = yield Post_1.Post.find({
+                    createdBy: user,
                 });
-            }
-        }));
+                feed = feed.concat(posts);
+                counter += 1;
+                if (counter === (currUsersFollowingsIds === null || currUsersFollowingsIds === void 0 ? void 0 : currUsersFollowingsIds.length)) {
+                    feed = feed.concat(myPosts);
+                    console.log('Feed : ', feed);
+                    res.status(http_status_codes_1.StatusCodes.OK).json({
+                        feed: feed,
+                    });
+                }
+            }));
+        }
     }
     catch (error) {
         res.status(http_status_codes_1.StatusCodes.INTERNAL_SERVER_ERROR).json({

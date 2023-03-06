@@ -32,19 +32,29 @@ const authenticaton = (req, res, next) => __awaiter(void 0, void 0, void 0, func
             });
         }
         else {
-            const { data: { id: id }, } = jsonwebtoken_1.default.verify(token, tokenGenerator_1.PK);
-            const user = yield User_1.User.findById(id);
-            if (!user) {
-                res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
-                    errorMessage: "You are not authorized to use this route",
-                });
-            }
-            else {
-                req.body["user"] = {
-                    id: id,
-                };
-                next();
-            }
+            let id;
+            jsonwebtoken_1.default.verify(token, tokenGenerator_1.accessTokenSecret, (err, decoded) => __awaiter(void 0, void 0, void 0, function* () {
+                if (err) {
+                    res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
+                        "errorMessage": err.message
+                    });
+                }
+                else {
+                    id = decoded === null || decoded === void 0 ? void 0 : decoded.data.id;
+                    const user = yield User_1.User.findById(id);
+                    if (!user) {
+                        res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({
+                            errorMessage: "You are not authorized to use this route",
+                        });
+                    }
+                    else {
+                        req.body["user"] = {
+                            id: id,
+                        };
+                        next();
+                    }
+                }
+            }));
         }
     }
 });

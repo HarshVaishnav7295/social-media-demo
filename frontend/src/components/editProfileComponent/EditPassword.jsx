@@ -37,7 +37,7 @@ const EditPassword = ({ user }) => {
 
   function handleBtnClick() {
     const data = {
-      token: user.token,
+      token: user.accessToken,
       oldPassword: oldPasswordInputValue,
       newPassword: confPassInputValue,
     };

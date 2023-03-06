@@ -1,6 +1,5 @@
 import { Request,Response } from "express"
 import { StatusCodes } from "http-status-codes"
-import { Chat } from "../models/Chat"
 import { Message } from "../models/Message"
 import { User } from "../models/User"
 

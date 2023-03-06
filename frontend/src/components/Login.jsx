@@ -24,6 +24,7 @@ const Login = () => {
       method: "POST",
       body: JSON.stringify(localUserData),
     });
+    
     if (response.status === 500) {
       let error = await response.json();
       toast.error(error.errorMessage, ToastOption);
