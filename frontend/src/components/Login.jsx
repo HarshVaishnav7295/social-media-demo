@@ -189,6 +189,20 @@ const Login = () => {
                 LogIn
               </Button>
             </Box>
+            <Box
+              width="77%"
+              display="flex"
+              flexDir="row"
+              justifyContent="center"
+              alignItems="center"
+              // to="/forgotPassword"
+              cursor="pointer"
+              color="linkedin.700"
+              fontSize="0.9rem"
+              onClick={() => navigate("/forgotPassword")}
+            >
+              <Text>Forgot password?</Text>
+            </Box>
           </Box>
         </Box>
       </Box>

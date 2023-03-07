@@ -24,6 +24,7 @@ const AuthenticationMiddleware_1 = require("../middleware/AuthenticationMiddlewa
 const http_1 = __importDefault(require("http"));
 const socket_io_1 = require("socket.io");
 const Message_1 = require("../models/Message");
+const path_1 = __importDefault(require("path"));
 const app = (0, express_1.default)();
 app.use(express_1.default.json({ limit: '50mb' }));
 app.use(express_1.default.urlencoded({ limit: '50mb', extended: true }));
@@ -32,6 +33,8 @@ app.use('/api/auth', authRouter_1.router);
 app.use('/api/user', AuthenticationMiddleware_1.authenticaton, userRouter_1.router);
 app.use('/api/post', AuthenticationMiddleware_1.authenticaton, postRouter_1.router);
 app.use('/api/chat', AuthenticationMiddleware_1.authenticaton, chatRouter_1.router);
+const publicDirPath = path_1.default.join(__dirname, '../../public');
+app.use(express_1.default.static(publicDirPath));
 const server = http_1.default.createServer(app);
 const io = new socket_io_1.Server(server, {
     cors: {

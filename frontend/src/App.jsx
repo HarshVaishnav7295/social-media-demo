@@ -7,6 +7,7 @@ import Register from "./components/Register";
 import EditPage from "./components/editProfileComponent/EditPage";
 import UploadPost from "./components/UploadPost/UploadPost";
 import Search from "./components/Search/Search";
+import ResetPassword from "./components/forgotPassword/ResetPassword";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/addPost" element={<UploadPost />} />
         <Route path="/editProfile" element={<EditPage />} />
         <Route path="/search" element={<Search />} />
+        <Route path='/forgotPassword' element={<ResetPassword />} />
       </Routes>
     </>
   );

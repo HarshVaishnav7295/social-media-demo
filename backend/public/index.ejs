@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reset password</title>
+    <style>
+        *{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body{
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #f9fafb;
+        }
+        .card{
+            border: 1px solid black;
+            border-radius: .4rem;
+            width: 30%;
+            height: 40%;
+            background: #334155;
+            color: #f1f5f9;
+            padding: 3rem;
+        }
+        #hr{
+            height: .05rem   ;
+            border: 1px solid transparent;
+            background: #FFF;
+            width: 30%;
+            margin-top: -1rem;
+        }
+        .mail-from{
+            margin-top: .8rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .mail-from-avatar{
+            width: 50px;
+            height: 50px;
+            border: 1px solid transparent;
+            background-color: white;
+            border-radius: 50%;
+        }
+        .mail-from-content p{
+            font-size: 12px;
+            margin: 0;
+            margin-top: .2rem;
+            margin-bottom: .2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>Social Media App</h1>
+        <p>Hello , username</p>
+        <p>your OTP for reset password is : </p>
+        <p><%= otp %></p>
+        <div id="hr"></div>
+        
+    </div>
+
+</body>
+</html>

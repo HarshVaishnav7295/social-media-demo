@@ -40,7 +40,8 @@ const authenticaton = (req, res, next) => __awaiter(void 0, void 0, void 0, func
                     });
                 }
                 else {
-                    id = decoded === null || decoded === void 0 ? void 0 : decoded.data.id;
+                    const jwtPayloadData = decoded;
+                    id = jwtPayloadData.data.id;
                     const user = yield User_1.User.findById(id);
                     if (!user) {
                         res.status(http_status_codes_1.StatusCodes.UNAUTHORIZED).json({

@@ -17,7 +17,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 exports.refreshTokenSecret = 'tsnodeexpress@refresh@1234@1234';
 exports.accessTokenSecret = 'tsnodeexpress@access@1234@1234';
 const generateToken = (id) => __awaiter(void 0, void 0, void 0, function* () {
-    const accessToken = jsonwebtoken_1.default.sign({ data: { id: id } }, exports.accessTokenSecret, { expiresIn: "120s" });
+    const accessToken = jsonwebtoken_1.default.sign({ data: { id: id } }, exports.accessTokenSecret, { expiresIn: "1h" });
     const refreshToken = jsonwebtoken_1.default.sign({ data: { id: id } }, exports.refreshTokenSecret, { expiresIn: "3d" });
     return { accessToken, refreshToken };
 });

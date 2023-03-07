@@ -10,3 +10,6 @@ const authController_1 = require("../controller/authController");
 exports.router.route('/signup').post(authController_1.signupUser);
 exports.router.route('/login').post(authController_1.loginUser);
 exports.router.route('/getNewAccessToken').post(authController_1.getNewAccessToken);
+exports.router.route('/getOTP').post(authController_1.getOTP);
+exports.router.route('/resetPassword').post(authController_1.resetPassword);
+exports.router.route('/loginWithGoogle').post(authController_1.loginWithGoogle);

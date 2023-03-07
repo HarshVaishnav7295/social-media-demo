@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import jwt from "jsonwebtoken";
+import jwt, { VerifyErrors, VerifyOptions } from "jsonwebtoken";
 import { User } from "../models/User";
 import { accessTokenSecret } from "../utils/tokenGenerator";
 interface JwtPayload {
@@ -34,7 +34,8 @@ export const authenticaton = async (
           })
         }
         else{
-          id = decoded?.data.id
+          const jwtPayloadData = decoded as JwtPayload
+          id = jwtPayloadData.data.id
           
           const user = await User.findById(id);
           if (!user) {

@@ -11,6 +11,7 @@ import http from 'http'
 import { Server } from 'socket.io'
 import { Message } from '../models/Message'
 import mongoose, { ObjectId } from 'mongoose'
+import path from 'path'
 const app = express()
 app.use(express.json({limit : '50mb'}))
 app.use(express.urlencoded({ limit: '50mb', extended: true }))
@@ -19,6 +20,10 @@ app.use('/api/auth',AuthRouter)
 app.use('/api/user',authenticaton,UserRouter)
 app.use('/api/post',authenticaton,PostRouter)
 app.use('/api/chat',authenticaton,chatRouter)
+
+const publicDirPath = path.join(__dirname,'../../public')
+
+app.use(express.static(publicDirPath))
 
 const server = http.createServer(app)
 const io = new Server(server,{

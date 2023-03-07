@@ -37,8 +37,7 @@ const userSchema = new Schema(
       },
     },
     password: {
-      type: String,
-      required: [true, "Please provide password"],
+      type: String
     },
     dob: Date,
     gender: String,
@@ -61,6 +60,11 @@ const userSchema = new Schema(
       },
     ],
     refreshToken : String,
+    accountType : {
+      type : String,
+      enum : ['normal','google','facebook'],
+      default : 'normal'
+    }
   },
   { timestamps: true }
 );
