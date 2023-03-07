@@ -64,13 +64,14 @@ const Register = () => {
     reset: passwordConfReset,
   } = useInput((value) => value === passwordInputValue);
 
-  const {
-    value: genderInputValue,
-    // hasError: genderInputHasError,
-    handleEnteredValueChange: handleGenderChnage,
-    handleBlur: handleGenderBlur,
-    // reset: genderReset,
-  } = useInput((value) => value === "true");
+  // const {
+  //   value: genderInputValue,
+  //   // hasError: genderInputHasError,
+  //   handleEnteredValueChange: handleGenderChnage,
+  //   handleBlur: handleGenderBlur,
+  //   // reset: genderReset,
+  // } = useInput((value) => value === "true");
+  const [gender, setGender] = useState("male")
 
   const Submitted = async () => {
     const localUserData = {
@@ -78,7 +79,7 @@ const Register = () => {
       email: emailInputValue,
       password: passwordInputValue,
       dob: dobInputValue,
-      gender: genderInputValue,
+      gender: gender,
     };
 
     let response = await fetch(RegisterAPI, {
@@ -203,9 +204,9 @@ const Register = () => {
                 <Text fontSize="0.9rem">Gender:</Text>
                 <Select
                   variant="flushed"
-                  value={genderInputValue}
-                  onChange={handleGenderChnage}
-                  onBlur={handleGenderBlur}
+                  value={gender}
+                  onChange={(e)=>setGender(e.target.value)}
+                
                 >
                   <option value="male">Male</option>
                   <option value="female">Female</option>
